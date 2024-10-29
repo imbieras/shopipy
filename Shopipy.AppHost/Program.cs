@@ -1,6 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.Shopipy_ApiService>("apiservice");
+var postgres = builder.AddPostgres("postgres").WithDataVolume(isReadOnly: false).WithPgAdmin();
+var postgresdb = postgres.AddDatabase("postgresdb");
+
+var apiService = builder.AddProject<Projects.Shopipy_ApiService>("apiservice").WithReference(postgresdb);
 
 builder.AddProject<Projects.Shopipy_Web>("webfrontend")
     .WithExternalHttpEndpoints()
