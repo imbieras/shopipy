@@ -9,7 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj"/>
+        <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.2.2" />
     </ItemGroup>
 
 </Project>

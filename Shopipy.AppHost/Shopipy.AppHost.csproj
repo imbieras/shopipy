@@ -10,12 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shopipy.ApiService\Shopipy.ApiService.csproj"/>
-        <ProjectReference Include="..\Shopipy.Web\Shopipy.Web.csproj"/>
+        <ProjectReference Include="..\Shopipy.ApiService\Shopipy.ApiService.csproj" />
+        <ProjectReference Include="..\Shopipy.Web\Shopipy.Web.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="8.1.0"/>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="8.1.0" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.2.2" />
     </ItemGroup>
 
 </Project>
