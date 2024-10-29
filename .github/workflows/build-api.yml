@@ -1,0 +1,44 @@
+name: Shopipy API Build & Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'Shopipy.ApiService/**'
+      - '*.sln'
+  pull_request:
+    paths:
+      - 'Shopipy.ApiService/**'
+      - '*.sln'
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install Aspire workload
+        run: dotnet workload install aspire
+
+      - name: Install required workloads
+        run: dotnet workload restore
+
+      - name: Trust Development Certificates
+        run: dotnet dev-certs https --trust
+
+      - name: Restore API
+        run: dotnet restore ./Shopipy.ApiService/
+
+      - name: Build API
+        run: dotnet build -c Release --no-restore ./Shopipy.ApiService/
+
+      - name: Test API
+        run: dotnet test ./Shopipy.Tests/

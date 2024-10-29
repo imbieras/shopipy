@@ -1,0 +1,32 @@
+name: Shopipy Web Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'Shopipy.Web/**'
+      - '*.sln'
+  pull_request:
+    paths:
+      - 'Shopipy.Web/**'
+      - '*.sln'
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore Web
+        run: dotnet restore ./Shopipy.Web/
+
+      - name: Build Web
+        run: dotnet build -c Release --no-restore ./Shopipy.Web/
