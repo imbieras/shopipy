@@ -35,6 +35,9 @@ $ dotnet workload install aspire
 $ dotnet workload list
 ```
 
+### Docker
+Docker is required for Aspire to run certain components, such as the PostgreSQL database. Install Docker from the official [Docker download page](https://www.docker.com/), and ensure Docker Desktop is running.
+
 ## Running the Project
 
 1. Clone the repository:
