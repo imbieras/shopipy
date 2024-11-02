@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Shopipy.ApiService.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
@@ -6,8 +9,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-// Add PostgreSQL database.
-// builder.AddNpgsqlDbContext<ShopipyDbContext>(connectionName: "postgresdb");
+builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddControllers();
 
@@ -24,5 +26,11 @@ app.MapControllers();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+using (var serviceScope = app.Services.CreateScope())
+{
+    var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();
