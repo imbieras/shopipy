@@ -14,14 +14,14 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
+// builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 // Life is fun with aspire and all that stuff,
 // but I need a debugger
-// builder.Services.AddDbContext<AppDbContext>(options =>
-// {
-//     options.UseInMemoryDatabase("db");
-// });
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseInMemoryDatabase("db");
+});
 
 builder.Services.AddControllers();
 
@@ -76,15 +76,19 @@ app.MapDefaultEndpoints();
 
 app.MapControllers();
 
-app.MapGet("oauth-google", () => Results.Challenge(null, [GoogleDefaults.AuthenticationScheme]));
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    // dbContext.Database.Migrate();
+    
+    // Seed database
+    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var result = await userManager.CreateAsync(new IdentityUser("seeded_superuser"), "Seeded_password1234");
+
+    dbContext.SaveChanges();
 }
 
 app.Run();
