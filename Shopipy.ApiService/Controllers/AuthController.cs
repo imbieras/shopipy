@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.ApiService.DTOs;
+using Shopipy.ApiService.Models;
 
 namespace Shopipy.ApiService.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+public class AuthController(UserManager<User> userManager, SignInManager<User> signInManager)
     : ControllerBase
 {
     [HttpPost("login")]

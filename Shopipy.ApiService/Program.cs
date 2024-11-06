@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
+using Shopipy.ApiService.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
@@ -47,16 +48,16 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
             if (emailAddress == null) throw new InvalidOperationException("email not found");
             
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
             var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
             if (user == null)
             {
-                user = new IdentityUser(emailAddress);
+                user = new User(emailAddress);
                 await userManager.CreateAsync(user);
                 await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
             }
 
-            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<IdentityUser>>();
+            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
             var principal = await signInManager.CreateUserPrincipalAsync(user);
             await context.HttpContext.SignInAsync(principal);
             context.HandleResponse();
@@ -85,8 +86,8 @@ using (var serviceScope = app.Services.CreateScope())
     // dbContext.Database.Migrate();
     
     // Seed database
-    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var result = await userManager.CreateAsync(new IdentityUser("seeded_superuser"), "Seeded_password1234");
+    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    await userManager.CreateAsync(new User("seeded_superuser"), "Seeded_password1234");
 
     dbContext.SaveChanges();
 }
