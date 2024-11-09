@@ -1,0 +1,39 @@
+﻿services:
+  shopipy.web:
+    image: shopipy.web
+    ports:
+      - "8000:80"
+    build:
+      context: .
+      dockerfile: Shopipy.Web/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: LocalDevelopment
+    depends_on:
+      - shopipy.apiservice
+
+  shopipy.apiservice:
+    image: shopipy.apiservice
+    ports:
+      - "8100:80"
+    build:
+      context: .
+      dockerfile: Shopipy.ApiService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: LocalDevelopment
+      ASPNETCORE_URLS: "http://*:80"
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: shopipy
+      POSTGRES_USER: shopipy
+      POSTGRES_PASSWORD: shopipypassword
+  
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
