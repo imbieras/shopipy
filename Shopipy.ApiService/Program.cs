@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
-using Shopipy.ApiService.Models;
+using Shopipy.UserManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

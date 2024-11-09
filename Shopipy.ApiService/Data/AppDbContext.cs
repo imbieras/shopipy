@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Shopipy.ApiService.Models;
+using Shopipy.UserManagement.Models;
 
 namespace Shopipy.ApiService.Data;
 

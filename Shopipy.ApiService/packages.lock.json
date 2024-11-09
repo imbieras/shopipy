@@ -839,6 +839,9 @@
           "OpenTelemetry.Instrumentation.Http": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
         }
+      },
+      "shopipy.usermanagement": {
+        "type": "Project"
       }
     }
   }
