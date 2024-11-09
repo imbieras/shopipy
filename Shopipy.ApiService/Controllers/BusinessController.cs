@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shopipy.ApiService.DTOs;
 using Shopipy.ApiService.Models;
 using Shopipy.ApiService.Services;
 
@@ -14,12 +15,27 @@ public class BusinessController : ControllerBase
     {
         _businessService = businessService;
     }
-
+    private BusinessResponseDto ToResponseDto(Business business) // main candidate for automapper
+    {
+        return new BusinessResponseDto
+        {
+            BusinessId = business.BusinessId,
+            Name = business.Name,
+            Address = business.Address,
+            Phone = business.Phone,
+            Email = business.Email,
+            VATNumber = business.VATNumber,
+            BusinessType = business.BusinessType,
+            CreatedAt = business.CreatedAt,
+            UpdatedAt = business.UpdatedAt
+        };
+    }
     [HttpGet]
     public async Task<IActionResult> GetBusinesses()
     {
         var businesses = await _businessService.GetAllBusinessesAsync();
-        return Ok(businesses);
+        var responseDtos = businesses.Select(ToResponseDto);
+        return Ok(responseDtos);
     }
 
     [HttpGet("{id}")]
@@ -27,22 +43,46 @@ public class BusinessController : ControllerBase
     {
         var business = await _businessService.GetBusinessByIdAsync(id);
         if (business == null) return NotFound();
-        return Ok(business);
-    }
 
+        var responseDto = ToResponseDto(business);
+        return Ok(responseDto);
+    }
     [HttpPost]
-    public async Task<IActionResult> CreateBusiness(Business business)
+    public async Task<IActionResult> CreateBusiness(BusinessRequestDto request)
     {
+        var business = new Business //add automapper here
+        {
+            Name = request.BusinessName,
+            Address = request.BusinessAddress,
+            VATNumber = request.BusinessVatNumber,
+            Email = request.BusinessEmail,
+            Phone = request.BusinessPhone,
+            BusinessType = request.BusinessType,
+        };   
         var createdBusiness = await _businessService.CreateBusinessAsync(business);
         return CreatedAtAction(nameof(GetBusiness), new { id = createdBusiness.BusinessId }, createdBusiness);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateBusiness(int id, Business business)
+    public async Task<IActionResult> UpdateBusiness(int id, BusinessRequestDto request)
     {
-        if (id != business.BusinessId) return BadRequest();
-        var updatedBusiness = await _businessService.UpdateBusinessAsync(business);
-        return Ok(updatedBusiness);
+        var existingBusiness = await _businessService.GetBusinessByIdAsync(id);
+        if (existingBusiness == null)
+        {
+            return NotFound();
+        }
+
+        // Map fields
+        existingBusiness.Name = request.BusinessName;
+        existingBusiness.Address = request.BusinessAddress;
+        existingBusiness.VATNumber = request.BusinessVatNumber;
+        existingBusiness.Email = request.BusinessEmail;
+        existingBusiness.Phone = request.BusinessPhone;
+        existingBusiness.UpdatedAt = DateTime.UtcNow; // Update the timestamp
+
+        var updatedBusiness = await _businessService.UpdateBusinessAsync(existingBusiness);
+
+        return Ok(ToResponseDto(updatedBusiness));
     }
 
     [HttpDelete("{id}")]

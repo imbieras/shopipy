@@ -35,12 +35,3 @@ public class Business
     [Required]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
-
-public enum BusinessType
-{
-    Retail,
-    Service,
-    Manufacturing,
-    Wholesale,
-    Other
-}
