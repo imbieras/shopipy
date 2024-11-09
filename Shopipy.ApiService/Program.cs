@@ -1,10 +1,13 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
+using Shopipy.UserManagement.Mappings;
 using Shopipy.UserManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +20,12 @@ builder.Services.AddProblemDetails();
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(UserMappingProfile));
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -45,7 +53,7 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
             if (user == null)
             {
-                user = new User(emailAddress);
+                user = new User(emailAddress) {Name = "Google"};
                 await userManager.CreateAsync(user);
                 await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
             }
@@ -80,9 +88,13 @@ using (var serviceScope = app.Services.CreateScope())
     
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    await userManager.CreateAsync(new User("seeded_superuser"), "Seeded_password1234");
+    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin"}, "Seeded_password1234");
 
     dbContext.SaveChanges();
+    
+    var mapper = serviceScope.ServiceProvider.GetRequiredService<IMapper>();
+    mapper.ConfigurationProvider.AssertConfigurationIsValid();
 }
+
 
 app.Run();
