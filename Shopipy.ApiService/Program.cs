@@ -14,14 +14,20 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-// builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
+var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
 
-// Life is fun with aspire and all that stuff,
-// but I need a debugger
-builder.Services.AddDbContext<AppDbContext>(options =>
+if (isLocalDevelopment)
 {
-    options.UseInMemoryDatabase("db");
-});
+    Console.WriteLine("Using Local Development PostgresSQL Database");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    Console.WriteLine("Using Aspire's PostgresSQL Database");
+    builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
+}
 
 builder.Services.AddControllers();
 
@@ -35,18 +41,16 @@ builder.Services.AddIdentityCore<IdentityUser>()
 
 builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
     .AddBearerToken()
-    .AddGoogle(options =>
-    {
+    .AddGoogle(options => {
         var config = builder.Configuration.GetSection("Authentication:Google");
         options.ClientId = config["ClientId"]!;
         options.ClientSecret = config["ClientSecret"]!;
-        options.Events.OnTicketReceived = async (context) =>
-        {
+        options.Events.OnTicketReceived = async (context) => {
             var providerKey = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
             if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
             if (emailAddress == null) throw new InvalidOperationException("email not found");
-            
+
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
             var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
             if (user == null)
@@ -61,7 +65,7 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             await context.HttpContext.SignInAsync(principal);
             context.HandleResponse();
         };
-        
+
     });
 
 var app = builder.Build();
@@ -82,8 +86,8 @@ app.UseSwaggerUI();
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-    // dbContext.Database.Migrate();
-    
+    dbContext.Database.Migrate();
+
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
     var result = await userManager.CreateAsync(new IdentityUser("seeded_superuser"), "Seeded_password1234");
