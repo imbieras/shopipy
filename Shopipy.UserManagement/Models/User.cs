@@ -13,5 +13,9 @@ public class User : IdentityUser
     }
 
     public required string Name { get; set; }
+    public required UserRole Role { get; set; }
     public UserState UserState { get; set; } = UserState.Active;
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

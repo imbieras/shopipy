@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
+using Shopipy.ApiService.Data.Interceptors;
 using Shopipy.UserManagement.Mappings;
 using Shopipy.UserManagement.Models;
 
@@ -18,7 +19,10 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
+builder.AddNpgsqlDbContext<AppDbContext>("postgresdb", null, opts =>
+{
+    opts.AddInterceptors(new UpdatedAtInterceptor());
+});
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 
@@ -53,7 +57,7 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
             if (user == null)
             {
-                user = new User(emailAddress) {Name = "Google"};
+                user = new User(emailAddress) {Name = "Google", Role = UserRole.SuperAdmin};
                 await userManager.CreateAsync(user);
                 await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
             }
@@ -88,7 +92,7 @@ using (var serviceScope = app.Services.CreateScope())
     
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin"}, "Seeded_password1234");
+    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
 
     dbContext.SaveChanges();
     
