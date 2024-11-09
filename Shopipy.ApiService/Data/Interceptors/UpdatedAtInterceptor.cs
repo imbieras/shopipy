@@ -17,4 +17,10 @@ public class UpdatedAtInterceptor : SaveChangesInterceptor
         }
         return base.SavingChanges(eventData, result);
     }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result,
+        CancellationToken cancellationToken = new CancellationToken())
+    {
+        return new ValueTask<InterceptionResult<int>>(this.SavingChanges(eventData, result));
+    }
 }
