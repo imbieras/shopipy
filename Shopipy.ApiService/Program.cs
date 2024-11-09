@@ -1,13 +1,10 @@
 using System.Security.Claims;
-using System.Text.Json.Serialization;
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
-using Shopipy.ApiService.Data.Interceptors;
 using Shopipy.UserManagement.Mappings;
 using Shopipy.UserManagement.Models;
 
@@ -19,10 +16,20 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-builder.AddNpgsqlDbContext<AppDbContext>("postgresdb", null, opts =>
+var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
+
+if (isLocalDevelopment)
 {
-    opts.AddInterceptors(new UpdatedAtInterceptor());
-});
+    Console.WriteLine("Using Local Development PostgresSQL Database");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    Console.WriteLine("Using Aspire's PostgresSQL Database");
+    builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
+}
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 
@@ -41,13 +48,11 @@ builder.Services.AddIdentityCore<User>()
 
 builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
     .AddBearerToken()
-    .AddGoogle(options =>
-    {
+    .AddGoogle(options => {
         var config = builder.Configuration.GetSection("Authentication:Google");
         options.ClientId = config["ClientId"]!;
         options.ClientSecret = config["ClientSecret"]!;
-        options.Events.OnTicketReceived = async (context) =>
-        {
+        options.Events.OnTicketReceived = async (context) => {
             var providerKey = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
             if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
@@ -67,7 +72,7 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             await context.HttpContext.SignInAsync(principal);
             context.HandleResponse();
         };
-        
+
     });
 
 var app = builder.Build();
@@ -89,7 +94,7 @@ using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
-    
+
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
@@ -99,6 +104,5 @@ using (var serviceScope = app.Services.CreateScope())
     var mapper = serviceScope.ServiceProvider.GetRequiredService<IMapper>();
     mapper.ConfigurationProvider.AssertConfigurationIsValid();
 }
-
 
 app.Run();

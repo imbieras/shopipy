@@ -10,11 +10,23 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<WeatherApiClient>(client => {
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new Uri("https+http://apiservice");
-});
+var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
+
+if (isLocalDevelopment)
+{
+    Console.WriteLine("Using Local Development API");
+    builder.Services.AddHttpClient<WeatherApiClient>(client => {
+        client.BaseAddress = new Uri("http://shopipy.apiservice:80/");
+    });
+}
+else
+{
+    Console.WriteLine("Using Aspire's API");
+    builder.Services.AddHttpClient<WeatherApiClient>(client => {
+        client.BaseAddress = new Uri("https+http://apiservice");
+    });
+}
+
 
 var app = builder.Build();
 
