@@ -15,14 +15,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-// builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
-
-// Life is fun with aspire and all that stuff,
-// but I need a debugger
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseInMemoryDatabase("db");
-});
+builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddControllers();
 
@@ -83,7 +76,7 @@ app.UseSwaggerUI();
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-    // dbContext.Database.Migrate();
+    dbContext.Database.Migrate();
     
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();

@@ -52,15 +52,6 @@
           "Mono.TextTemplating": "2.2.1"
         }
       },
-      "Microsoft.EntityFrameworkCore.InMemory": {
-        "type": "Direct",
-        "requested": "[8.0.10, )",
-        "resolved": "8.0.10",
-        "contentHash": "TdtSEbBsMg8dFq5T1PiOv48w2oiiduNzaEf3Fa7tO2b3lTBFO1y1Dla6ihs628P53TowsScjLSG8g5ZEw6KN0Q==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.10"
-        }
-      },
       "Swashbuckle.AspNetCore": {
         "type": "Direct",
         "requested": "[6.9.0, )",
