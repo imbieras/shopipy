@@ -23,6 +23,15 @@
           "OpenTelemetry.Extensions.Hosting": "1.9.0"
         }
       },
+      "AutoMapper": {
+        "type": "Direct",
+        "requested": "[13.0.1, )",
+        "resolved": "13.0.1",
+        "contentHash": "/Fx1SbJ16qS7dU4i604Sle+U9VLX+WSNVJggk6MupKVkYvvBm4XqYaeFuf67diHefHKHs50uQIS2YEDFhPCakQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Options": "6.0.0"
+        }
+      },
       "Microsoft.AspNetCore.Authentication.Google": {
         "type": "Direct",
         "requested": "[8.0.10, )",
@@ -50,15 +59,6 @@
           "Microsoft.EntityFrameworkCore.Relational": "8.0.10",
           "Microsoft.Extensions.DependencyModel": "8.0.2",
           "Mono.TextTemplating": "2.2.1"
-        }
-      },
-      "Microsoft.EntityFrameworkCore.InMemory": {
-        "type": "Direct",
-        "requested": "[8.0.10, )",
-        "resolved": "8.0.10",
-        "contentHash": "TdtSEbBsMg8dFq5T1PiOv48w2oiiduNzaEf3Fa7tO2b3lTBFO1y1Dla6ihs628P53TowsScjLSG8g5ZEw6KN0Q==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.10"
         }
       },
       "Swashbuckle.AspNetCore": {
@@ -847,6 +847,12 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
+        }
+      },
+      "shopipy.usermanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )"
         }
       }
     }

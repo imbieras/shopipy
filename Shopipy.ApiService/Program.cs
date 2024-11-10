@@ -1,10 +1,14 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.ApiService.Data;
+using Shopipy.UserManagement.Mappings;
+using Shopipy.UserManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,13 +33,18 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(UserMappingProfile));
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
@@ -50,17 +59,17 @@ builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
             var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
             if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
             if (emailAddress == null) throw new InvalidOperationException("email not found");
-
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+            
+            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
             var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
             if (user == null)
             {
-                user = new IdentityUser(emailAddress);
+                user = new User(emailAddress) {Name = "Google", Role = UserRole.SuperAdmin};
                 await userManager.CreateAsync(user);
                 await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
             }
 
-            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<IdentityUser>>();
+            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
             var principal = await signInManager.CreateUserPrincipalAsync(user);
             await context.HttpContext.SignInAsync(principal);
             context.HandleResponse();
@@ -89,10 +98,13 @@ using (var serviceScope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 
     // Seed database
-    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var result = await userManager.CreateAsync(new IdentityUser("seeded_superuser"), "Seeded_password1234");
+    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
 
     dbContext.SaveChanges();
+    
+    var mapper = serviceScope.ServiceProvider.GetRequiredService<IMapper>();
+    mapper.ConfigurationProvider.AssertConfigurationIsValid();
 }
 
 app.Run();

@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Tests", "Shopipy.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Web", "Shopipy.Web\Shopipy.Web.csproj", "{1A0E45D8-272B-469D-B173-71AE5D57BC77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.UserManagement", "Shopipy.UserManagement\Shopipy.UserManagement.csproj", "{AE18BA20-80F0-4941-8064-E1DF92D15894}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{399E5849-C540-4F9E-A191-CFA8A0F435A4}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
@@ -41,5 +43,9 @@ Global
 		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
