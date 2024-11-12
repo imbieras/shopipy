@@ -7,22 +7,30 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
       <UserSecretsId>8aa94d1f-8f63-4ece-a527-8987e41b9d4d</UserSecretsId>
+      <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
+        <ProjectReference Include="..\Shopipy.UserManagement\Shopipy.UserManagement.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.2.2" />
+      <PackageReference Include="AutoMapper" Version="13.0.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>
