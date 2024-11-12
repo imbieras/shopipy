@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Shopipy.ApiService.DTOs;
-using Shopipy.ApiService.Models;
-using Shopipy.ApiService.Services;
+using Shopipy.BusinessManagement.DTOs;
+using Shopipy.BusinessManagement.Services;
+using Shopipy.Persistance.Models;
 
-namespace Shopipy.ApiService.Controllers;
+namespace Shopipy.BusinessManagement.Controllers;
 
 [ApiController]
 [Route("[controller]")]

@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Shopipy.ApiService.Data;
+using Shopipy.BusinessManagement.Repositories;
+using Shopipy.BusinessManagement.Services;
+using Shopipy.Persistance.Data;
+using Shopipy.Persistance.Models;
+using Shopipy.ServiceDefaults;
 using Shopipy.UserManagement.Mappings;
-using Shopipy.UserManagement.Models;
-using Shopipy.ApiService.Repositories;
-using Shopipy.ApiService.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

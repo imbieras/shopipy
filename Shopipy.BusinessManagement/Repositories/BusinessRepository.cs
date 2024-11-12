@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Shopipy.ApiService.Data;
-using Shopipy.ApiService.Models;
+using Shopipy.BusinessManagement.Repositories;
+using Shopipy.Persistance.Data;
+using Shopipy.Persistance.Models;
 
-namespace Shopipy.ApiService.Repositories;
+namespace Shopipy.BusinessManagement.Repositories;
 
 public class BusinessRepository : IBusinessRepository
 {

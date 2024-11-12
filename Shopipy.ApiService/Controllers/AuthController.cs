@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.ApiService.DTOs;
-using Shopipy.UserManagement.Models;
+using Shopipy.Persistance.Models;
 
 namespace Shopipy.ApiService.Controllers;
 

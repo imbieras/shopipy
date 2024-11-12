@@ -1,6 +1,6 @@
 using AutoMapper;
+using Shopipy.Persistance.Models;
 using Shopipy.UserManagement.Dtos;
-using Shopipy.UserManagement.Models;
 
 namespace Shopipy.UserManagement.Mappings;
 

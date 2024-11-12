@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Shopipy.ApiService.Models;
+using Shopipy.Persistance.Models;
 
-namespace Shopipy.ApiService.DTOs;
+namespace Shopipy.BusinessManagement.DTOs;
 
 public class BusinessRequestDto
 {

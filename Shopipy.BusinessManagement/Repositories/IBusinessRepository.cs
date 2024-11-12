@@ -1,6 +1,6 @@
-using Shopipy.ApiService.Models;
+using Shopipy.Persistance.Models;
 
-namespace Shopipy.ApiService.Repositories;
+namespace Shopipy.BusinessManagement.Repositories;
 
 //mb we will have 2 implementations of a repository: database-backed and cache-backed
 public interface IBusinessRepository

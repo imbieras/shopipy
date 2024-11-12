@@ -1,7 +1,7 @@
-using Shopipy.ApiService.Models;
-using Shopipy.ApiService.Repositories;
+using Shopipy.Persistance.Models;
+using Shopipy.BusinessManagement.Repositories;
 
-namespace Shopipy.ApiService.Services;
+namespace Shopipy.BusinessManagement.Services;
 
 public class BusinessService
 {
