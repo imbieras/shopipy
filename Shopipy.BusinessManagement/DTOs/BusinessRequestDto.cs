@@ -29,6 +29,5 @@ public class BusinessRequestDto
     public string BusinessPhone { get; set; }
     
     [Required]
-    [JsonConverter(typeof(JsonStringEnumConverter))]    
     public BusinessType BusinessType { get; set; }
 }
