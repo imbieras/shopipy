@@ -13,5 +13,5 @@ public class UserBaseDto
 
     [Phone]
     public required string Phone { get; set; }
-
+    public int? BusinessId { get; set; }
 }

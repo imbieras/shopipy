@@ -102,8 +102,27 @@ app.UseSwaggerUI();
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
 
+    if (!dbContext.Businesses.Any(b => b.BusinessId == 0))
+    {
+        dbContext.Businesses.Add(new Business 
+        {
+            BusinessId = 0,
+            Name = "Default Business",
+            Address = "Default Street",
+            Phone = "123456789",
+            Email = "default@business.com",
+            VATNumber = "VAT000",
+            BusinessType = BusinessType.Retail, 
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        Console.WriteLine("Default Business entry added.");
+    }
+
+    Console.WriteLine("Applying migrations...");
+    dbContext.Database.Migrate();
+    Console.WriteLine("Migrations applied successfully.");    
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
