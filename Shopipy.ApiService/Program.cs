@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shopipy.BusinessManagement.Mappings;
 using Shopipy.BusinessManagement.Repositories;
 using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
@@ -37,7 +38,7 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile));
 
 builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
 builder.Services.AddScoped<BusinessService>();
@@ -102,24 +103,7 @@ app.UseSwaggerUI();
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    if (!dbContext.Businesses.Any(b => b.BusinessId == 0))
-    {
-        dbContext.Businesses.Add(new Business 
-        {
-            BusinessId = 0,
-            Name = "Default Business",
-            Address = "Default Street",
-            Phone = "123456789",
-            Email = "default@business.com",
-            VATNumber = "VAT000",
-            BusinessType = BusinessType.Retail, 
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        });
-        Console.WriteLine("Default Business entry added.");
-    }
-
+    
     Console.WriteLine("Applying migrations...");
     dbContext.Database.Migrate();
     Console.WriteLine("Migrations applied successfully.");    

@@ -11,10 +11,7 @@ public class BusinessResponseDto
     public string Phone { get; set; }
     public string Email { get; set; }
     public string VATNumber { get; set; }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BusinessType BusinessType { get; set; }
-    
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }   
 }
