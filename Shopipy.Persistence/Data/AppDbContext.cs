@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Models;
 
-namespace Shopipy.Persistance.Data;
+namespace Shopipy.Persistence.Data;
 
 public class AppDbContext : IdentityDbContext<User>
 {

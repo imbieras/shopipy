@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shopipy.Persistance\Shopipy.Persistance.csproj" />
+      <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
     </ItemGroup>
 
     

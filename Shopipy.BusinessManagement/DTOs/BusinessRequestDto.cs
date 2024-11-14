@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Models;
 
 namespace Shopipy.BusinessManagement.DTOs;
 

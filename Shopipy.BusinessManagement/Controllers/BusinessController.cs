@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.BusinessManagement.DTOs;
 using Shopipy.BusinessManagement.Services;
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Models;
 
 namespace Shopipy.BusinessManagement.Controllers;
 

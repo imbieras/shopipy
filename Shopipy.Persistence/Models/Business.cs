@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Shopipy.Persistance.Models;
+namespace Shopipy.Persistence.Models;
 
 public class Business
 {

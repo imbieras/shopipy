@@ -1,4 +1,4 @@
-namespace Shopipy.Persistance.Models;
+namespace Shopipy.Persistence.Models;
 
 public enum UserState
 {

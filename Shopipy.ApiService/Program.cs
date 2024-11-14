@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.BusinessManagement.Repositories;
 using Shopipy.BusinessManagement.Services;
-using Shopipy.Persistance.Data;
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Data;
+using Shopipy.Persistence.Models;
 using Shopipy.ServiceDefaults;
 using Shopipy.UserManagement.Mappings;
 

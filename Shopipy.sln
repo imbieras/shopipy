@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.AppHost", "Shopipy.AppHost\Shopipy.AppHost.csproj", "{CE05A877-3237-4E43-86DF-ADBD9260B3C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.ServiceDefaults", "Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj", "{711BF0FD-7715-4681-A65E-3F7525163276}"
@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Persistance", "Shopipy.Persistance\Shopipy.Persistance.csproj", "{FFE4FD5C-215C-43DA-8402-BA0F8572E68C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Persistence", "Shopipy.Persistence\Shopipy.Persistence.csproj", "{FFE4FD5C-215C-43DA-8402-BA0F8572E68C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.BusinessManagement", "Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj", "{28E09A15-E90B-43E9-9488-459F5912A8D2}"
 EndProject

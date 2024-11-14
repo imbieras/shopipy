@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Shopipy.Persistance.Data.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     /// <inheritdoc />
     public partial class addNullabelBuisinessIdToUser : Migration

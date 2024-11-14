@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Shopipy.Persistance.Models;
+namespace Shopipy.Persistence.Models;
 
 public class User : IdentityUser
 {

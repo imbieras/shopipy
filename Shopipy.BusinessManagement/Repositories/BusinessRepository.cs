@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shopipy.BusinessManagement.Repositories;
-using Shopipy.Persistance.Data;
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Data;
+using Shopipy.Persistence.Models;
 
 namespace Shopipy.BusinessManagement.Repositories;
 

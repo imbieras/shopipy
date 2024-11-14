@@ -1,4 +1,4 @@
-using Shopipy.Persistance.Models;
+using Shopipy.Persistence.Models;
 
 namespace Shopipy.BusinessManagement.Repositories;
 

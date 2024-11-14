@@ -838,10 +838,10 @@
       "shopipy.businessmanagement": {
         "type": "Project",
         "dependencies": {
-          "Shopipy.Persistance": "[1.0.0, )"
+          "Shopipy.Persistence": "[1.0.0, )"
         }
       },
-      "shopipy.persistance": {
+      "shopipy.persistence": {
         "type": "Project",
         "dependencies": {
           "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": "[8.2.2, )",
@@ -864,7 +864,7 @@
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
-          "Shopipy.Persistance": "[1.0.0, )"
+          "Shopipy.Persistence": "[1.0.0, )"
         }
       }
     }
