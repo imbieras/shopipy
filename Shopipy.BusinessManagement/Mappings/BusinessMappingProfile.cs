@@ -15,7 +15,7 @@ public class BusinessMappingProfile : Profile
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.VATNumber, opt => opt.MapFrom(src => src.VATNumber))
+            .ForMember(dest => dest.VatNumber, opt => opt.MapFrom(src => src.VatNumber))
             .ForMember(dest => dest.BusinessType, opt => opt.MapFrom(src => src.BusinessType))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
@@ -26,7 +26,7 @@ public class BusinessMappingProfile : Profile
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.BusinessAddress))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.BusinessPhone))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.BusinessEmail))
-            .ForMember(dest => dest.VATNumber, opt => opt.MapFrom(src => src.BusinessVatNumber))
+            .ForMember(dest => dest.VatNumber, opt => opt.MapFrom(src => src.BusinessVatNumber))
             .ForMember(dest => dest.BusinessType, opt => opt.MapFrom(src => src.BusinessType))
             .ForMember(dest => dest.BusinessId, opt => opt.Ignore()) 
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
