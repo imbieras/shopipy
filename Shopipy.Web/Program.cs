@@ -1,4 +1,3 @@
-using Shopipy.ServiceDefaults;
 using Shopipy.Web;
 
 var builder = WebApplication.CreateBuilder(args);

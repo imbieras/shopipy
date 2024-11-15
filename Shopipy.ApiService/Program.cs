@@ -11,7 +11,6 @@ using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
-using Shopipy.ServiceDefaults;
 using Shopipy.UserManagement.Mappings;
 
 
