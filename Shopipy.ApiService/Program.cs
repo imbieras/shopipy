@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
 using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
@@ -40,7 +41,7 @@ else
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<BusinessService>();
+builder.Services.AddBusinessManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
