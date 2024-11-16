@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shopipy.ApiService.Data;
+using Shopipy.Persistence.Data;
 
 #nullable disable
 
 namespace Shopipy.ApiService.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241109215020_CreatedUpdatedAt")]
-    partial class CreatedUpdatedAt
+    [Migration("20241109212525_AddUserState")]
+    partial class AddUserState
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -169,9 +170,6 @@ namespace Shopipy.ApiService.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -211,9 +209,6 @@ namespace Shopipy.ApiService.Data.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)

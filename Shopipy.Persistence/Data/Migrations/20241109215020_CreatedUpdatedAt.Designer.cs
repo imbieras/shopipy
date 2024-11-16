@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shopipy.ApiService.Data;
+using Shopipy.Persistence.Data;
 
 #nullable disable
 
 namespace Shopipy.ApiService.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241109220115_AddUserRole")]
-    partial class AddUserRole
+    [Migration("20241109215020_CreatedUpdatedAt")]
+    partial class CreatedUpdatedAt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,9 +206,6 @@ namespace Shopipy.ApiService.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

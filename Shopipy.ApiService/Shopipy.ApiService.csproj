@@ -13,14 +13,14 @@
     <ItemGroup>
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
         <ProjectReference Include="..\Shopipy.UserManagement\Shopipy.UserManagement.csproj" />
+        <ProjectReference Include="..\Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj" />
+        <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.2.2" />
       <PackageReference Include="AutoMapper" Version="13.0.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

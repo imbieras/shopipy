@@ -1,4 +1,4 @@
-namespace Shopipy.UserManagement.Models;
+namespace Shopipy.Persistence.Models;
 
 public enum UserRole
 {

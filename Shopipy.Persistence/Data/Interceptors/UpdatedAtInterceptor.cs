@@ -1,9 +1,8 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Shopipy.UserManagement.Models;
+using Shopipy.Persistence.Models;
 
-namespace Shopipy.ApiService.Data.Interceptors;
+namespace Shopipy.Persistence.Data.Interceptors;
 
 public class UpdatedAtInterceptor : SaveChangesInterceptor
 {

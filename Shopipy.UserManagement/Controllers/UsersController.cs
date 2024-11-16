@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Shopipy.Persistence.Models;
 using Shopipy.UserManagement.Dtos;
-using Shopipy.UserManagement.Models;
 
 namespace Shopipy.UserManagement.Controllers;
 

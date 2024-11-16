@@ -10,11 +10,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutoMapper" Version="13.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="13.0.1" />
+    </ItemGroup>
+
+    
 </Project>

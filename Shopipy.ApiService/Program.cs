@@ -6,9 +6,14 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Shopipy.ApiService.Data;
+using Shopipy.BusinessManagement;
+using Shopipy.BusinessManagement.Mappings;
+using Shopipy.BusinessManagement.Services;
+using Shopipy.Persistence.Data;
+using Shopipy.Persistence.Models;
+using Shopipy.Persistence.Repositories;
 using Shopipy.UserManagement.Mappings;
-using Shopipy.UserManagement.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +38,10 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile));
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddBusinessManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -95,8 +103,10 @@ app.UseSwaggerUI();
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    Console.WriteLine("Applying migrations...");
     dbContext.Database.Migrate();
-
+    Console.WriteLine("Migrations applied successfully.");    
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
