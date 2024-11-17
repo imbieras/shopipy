@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using AppointmentManagement;
+using AppointmentManagement.Mappings;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
@@ -40,11 +42,13 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
+    typeof(AppointmentMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
 builder.Services.AddServiceManagement();
+builder.Services.AddAppointmentManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
