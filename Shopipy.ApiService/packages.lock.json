@@ -861,6 +861,13 @@
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
         }
       },
+      "shopipy.servicemanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )"
+        }
+      },
       "shopipy.usermanagement": {
         "type": "Project",
         "dependencies": {

@@ -14,6 +14,7 @@
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
         <ProjectReference Include="..\Shopipy.UserManagement\Shopipy.UserManagement.csproj" />
         <ProjectReference Include="..\Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj" />
+        <ProjectReference Include="..\Shopipy.ServiceManagement\Shopipy.ServiceManagement.csproj" />
         <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
     </ItemGroup>
 

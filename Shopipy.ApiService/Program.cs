@@ -12,6 +12,8 @@ using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.ServiceManagement;
+using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement.Mappings;
 
 
@@ -38,10 +40,11 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
+builder.Services.AddServiceManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
