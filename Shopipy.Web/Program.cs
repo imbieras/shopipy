@@ -1,4 +1,4 @@
-using Shopipy.Web;
+using Shopipy.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,18 +15,24 @@ var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
 if (isLocalDevelopment)
 {
     Console.WriteLine("Using Local Development API");
-    builder.Services.AddHttpClient<WeatherApiClient>(client => {
+    builder.Services.AddHttpClient("Shopipy.ApiService", client => {
         client.BaseAddress = new Uri("http://shopipy.apiservice:80/");
     });
 }
 else
 {
     Console.WriteLine("Using Aspire's API");
-    builder.Services.AddHttpClient<WeatherApiClient>(client => {
+    builder.Services.AddHttpClient("Shopipy.ApiService", client => {
         client.BaseAddress = new Uri("https+http://apiservice");
     });
 }
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
 
 var app = builder.Build();
 
@@ -37,6 +43,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseMiddleware<TokenMiddleware>();
 
 app.UseHttpsRedirection();
 

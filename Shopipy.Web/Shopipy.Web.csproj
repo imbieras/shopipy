@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Shopipy.ApiService\Shopipy.ApiService.csproj" />
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj"/>
     </ItemGroup>
 
