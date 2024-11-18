@@ -4,7 +4,8 @@ namespace Shopipy.Persistence.Models;
 
 public class Service
 {
-    //Should also return category ID
+    public required int CategoryId { get; set; }
+    
     [Key]
     public required int ServiceId { get; set; }
     

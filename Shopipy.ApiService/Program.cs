@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
 using Shopipy.BusinessManagement.Services;
+using Shopipy.CategoryManagement;
+using Shopipy.CategoryManagement.Mappings;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
@@ -43,12 +45,13 @@ else
 }
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
-    typeof(AppointmentMappingProfile));
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
 builder.Services.AddServiceManagement();
 builder.Services.AddAppointmentManagement();
+builder.Services.AddCategoryManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

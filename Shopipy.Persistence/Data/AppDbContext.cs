@@ -13,4 +13,6 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Service> Services { get; set; }
     
     public DbSet<Appointment> Appointments { get; set; }
+    
+    public DbSet<Category> Categories { get; set; }
 }

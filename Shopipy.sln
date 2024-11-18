@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.ServiceManagement",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.AppointmentManagement", "Shopipy.AppointmentManagement\Shopipy.AppointmentManagement.csproj", "{7A7D3A82-F569-4A2E-85F2-74CFE8B0F77D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.CategoryManagement", "Shopipy.CategoryManagement\Shopipy.CategoryManagement.csproj", "{40C61A63-0167-43A5-97D5-52A6D18A679C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,9 @@ Global
 		{7A7D3A82-F569-4A2E-85F2-74CFE8B0F77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A7D3A82-F569-4A2E-85F2-74CFE8B0F77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A7D3A82-F569-4A2E-85F2-74CFE8B0F77D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40C61A63-0167-43A5-97D5-52A6D18A679C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40C61A63-0167-43A5-97D5-52A6D18A679C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40C61A63-0167-43A5-97D5-52A6D18A679C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40C61A63-0167-43A5-97D5-52A6D18A679C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

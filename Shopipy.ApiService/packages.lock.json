@@ -849,6 +849,13 @@
           "Shopipy.Persistence": "[1.0.0, )"
         }
       },
+      "shopipy.categorymanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )"
+        }
+      },
       "shopipy.persistence": {
         "type": "Project",
         "dependencies": {
@@ -872,6 +879,7 @@
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
+          "Shopipy.CategoryManagement": "[1.0.0, )",
           "Shopipy.Persistence": "[1.0.0, )"
         }
       },

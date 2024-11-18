@@ -21,6 +21,12 @@ public class ServiceManagementService
     {
         return await _serviceRepository.GetByIdAsync(id);
     }
+    
+    public async Task<IEnumerable<Service>> GetAllServicesByCategory(int id)
+    {
+        return await _serviceRepository.GetAllByConditionAsync(cs => cs.CategoryId == id);
+    }
+
 
     public async Task<Service> CreateService(Service service)
     {

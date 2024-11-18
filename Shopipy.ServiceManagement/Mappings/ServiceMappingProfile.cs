@@ -10,6 +10,7 @@ public class ServiceMappingProfile : Profile
     {
         // Map Service -> ServiceResponseDto
         CreateMap<Service, ServiceResponseDto>()
+            .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(dest => dest.ServiceId, opt => opt.MapFrom(src => src.ServiceId))
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.ServiceDescription, opt => opt.MapFrom(src => src.ServiceDescription))
@@ -22,6 +23,7 @@ public class ServiceMappingProfile : Profile
 
         // Map ServiceRequestDto -> Service
         CreateMap<ServiceRequestDto, Service>()
+            .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.ServiceDescription, opt => opt.MapFrom(src => src.ServiceDescription))
             .ForMember(dest => dest.ServiceBasePrice, opt => opt.MapFrom(src => src.ServiceBasePrice))

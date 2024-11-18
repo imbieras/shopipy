@@ -4,7 +4,8 @@ namespace Shopipy.ServiceManagement.DTOs;
 
 public class ServiceRequestDto
 {
-    //category_id
+    public required int CategoryId { get; set; }
+    
     [StringLength(256)]
     public required string ServiceName { get; set; }
     
