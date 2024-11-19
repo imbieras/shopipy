@@ -6,10 +6,13 @@ namespace AppointmentManagement.Services;
 public class AppointmentService
 {
     private readonly IGenericRepository<Appointment> _appointmentRepository;
+    private readonly IGenericRepository<Service> _serviceRepository;
 
-    public AppointmentService(IGenericRepository<Appointment> appointmentRepository)
+    public AppointmentService(IGenericRepository<Appointment> appointmentRepository,
+        IGenericRepository<Service> serviceRepository)
     {
         _appointmentRepository = appointmentRepository;
+        _serviceRepository = serviceRepository;
     }
 
     public async Task<IEnumerable<Appointment>> GetAllAppointments()
@@ -34,6 +37,15 @@ public class AppointmentService
 
     public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
     {
+        var service = await _serviceRepository.GetByIdAsync(appointment.ServiceId);
+        
+        if (service == null)
+        {
+            throw new ArgumentException("Service not found");
+        }
+
+        appointment.EndTime = appointment.StartTime.AddMinutes(service.ServiceDuration);
+
         return await _appointmentRepository.AddAsync(appointment);
     }
 
