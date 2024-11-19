@@ -4,6 +4,7 @@ namespace Shopipy.Persistence.Models;
 
 public class Appointment
 {
+    public required int BusinessId { get; set; }
     [Key]
     public required int AppointmentId { get; set; }
 

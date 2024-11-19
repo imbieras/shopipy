@@ -8,14 +8,10 @@ namespace Shopipy.CategoryManagement.Mappings
     {
         public CategoryMappingProfile()
         {
-            // Map Category -> CategoryResponseDto
-            CreateMap<Category, CategoryResponseDto>()
-                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+            CreateMap<Category, CategoryResponseDto>();
 
-            // Map CategoryRequestDto -> Category
             CreateMap<CategoryRequestDto, Category>()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.BusinessId, opt => opt.Ignore())
                 .ForMember(dest => dest.CategoryId, opt => opt.Ignore());
         }
     }

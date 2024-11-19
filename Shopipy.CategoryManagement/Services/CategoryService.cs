@@ -17,9 +17,19 @@ public class CategoryService
         return await _categoryRepository.GetAllAsync();
     }
 
+    public async Task<IEnumerable<Category>> GetAllCategoriesInBusinessAsync(int businessId)
+    {
+        return await _categoryRepository.GetAllByConditionAsync(c => c.BusinessId == businessId);
+    }
+
     public async Task<Category> GetCategoryByIdAsync(int id)
     {
         return await _categoryRepository.GetByIdAsync(id);
+    }
+
+    public async Task<Category> GetCategoryByIdInBusinessAsync(int businessId, int id)
+    {
+        return await _categoryRepository.GetByConditionAsync(c => c.BusinessId == businessId && c.CategoryId == id);
     }
     
     public async Task<Category> CreateCategoryAsync(Category category)

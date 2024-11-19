@@ -14,6 +14,7 @@ using Shopipy.BusinessManagement.Services;
 using Shopipy.CategoryManagement;
 using Shopipy.CategoryManagement.Mappings;
 using Shopipy.Persistence.Data;
+using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.ServiceManagement;
@@ -28,6 +29,7 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
+builder.Services.AddScoped<BusinessService>();
 
 var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
 
@@ -102,6 +104,8 @@ app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<BusinessExistsMiddleware>();
 
 app.MapDefaultEndpoints();
 

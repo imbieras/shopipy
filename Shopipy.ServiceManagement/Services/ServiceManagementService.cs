@@ -22,11 +22,20 @@ public class ServiceManagementService
         return await _serviceRepository.GetByIdAsync(id);
     }
     
-    public async Task<IEnumerable<Service>> GetAllServicesByCategory(int id)
+    public async Task<Service> GetServiceByIdInBusiness(int businessId ,int id)
     {
-        return await _serviceRepository.GetAllByConditionAsync(cs => cs.CategoryId == id);
+        return await _serviceRepository.GetByConditionAsync(s => s.BusinessId == businessId && s.ServiceId == id);
+    }
+    
+    public async Task<IEnumerable<Service>> GetAllServicesByCategory(int businessId, int categoryId)
+    {
+        return await _serviceRepository.GetAllByConditionAsync(cs => cs.BusinessId == businessId && cs.CategoryId == categoryId);
     }
 
+    public async Task<IEnumerable<Service>> GetAllServicesInBusiness(int businessId)
+    {
+        return await _serviceRepository.GetAllByConditionAsync(cs => cs.BusinessId == businessId);
+    }
 
     public async Task<Service> CreateService(Service service)
     {

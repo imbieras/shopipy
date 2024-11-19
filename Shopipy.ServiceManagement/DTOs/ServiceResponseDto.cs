@@ -2,7 +2,7 @@ namespace Shopipy.ServiceManagement.Mappings;
 
 public class ServiceResponseDto
 {
-    //Should also return category ID
+    public required int BusinessId { get; set; }
     public required int CategoryId { get; set; }
     public required int ServiceId { get; set; }
     public required string ServiceName { get; set; }

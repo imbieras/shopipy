@@ -2,6 +2,7 @@ namespace AppointmentManagement.DTOs;
 
 public class AppointmentResponseDto
 {
+  public required int BusinessId { get; set; }
   public required int AppointmentId { get; set; }
   public required string CustomerName { get; set; }
   public required string CustomerEmail { get; set; }
