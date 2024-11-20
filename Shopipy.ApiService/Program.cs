@@ -1,14 +1,10 @@
-using System.Security.Claims;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
-using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
@@ -57,33 +53,7 @@ builder.Services.AddIdentityCore<User>()
     .AddSignInManager();
 
 builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
-    .AddBearerToken()
-    .AddGoogle(options => {
-        var config = builder.Configuration.GetSection("Authentication:Google");
-        options.ClientId = config["ClientId"]!;
-        options.ClientSecret = config["ClientSecret"]!;
-        options.Events.OnTicketReceived = async (context) => {
-            var providerKey = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
-            if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
-            if (emailAddress == null) throw new InvalidOperationException("email not found");
-            
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
-            var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
-            if (user == null)
-            {
-                user = new User(emailAddress) {Name = "Google", Role = UserRole.SuperAdmin};
-                await userManager.CreateAsync(user);
-                await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
-            }
-
-            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
-            var principal = await signInManager.CreateUserPrincipalAsync(user);
-            await context.HttpContext.SignInAsync(principal);
-            context.HandleResponse();
-        };
-
-    });
+    .AddBearerToken();
 
 var app = builder.Build();
 
