@@ -11,16 +11,6 @@ public class ServiceManagementService
     {
         _serviceRepository = serviceRepository;
     }
-
-    public async Task<IEnumerable<Service>> GetAllServices()
-    {
-        return await _serviceRepository.GetAllAsync();
-    }
-
-    public async Task<Service> GetServiceById(int id)
-    {
-        return await _serviceRepository.GetByIdAsync(id);
-    }
     
     public async Task<Service> GetServiceByIdInBusiness(int businessId ,int id)
     {
