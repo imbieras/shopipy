@@ -18,6 +18,8 @@ public class AuthService(IConfiguration config)
         {
             SigningCredentials = signingCredentials,
             Expires = DateTime.UtcNow.AddHours(1),
+            Audience = config["Authentication:Jwt:Audience"],
+            Issuer = config["Authentication:Jwt:Issuer"],
             Claims = new Dictionary<string, object>
             {
                 {JwtRegisteredClaimNames.Sub, user.Id}

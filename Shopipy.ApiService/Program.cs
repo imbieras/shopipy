@@ -1,8 +1,9 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
@@ -53,8 +54,14 @@ builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
-builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
-    .AddBearerToken();
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Jwt:Key"]!));
+        options.TokenValidationParameters.IssuerSigningKey = key;
+        options.TokenValidationParameters.ValidAudience = builder.Configuration["Authentication:Jwt:Audience"]!;
+        options.TokenValidationParameters.ValidIssuer = builder.Configuration["Authentication:Jwt:Issuer"]!;
+    });
 
 builder.Services.AddScoped<AuthService>();
 
