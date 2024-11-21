@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
 using Shopipy.Persistence.Data;
@@ -54,6 +55,8 @@ builder.Services.AddIdentityCore<User>()
 
 builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
     .AddBearerToken();
+
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
