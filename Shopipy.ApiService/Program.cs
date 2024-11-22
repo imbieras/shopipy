@@ -54,16 +54,20 @@ builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
+var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Jwt:Key"]!));
+var signingCredentials = new SigningCredentials(jwtKey, SecurityAlgorithms.HmacSha256);
+var issuer = builder.Configuration["Authentication:Jwt:Issuer"]!;
+var audience = builder.Configuration["Authentication:Jwt:Audience"]!;
+
 builder.Services.AddAuthentication()
     .AddJwtBearer(options =>
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Jwt:Key"]!));
-        options.TokenValidationParameters.IssuerSigningKey = key;
-        options.TokenValidationParameters.ValidAudience = builder.Configuration["Authentication:Jwt:Audience"]!;
-        options.TokenValidationParameters.ValidIssuer = builder.Configuration["Authentication:Jwt:Issuer"]!;
+        options.TokenValidationParameters.IssuerSigningKey = jwtKey;
+        options.TokenValidationParameters.ValidIssuer = issuer;
+        options.TokenValidationParameters.ValidAudience = audience;
     });
 
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 
 var app = builder.Build();
 
