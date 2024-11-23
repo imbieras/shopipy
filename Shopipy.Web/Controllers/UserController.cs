@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.ApiService.DTOs;
 using Shopipy.Web.DTOs;
+using Shopipy.Web.Services;
 using System.Text;
 using System.Text.Json;
 
 namespace Shopipy.Web.Controllers;
 
-public class UserController(ILogger<UserController> logger, IHttpClientFactory httpClientFactory) : Controller
+public class UserController(UserService userService, ILogger<UserController> logger, IHttpClientFactory httpClientFactory) : BaseController(userService)
 {
-    private readonly ILogger<UserController> _logger = logger;
 
     [HttpGet]
     public IActionResult Login()
@@ -26,6 +26,7 @@ public class UserController(ILogger<UserController> logger, IHttpClientFactory h
     {
         if (!ModelState.IsValid)
         {
+            logger.LogWarning("Invalid login request received.");
             return View(loginRequest);
         }
 
@@ -36,19 +37,20 @@ public class UserController(ILogger<UserController> logger, IHttpClientFactory h
 
         if (!response.IsSuccessStatusCode)
         {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            logger.LogWarning("Login failed with status code {StatusCode}. Response: {Error}", response.StatusCode, errorContent);
             ModelState.AddModelError("", "Invalid username or password.");
             return View(loginRequest);
         }
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine(responseContent);
-
         var tokenResponse = JsonSerializer.Deserialize<TokenResponseDto>(responseContent);
 
         if (tokenResponse != null)
         {
-            Response.Cookies.Append("BearerToken", tokenResponse.AccessToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn) });
+            // FIXME: The expiration time right now is hardcoded to 1 hour, since no refresh token is implemented.
+            Response.Cookies.Append("BearerToken", tokenResponse.Token, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(3600) });
         }
 
         return RedirectToAction("Index", "Home");

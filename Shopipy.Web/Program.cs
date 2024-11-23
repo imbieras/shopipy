@@ -1,4 +1,6 @@
+using Shopipy.Web.Helpers;
 using Shopipy.Web.Middlewares;
+using Shopipy.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +29,13 @@ else
     });
 }
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
+builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Strict;
 });
+
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
