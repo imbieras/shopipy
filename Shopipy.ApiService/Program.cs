@@ -1,14 +1,12 @@
-using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
-using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
@@ -56,34 +54,20 @@ builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
-builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
-    .AddBearerToken()
-    .AddGoogle(options => {
-        var config = builder.Configuration.GetSection("Authentication:Google");
-        options.ClientId = config["ClientId"]!;
-        options.ClientSecret = config["ClientSecret"]!;
-        options.Events.OnTicketReceived = async (context) => {
-            var providerKey = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
-            if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
-            if (emailAddress == null) throw new InvalidOperationException("email not found");
-            
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
-            var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
-            if (user == null)
-            {
-                user = new User(emailAddress) {Name = "Google", Role = UserRole.SuperAdmin};
-                await userManager.CreateAsync(user);
-                await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
-            }
+var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Jwt:Key"]!));
+var signingCredentials = new SigningCredentials(jwtKey, SecurityAlgorithms.HmacSha256);
+var issuer = builder.Configuration["Authentication:Jwt:Issuer"]!;
+var audience = builder.Configuration["Authentication:Jwt:Audience"]!;
 
-            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
-            var principal = await signInManager.CreateUserPrincipalAsync(user);
-            await context.HttpContext.SignInAsync(principal);
-            context.HandleResponse();
-        };
-
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters.IssuerSigningKey = jwtKey;
+        options.TokenValidationParameters.ValidIssuer = issuer;
+        options.TokenValidationParameters.ValidAudience = audience;
     });
+
+builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 
 var app = builder.Build();
 
