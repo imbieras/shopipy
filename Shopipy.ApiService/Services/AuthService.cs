@@ -1,5 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Shopipy.Persistence.Models;
 
@@ -18,8 +18,9 @@ public class AuthService(SigningCredentials signingCredentials, string issuer, s
             Audience = audience,
             Claims = new Dictionary<string, object>
             {
-                {JwtRegisteredClaimNames.Sub, user.Id}
-            }
+                {JwtRegisteredClaimNames.Sub, user.Id},
+                {ClaimTypes.Role, user.Role.ToString()}
+            },
         };
         return handler.CreateEncodedJwt(descriptor);
     }

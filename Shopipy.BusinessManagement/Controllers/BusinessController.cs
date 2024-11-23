@@ -1,13 +1,16 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.BusinessManagement.DTOs;
 using Shopipy.BusinessManagement.Services;
 using Shopipy.Persistence.Models;
+using Shopipy.Shared;
 
 namespace Shopipy.BusinessManagement.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Policy = AuthorizationPolicies.RequireSuperAdmin)]
 public class BusinessController(BusinessService businessService, IMapper mapper) : ControllerBase
 {
     [HttpGet]

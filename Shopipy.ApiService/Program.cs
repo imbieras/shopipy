@@ -1,15 +1,18 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared;
 using Shopipy.UserManagement.Mappings;
 
 
@@ -48,7 +51,33 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter bearer token here"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 
 builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -67,6 +96,15 @@ builder.Services.AddAuthentication()
         options.TokenValidationParameters.ValidAudience = audience;
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthorizationPolicies.RequireSuperAdmin,
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRole.SuperAdmin.ToString()));
+    options.AddPolicy(AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin,
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRole.BusinessOwner.ToString(),
+            UserRole.SuperAdmin.ToString()));
+});
+
 builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 
 var app = builder.Build();
@@ -81,8 +119,13 @@ app.MapDefaultEndpoints();
 
 app.MapControllers();
 
+app.UseStaticFiles();
+
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.InjectJavascript("/swagger-extension.js", "module");
+});
 
 using (var serviceScope = app.Services.CreateScope())
 {
