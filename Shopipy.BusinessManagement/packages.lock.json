@@ -359,6 +359,9 @@
           "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": "[8.2.2, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.11, )"
         }
+      },
+      "shopipy.shared": {
+        "type": "Project"
       }
     }
   }
