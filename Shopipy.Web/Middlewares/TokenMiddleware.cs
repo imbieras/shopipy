@@ -13,7 +13,7 @@ public class TokenMiddleware(RequestDelegate next)
             context.Request.Headers.Authorization = $"Bearer {token}";
 
             var userId = TokenHelper.GetUserIdFromToken(token);
-            
+
             if (!string.IsNullOrEmpty(userId))
             {
                 context.Items["UserId"] = userId;

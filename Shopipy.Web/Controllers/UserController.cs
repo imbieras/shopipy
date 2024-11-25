@@ -31,21 +31,18 @@ public class UserController(UserService userService, ILogger<UserController> log
         }
 
         var client = httpClientFactory.CreateClient("Shopipy.ApiService");
-        var requestContent = new StringContent(JsonSerializer.Serialize(loginRequest), Encoding.UTF8, "application/json");
+        var response = await client.PostAsJsonAsync("/Auth/login", loginRequest);
 
-        var response = await client.PostAsync("/Auth/login", requestContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            logger.LogWarning("Login failed with status code {StatusCode}. Response: {Error}", response.StatusCode, errorContent);
+            logger.LogWarning("Login failed with status code {StatusCode}. Response: {Error}", response.StatusCode, responseContent);
             ModelState.AddModelError("", "Invalid username or password.");
             return View(loginRequest);
         }
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-
-        var tokenResponse = JsonSerializer.Deserialize<TokenResponseDto>(responseContent);
+        var tokenResponse = JsonSerializer.Deserialize<TokenResponseDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
         if (tokenResponse != null)
         {

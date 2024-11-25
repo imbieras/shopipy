@@ -1,4 +1,4 @@
-using Shopipy.Web.Helpers;
+using Shopipy.Web;
 using Shopipy.Web.Middlewares;
 using Shopipy.Web.Services;
 
@@ -12,22 +12,26 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddOutputCache();
 
+builder.Services.AddHttpContextAccessor();
+
 var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
 
-if (isLocalDevelopment)
-{
-    Console.WriteLine("Using Local Development API");
-    builder.Services.AddHttpClient("Shopipy.ApiService", client => {
-        client.BaseAddress = new Uri("http://shopipy.apiservice:80/");
+builder.Services.AddHttpClient("Shopipy.ApiService", client => {
+        if (isLocalDevelopment)
+        {
+            Console.WriteLine("Using Local Development API");
+            client.BaseAddress = new Uri("http://shopipy.apiservice:80/");
+        }
+        else
+        {
+            Console.WriteLine("Using Aspire's API");
+            client.BaseAddress = new Uri("https://apiservice");
+        }
+    })
+    .ConfigurePrimaryHttpMessageHandler(serviceProvider => {
+        var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+        return new TokenAppendingHandler(httpContextAccessor, new HttpClientHandler());
     });
-}
-else
-{
-    Console.WriteLine("Using Aspire's API");
-    builder.Services.AddHttpClient("Shopipy.ApiService", client => {
-        client.BaseAddress = new Uri("https+http://apiservice");
-    });
-}
 
 builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.HttpOnly = true;

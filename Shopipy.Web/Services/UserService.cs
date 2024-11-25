@@ -1,5 +1,4 @@
 using Shopipy.UserManagement.Dtos;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,18 +8,22 @@ public class UserService(IHttpClientFactory httpClientFactory)
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Shopipy.ApiService");
 
-    public async Task<UserResponseDto?> GetUserByIdAsync(string userId, string token)
+    private UserResponseDto? _currentUser;
+    public async Task<UserResponseDto?> GetCurrentUserAsync(string? userId, string? token)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (_currentUser != null) return _currentUser;
 
-        var response = await _httpClient.GetAsync($"/Users/{userId}");
-        if (!response.IsSuccessStatusCode) return null;
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) return null;
 
-        var content = await response.Content.ReadAsStringAsync();
+        try
+        {
+            _currentUser = await _httpClient.GetFromJsonAsync<UserResponseDto>($"/Users/{userId}", new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+        }
+        catch (Exception)
+        {
+            _currentUser = null;
+        }
 
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        options.Converters.Add(new JsonStringEnumConverter());
-
-        return JsonSerializer.Deserialize<UserResponseDto>(content, options);
+        return _currentUser;
     }
 }
