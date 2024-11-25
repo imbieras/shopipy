@@ -1,13 +1,14 @@
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 using AppointmentManagement;
 using AppointmentManagement.Mappings;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
 using Shopipy.BusinessManagement.Services;
@@ -17,6 +18,7 @@ using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared;
 using Shopipy.ServiceManagement;
 using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement.Mappings;
@@ -62,40 +64,61 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter bearer token here"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 
 builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
-builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
-    .AddBearerToken()
-    .AddGoogle(options => {
-        var config = builder.Configuration.GetSection("Authentication:Google");
-        options.ClientId = config["ClientId"]!;
-        options.ClientSecret = config["ClientSecret"]!;
-        options.Events.OnTicketReceived = async (context) => {
-            var providerKey = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var emailAddress = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
-            if (providerKey == null) throw new InvalidOperationException("nameidentifier not found");
-            if (emailAddress == null) throw new InvalidOperationException("email not found");
-            
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
-            var user = await userManager.FindByLoginAsync(GoogleDefaults.AuthenticationScheme, providerKey);
-            if (user == null)
-            {
-                user = new User(emailAddress) {Name = "Google", Role = UserRole.SuperAdmin};
-                await userManager.CreateAsync(user);
-                await userManager.AddLoginAsync(user, new UserLoginInfo(GoogleDefaults.AuthenticationScheme, providerKey, null));
-            }
+var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Jwt:Key"]!));
+var signingCredentials = new SigningCredentials(jwtKey, SecurityAlgorithms.HmacSha256);
+var issuer = builder.Configuration["Authentication:Jwt:Issuer"]!;
+var audience = builder.Configuration["Authentication:Jwt:Audience"]!;
 
-            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
-            var principal = await signInManager.CreateUserPrincipalAsync(user);
-            await context.HttpContext.SignInAsync(principal);
-            context.HandleResponse();
-        };
-
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters.IssuerSigningKey = jwtKey;
+        options.TokenValidationParameters.ValidIssuer = issuer;
+        options.TokenValidationParameters.ValidAudience = audience;
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthorizationPolicies.RequireSuperAdmin,
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRole.SuperAdmin.ToString()));
+    options.AddPolicy(AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin,
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRole.BusinessOwner.ToString(),
+            UserRole.SuperAdmin.ToString()));
+});
+
+builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 
 var app = builder.Build();
 
@@ -111,8 +134,13 @@ app.MapDefaultEndpoints();
 
 app.MapControllers();
 
+app.UseStaticFiles();
+
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.InjectJavascript("/swagger-extension.js", "module");
+});
 
 using (var serviceScope = app.Services.CreateScope())
 {

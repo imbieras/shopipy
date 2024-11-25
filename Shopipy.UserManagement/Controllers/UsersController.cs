@@ -1,13 +1,16 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
+using Shopipy.Shared;
 using Shopipy.UserManagement.Dtos;
 
 namespace Shopipy.UserManagement.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 public class UsersController(UserManager<User> userManager, IMapper mapper) : ControllerBase
 {
     [HttpPost]
