@@ -1,23 +1,30 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Web.Models;
+using Shopipy.Web.Services;
+using Shopipy.Web.ViewModels;
 
 namespace Shopipy.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(UserService userService, ILogger<HomeController> logger) : BaseController(userService)
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public async Task<IActionResult> Index()
     {
-        _logger = logger;
-    }
+        var currentUser = await GetCurrentUserAsync();
 
-    public IActionResult Index()
-    {
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "User");
+        }
+
         ViewData["Title"] = "Home";
-        return View();
+        ViewData["UserName"] = currentUser.Name;
+
+        var viewModel = new HomeViewModel { CurrentUser = currentUser };
+
+        return View(viewModel);
     }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
