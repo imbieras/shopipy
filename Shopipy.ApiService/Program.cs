@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shopipy.ApiService.ExceptionFilters;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
@@ -13,6 +14,7 @@ using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared;
+using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
 
 
@@ -44,7 +46,11 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappin
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
 
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<UnauthorizedAccessExceptionFilter>();
+    options.Filters.Add<ArgumentExceptionFilter>();
+}).AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
@@ -106,6 +112,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
+builder.Services.AddShared();
+builder.Services.AddUserManagement();
 
 var app = builder.Build();
 
