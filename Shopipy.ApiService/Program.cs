@@ -136,7 +136,7 @@ using (var serviceScope = app.Services.CreateScope())
     Console.WriteLine("Migrations applied successfully.");    
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin}, "Seeded_password1234");
+    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin, Email = "admin@shopipy.com", PhoneNumber = "+37065011111"}, "Seeded_password1234");
 
     dbContext.SaveChanges();
     
