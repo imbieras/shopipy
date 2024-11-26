@@ -21,7 +21,7 @@ public class Appointment
 
     public required DateTime EndTime { get; set; }
 
-    public required int EmployeeId { get; set; }
+    public required Guid EmployeeId { get; set; }
 
     public required int ServiceId { get; set; }
 }

@@ -9,7 +9,7 @@ using Shopipy.Persistence.Data;
 
 #nullable disable
 
-namespace Shopipy.Persistence.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20241117174034_addedAppointments")]

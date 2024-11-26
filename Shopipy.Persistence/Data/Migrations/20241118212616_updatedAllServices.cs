@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Shopipy.Persistence.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     /// <inheritdoc />
     public partial class updatedAllServices : Migration

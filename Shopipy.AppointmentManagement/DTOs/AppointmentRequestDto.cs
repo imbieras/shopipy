@@ -4,7 +4,7 @@ namespace AppointmentManagement.DTOs;
 
 public class AppointmentRequestDto
 {
-  public required int EmployeeId { get; set; }
+  public required Guid EmployeeId { get; set; }
   public required int ServiceId { get; set; }
 
   [StringLength(100, ErrorMessage = "Customer name must not exceed 100 characters.")]

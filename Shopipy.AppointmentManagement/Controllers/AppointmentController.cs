@@ -14,11 +14,6 @@ public class AppointmentController : ControllerBase
     private readonly AppointmentService _appointmentService;
     private readonly IMapper _mapper;
 
-    //3 Get endpoints
-    
-    //1 Get available employees for a specific time and service
-    //2 Get available time slots for a specific employee on a given day
-    
     public AppointmentController(AppointmentService appointmentService, IMapper mapper)
     {
         _appointmentService = appointmentService;
@@ -31,13 +26,19 @@ public class AppointmentController : ControllerBase
         try
         {
             var availableEmployees = await _appointmentService.GetAvailableEmployees(businessId, time, serviceId);
-
-            if (availableEmployees == null || !availableEmployees.Any())
+            
+            if (!availableEmployees.Any())
             {
-                return NotFound(new { message = "No available employees for this service at the given time." });
+                return NotFound(new { message = $"No available employees for this service at the given time: {availableEmployees}." });
             }
 
-            return Ok(availableEmployees);
+            var responseDto = availableEmployees.Select(a => new
+            {
+                employee_id = a.Id,
+                employee_name = a.Name
+            });
+            
+            return Ok(responseDto);
         }
         catch (Exception ex)
         {
@@ -45,19 +46,10 @@ public class AppointmentController : ControllerBase
         }
     }
     
-    /*
-    [HttpGet("{businessId}/employees/{employeeId}/slots")]
-    public async Task<IActionResult> GetEmployeeTimeSlots(int serviceId, DateTime time)
-    {
-        //Take the entire day and show every slot where the employee is not busy
-        //meaning that from all start time and end time, we dont show those
-    }
-    */
-    
     [HttpGet("{businessId}/employees/{employeeId}/appointments")]
     public async Task<IActionResult> GetAppointmentsOfEmployee(
         int businessId,
-        int employeeId,
+        Guid employeeId,
         [FromQuery] DateTime time,
         [FromQuery] bool week = false)
     {
@@ -79,6 +71,36 @@ public class AppointmentController : ControllerBase
 
         return Ok(result);
     }
+    
+    [HttpGet("{businessId}/employees/{employeeId}/slots/{serviceId}")]
+    public async Task<IActionResult> GetAvailableTimeSlots(
+        int businessId, 
+        Guid employeeId, 
+        [FromQuery] DateTime date, 
+        int serviceId)
+    {
+        try
+        {
+            var availableTimeSlots = await _appointmentService.GetAvailableTimeSlots(businessId, employeeId, date, serviceId);
+    
+            if (!availableTimeSlots.Any())
+            {
+                return NotFound(new { message = "No available time slots for the given employee on this date." });
+            }
+    
+            var response = availableTimeSlots.Select(slot => new
+            {
+                available_time = slot.ToString("o") 
+            });
+    
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+    
 
     [HttpGet("{businessId}/appointments")]
     public async Task<IActionResult> GetAppointments(int businessId)

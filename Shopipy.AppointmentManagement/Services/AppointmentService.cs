@@ -29,13 +29,12 @@ public class AppointmentService
         return await _appointmentRepository.GetAllByConditionAsync(a => a.BusinessId == businessId);
     }
     
-    //yeah ik this is an appointment service, and that I shouldnt use service endpoint data logic here, but wtv it works
     public async Task<IEnumerable<Service>> GetServicesByIdsAsync(IEnumerable<int> serviceIds)
     {
         return await _serviceRepository.GetAllByConditionAsync(s => serviceIds.Contains(s.ServiceId));
     }
 
-    public async Task<IEnumerable<User>> GetAvailableEmployees(int businessId, DateTime time, int serviceId)
+    public async Task<List<User>> GetAvailableEmployees(int businessId, DateTime time, int serviceId)
     {
         var service = await _serviceRepository.GetByConditionAsync(s => s.ServiceId == serviceId);
         
@@ -44,26 +43,91 @@ public class AppointmentService
             throw new Exception($"Service with ID {serviceId} does not exist");
         }
 
-        var employees =
-            await _userRepository.GetAllByConditionAsync(u =>
-                u.BusinessId == businessId && u.UserState == UserState.Active);
+        var employees = await _userRepository.GetAllByConditionAsync(u =>
+            u.BusinessId == businessId && 
+            u.UserState == UserState.Active);
+
+        var appointmentEndTime = time.AddMinutes(service.ServiceDuration);
 
         var filteredConflictingAppointments = await _appointmentRepository.GetAllByConditionAsync(a =>
             a.BusinessId == businessId &&
             a.ServiceId == serviceId &&
-            a.StartTime < time.AddMinutes(service.ServiceDuration) &&
-            a.EndTime > time);
+            (
+                (a.StartTime <= time && a.EndTime > time) ||
+                (a.StartTime < appointmentEndTime && a.StartTime >= time) 
+            ));
 
-        var conflictingAppointments = filteredConflictingAppointments.Select(a => a.EmployeeId);
+        var conflictingEmployeeIds = filteredConflictingAppointments
+            .Select(a => a.EmployeeId)
+            .ToHashSet();
 
-        var availableEmployees = employees
-            .Where(e => !conflictingAppointments.Contains(Int32.Parse(e.Id)))
-            .ToList();
+        try 
+        {
+            var availableEmployees = employees
+                .Where(e => 
+                {
+                    try 
+                    {
+                        var parsedId = Guid.Parse(e.Id);
+                        var isAvailable = !conflictingEmployeeIds.Contains(parsedId);
+                        return isAvailable;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Debug] Error parsing ID {e.Id}: {ex.Message}");
+                        return false;
+                    }
+                })
+                .ToList();
 
-        return availableEmployees;
+            return availableEmployees;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Debug] Error in final filtering: {ex.Message}");
+            throw;
+        }
     }
     
-    public async Task<IEnumerable<Appointment>> GetAppointmentsOfEmployee(int businessId, int employeeId, DateTime time, bool week)
+    //krc kentai musu is kinijos, gali 24h dirbt
+    public async Task<List<DateTime>> GetAvailableTimeSlots(int businessId, Guid employeeId, DateTime date, int serviceId)
+    {
+        var dayStart = date.Date;
+        var dayEnd = dayStart.AddDays(1);
+    
+        var service = await _serviceRepository.GetByConditionAsync(s => s.BusinessId == businessId && s.ServiceId == serviceId);
+        if (service == null)
+            throw new InvalidOperationException($"Service with ID {serviceId} not found");
+        
+        var serviceDuration = service.ServiceDuration;
+        if (serviceDuration <= 0)
+            throw new InvalidOperationException("Service duration must be greater than 0");
+    
+        var appointments = await _appointmentRepository.GetAllByConditionAsync(a =>
+            a.BusinessId == businessId &&
+            a.EmployeeId == employeeId &&
+            a.StartTime.Date == date.Date) ?? new List<Appointment>();
+
+        var busyPeriods = appointments
+            .OrderBy(a => a.StartTime)
+            .Select(a => new { Start = a.StartTime, End = a.EndTime })
+            .ToList();
+
+        busyPeriods.Insert(0, new { Start = dayStart, End = dayStart });
+        busyPeriods.Add(new { Start = dayEnd, End = dayEnd });
+
+        return busyPeriods
+            .Zip(busyPeriods.Skip(1), (current, next) => new { Start = current.End, End = next.Start })
+            .Where(gap => gap.End > gap.Start && (gap.End - gap.Start).TotalMinutes >= serviceDuration)
+            .SelectMany(gap => 
+                Enumerable
+                    .Range(0, (int)((gap.End - gap.Start).TotalMinutes / serviceDuration))
+                    .Select(i => gap.Start.AddMinutes(i * serviceDuration)))
+            .ToList();
+    }
+
+    
+    public async Task<IEnumerable<Appointment>> GetAppointmentsOfEmployee(int businessId, Guid employeeId, DateTime time, bool week)
     {
         var dateStart = time.Date;
         var dateEnd = dateStart.AddDays(1); 

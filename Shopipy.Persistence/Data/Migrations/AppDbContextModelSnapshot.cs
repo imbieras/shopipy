@@ -178,8 +178,8 @@ namespace Shopipy.ApiService.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
