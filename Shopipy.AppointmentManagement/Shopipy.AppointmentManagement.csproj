@@ -18,5 +18,10 @@
         <PackageReference Include="AutoMapper" Version="13.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Properties\launchSettings.json" />
+    </ItemGroup>
+
+
     
 </Project>

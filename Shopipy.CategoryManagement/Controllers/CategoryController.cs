@@ -7,71 +7,71 @@ using Shopipy.Persistence.Models;
 namespace Shopipy.CategoryManagement.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/{businessId}")]
 public class CategoryController : ControllerBase
 {
-    private readonly CategoryService _categoryService;
-    private readonly IMapper _mapper;
+    private readonly CategoryService categoryService;
+    private readonly IMapper mapper;
 
     public CategoryController(CategoryService categoryService, IMapper mapper)
     {
-        _categoryService = categoryService;
-        _mapper = mapper;
+        categoryService = categoryService;
+        mapper = mapper;
     }
 
-    [HttpGet("{businessId}/categories")]
+    [HttpGet("/categories")]
     public async Task<IActionResult> GetAllCategories(int businessId)
     {
-        var categories = await _categoryService.GetAllCategoriesInBusinessAsync(businessId);
-        var responseDtos = _mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
+        var categories = await categoryService.GetAllCategoriesInBusinessAsync(businessId);
+        var responseDtos = mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
         return Ok(responseDtos);
     }
 
-    [HttpGet("{businessId}/categories/{id}")]
+    [HttpGet("/categories/{id}")]
     public async Task<IActionResult> GetCategoryById(int businessId, int id)
     {
-        var category = await _categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
         if (category == null) return NotFound();
 
-        var responseDto = _mapper.Map<CategoryResponseDto>(category);
+        var responseDto = mapper.Map<CategoryResponseDto>(category);
         return Ok(responseDto);
     }
 
-    [HttpPost("{businessId}/categories")]
+    [HttpPost("/categories")]
     public async Task<IActionResult> CreateCategory(int businessId, CategoryRequestDto request)
     {
-        var category = _mapper.Map<Category>(request);
+        var category = mapper.Map<Category>(request);
         category.BusinessId = businessId; 
 
-        var createdCategory = await _categoryService.CreateCategoryAsync(category);
+        var createdCategory = await categoryService.CreateCategoryAsync(category);
 
-        var responseDto = _mapper.Map<CategoryResponseDto>(createdCategory);
+        var responseDto = mapper.Map<CategoryResponseDto>(createdCategory);
         return CreatedAtAction(
             nameof(GetCategoryById),
             new { businessId = businessId, id = createdCategory.CategoryId },
             responseDto);
     }
 
-    [HttpPut("{businessId}/categories/{id}")]
+    [HttpPut("/categories/{id}")]
     public async Task<IActionResult> UpdateCategory(int businessId, int id, CategoryRequestDto request)
     {
-        var existingCategory = await _categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
         if (existingCategory == null) return NotFound();
 
-        _mapper.Map(request, existingCategory);
-        var updatedCategory = await _categoryService.UpdateCategoryAsync(existingCategory);
+        mapper.Map(request, existingCategory);
+        var updatedCategory = await categoryService.UpdateCategoryAsync(existingCategory);
 
-        var responseDto = _mapper.Map<CategoryResponseDto>(updatedCategory);
+        var responseDto = mapper.Map<CategoryResponseDto>(updatedCategory);
         return Ok(responseDto);
     }
 
-    [HttpDelete("{businessId}/categories/{id}")]
+    [HttpDelete("/categories/{id}")]
     public async Task<IActionResult> DeleteCategory(int businessId, int id)
     {
-        var existingCategory = await _categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
         if (existingCategory == null) return NotFound();
 
-        var success = await _categoryService.DeleteCategoryAsync(id);
+        var success = await categoryService.DeleteCategoryAsync(id);
         if (!success) return BadRequest("Failed to delete category.");
         return NoContent();
     }

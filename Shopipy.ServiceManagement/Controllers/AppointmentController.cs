@@ -1,31 +1,22 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using AppointmentManagement.DTOs;
-using AppointmentManagement.Services;
 using Shopipy.Persistence.Models;
+using Shopipy.ServiceManagement.DTOs;
 
 
-namespace AppointmentManagement.Controllers;
+namespace Shopipy.ServiceManagement.Services;
 
 [ApiController]
-[Route("[controller]")]
-public class AppointmentController : ControllerBase
+[Route("[controller]/{businessId}")]
+public class AppointmentController(AppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
-    private readonly AppointmentService _appointmentService;
-    private readonly IMapper _mapper;
-
-    public AppointmentController(AppointmentService appointmentService, IMapper mapper)
-    {
-        _appointmentService = appointmentService;
-        _mapper = mapper;
-    }
     
-    [HttpGet("{businessId}/employees/available")]
+    [HttpGet("/employees/available")]
     public async Task<IActionResult> GetAvailableEmployees(int businessId, [FromQuery] int serviceId, [FromQuery] DateTime time)
     {
         try
         {
-            var availableEmployees = await _appointmentService.GetAvailableEmployees(businessId, time, serviceId);
+            var availableEmployees = await appointmentService.GetAvailableEmployees(businessId, time, serviceId);
             
             if (!availableEmployees.Any())
             {
@@ -46,17 +37,17 @@ public class AppointmentController : ControllerBase
         }
     }
     
-    [HttpGet("{businessId}/employees/{employeeId}/appointments")]
+    [HttpGet("/employees/{employeeId}/appointments")]
     public async Task<IActionResult> GetAppointmentsOfEmployee(
         int businessId,
         Guid employeeId,
         [FromQuery] DateTime time,
         [FromQuery] bool week = false)
     {
-        var appointments = await _appointmentService.GetAppointmentsOfEmployee(businessId, employeeId, time, week);
+        var appointments = await appointmentService.GetAppointmentsOfEmployee(businessId, employeeId, time, week);
 
         var serviceIds = appointments.Select(a => a.ServiceId).Distinct();
-        var services = await _appointmentService.GetServicesByIdsAsync(serviceIds);
+        var services = await appointmentService.GetServicesByIdsAsync(serviceIds);
         var serviceNameLookup = services.ToDictionary(s => s.ServiceId, s => s.ServiceName);
         
         var result = appointments.Select(a => new
@@ -72,7 +63,7 @@ public class AppointmentController : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet("{businessId}/employees/{employeeId}/slots/{serviceId}")]
+    [HttpGet("/employees/{employeeId}/slots/{serviceId}")]
     public async Task<IActionResult> GetAvailableTimeSlots(
         int businessId, 
         Guid employeeId, 
@@ -81,7 +72,7 @@ public class AppointmentController : ControllerBase
     {
         try
         {
-            var availableTimeSlots = await _appointmentService.GetAvailableTimeSlots(businessId, employeeId, date, serviceId);
+            var availableTimeSlots = await appointmentService.GetAvailableTimeSlots(businessId, employeeId, date, serviceId);
     
             if (!availableTimeSlots.Any())
             {
@@ -102,62 +93,62 @@ public class AppointmentController : ControllerBase
     }
     
 
-    [HttpGet("{businessId}/appointments")]
+    [HttpGet("/appointments")]
     public async Task<IActionResult> GetAppointments(int businessId)
     {
-        var appointments = await _appointmentService.GetAllAppointmentsInBusinessAsync(businessId);
-        var responseDtos = _mapper.Map<IEnumerable<AppointmentResponseDto>>(appointments);
+        var appointments = await appointmentService.GetAllAppointmentsInBusinessAsync(businessId);
+        var responseDtos = mapper.Map<IEnumerable<AppointmentResponseDto>>(appointments);
 
         return Ok(responseDtos);
     }
 
-    [HttpGet("{businessId}/appointments/{id}")]
+    [HttpGet("/appointments/{id}")]
     public async Task<IActionResult> GetAppointment(int businessId, int id)
     {
-        var appointment = await _appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var appointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
         if (appointment == null) return NotFound();
 
-        var responseDto = _mapper.Map<AppointmentResponseDto>(appointment);
+        var responseDto = mapper.Map<AppointmentResponseDto>(appointment);
 
         return Ok(responseDto);
     }
 
-    [HttpPost("{businessId}/appointments")]
+    [HttpPost("/appointments")]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
-        var appointment = _mapper.Map<Appointment>(request);
+        var appointment = mapper.Map<Appointment>(request);
         appointment.BusinessId = businessId; // Associate with the business
 
-        var createdAppointment = await _appointmentService.CreateAppointmentAsync(appointment);
+        var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment);
 
-        var responseDto = _mapper.Map<AppointmentResponseDto>(createdAppointment);
+        var responseDto = mapper.Map<AppointmentResponseDto>(createdAppointment);
 
         return CreatedAtAction(nameof(GetAppointment), 
             new { businessId = businessId, id = createdAppointment.AppointmentId }, 
             responseDto);
     }
 
-    [HttpPut("{businessId}/appointments/{id}")]
+    [HttpPut("/appointments/{id}")]
     public async Task<IActionResult> UpdateAppointment(int businessId, int id, AppointmentRequestDto request)
     {
-        var existingAppointment = await _appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
         if (existingAppointment == null) return NotFound();
 
-        _mapper.Map(request, existingAppointment);
-        var updatedAppointment = await _appointmentService.UpdateAppointmentAsync(existingAppointment);
+        mapper.Map(request, existingAppointment);
+        var updatedAppointment = await appointmentService.UpdateAppointmentAsync(existingAppointment);
 
-        var responseDto = _mapper.Map<AppointmentResponseDto>(updatedAppointment);
+        var responseDto = mapper.Map<AppointmentResponseDto>(updatedAppointment);
 
         return Ok(responseDto);
     }
 
-    [HttpDelete("{businessId}/appointments/{id}")]
+    [HttpDelete("/appointments/{id}")]
     public async Task<IActionResult> DeleteAppointment(int businessId, int id)
     {
-        var existingAppointment = await _appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
         if (existingAppointment == null) return NotFound();
 
-        var success = await _appointmentService.DeleteAppointmentAsync(id);
+        var success = await appointmentService.DeleteAppointmentAsync(id);
         if (!success) return BadRequest("Failed to delete appointment.");
 
         return NoContent();

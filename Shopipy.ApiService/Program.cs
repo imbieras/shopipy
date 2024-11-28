@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
-using AppointmentManagement;
-using AppointmentManagement.Mappings;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +52,6 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappin
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
 builder.Services.AddServiceManagement();
-builder.Services.AddAppointmentManagement();
 builder.Services.AddCategoryManagement();
 
 builder.Services.AddControllers().AddJsonOptions(options =>

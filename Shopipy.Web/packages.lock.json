@@ -719,7 +719,6 @@
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.11, )",
-          "Shopipy.AppointmentManagement": "[1.0.0, )",
           "Shopipy.BusinessManagement": "[1.0.0, )",
           "Shopipy.CategoryManagement": "[1.0.0, )",
           "Shopipy.Persistence": "[1.0.0, )",
@@ -729,13 +728,6 @@
           "Shopipy.UserManagement": "[1.0.0, )",
           "Swashbuckle.AspNetCore": "[6.9.0, )",
           "System.IdentityModel.Tokens.Jwt": "[8.2.1, )"
-        }
-      },
-      "shopipy.appointmentmanagement": {
-        "type": "Project",
-        "dependencies": {
-          "AutoMapper": "[13.0.1, )",
-          "Shopipy.Persistence": "[1.0.0, )"
         }
       },
       "shopipy.businessmanagement": {
