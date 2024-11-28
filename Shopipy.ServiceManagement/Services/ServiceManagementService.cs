@@ -3,14 +3,8 @@ using Shopipy.Persistence.Repositories;
 
 namespace Shopipy.ServiceManagement.Services;
 
-public class ServiceManagementService
+public class ServiceManagementService(IGenericRepository<Service> serviceRepository)
 {
-    private readonly IGenericRepository<Service> serviceRepository;
-
-    public ServiceManagementService(IGenericRepository<Service> serviceRepository)
-    {
-        serviceRepository = serviceRepository;
-    }
     
     public async Task<Service> GetServiceByIdInBusiness(int businessId ,int id)
     {

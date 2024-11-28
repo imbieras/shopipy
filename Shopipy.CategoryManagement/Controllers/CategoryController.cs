@@ -8,17 +8,8 @@ namespace Shopipy.CategoryManagement.Controllers;
 
 [ApiController]
 [Route("[controller]/{businessId}")]
-public class CategoryController : ControllerBase
+public class CategoryController(CategoryService categoryService, IMapper mapper) : ControllerBase
 {
-    private readonly CategoryService categoryService;
-    private readonly IMapper mapper;
-
-    public CategoryController(CategoryService categoryService, IMapper mapper)
-    {
-        categoryService = categoryService;
-        mapper = mapper;
-    }
-
     [HttpGet("/categories")]
     public async Task<IActionResult> GetAllCategories(int businessId)
     {
