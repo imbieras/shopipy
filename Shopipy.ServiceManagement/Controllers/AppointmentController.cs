@@ -11,7 +11,7 @@ namespace Shopipy.ServiceManagement.Services;
 public class AppointmentController(AppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
     
-    [HttpGet("/employees/available")]
+    [HttpGet("employees/available")]
     public async Task<IActionResult> GetAvailableEmployees(int businessId, [FromQuery] int serviceId, [FromQuery] DateTime time)
     {
         try
@@ -37,7 +37,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
         }
     }
     
-    [HttpGet("/employees/{employeeId}/appointments")]
+    [HttpGet("employees/{employeeId}/appointments")]
     public async Task<IActionResult> GetAppointmentsOfEmployee(
         int businessId,
         Guid employeeId,
@@ -63,7 +63,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
         return Ok(result);
     }
     
-    [HttpGet("/employees/{employeeId}/slots/{serviceId}")]
+    [HttpGet("employees/{employeeId}/slots/{serviceId}")]
     public async Task<IActionResult> GetAvailableTimeSlots(
         int businessId, 
         Guid employeeId, 
@@ -93,7 +93,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
     }
     
 
-    [HttpGet("/appointments")]
+    [HttpGet("appointments")]
     public async Task<IActionResult> GetAppointments(int businessId)
     {
         var appointments = await appointmentService.GetAllAppointmentsInBusinessAsync(businessId);
@@ -102,7 +102,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
         return Ok(responseDtos);
     }
 
-    [HttpGet("/appointments/{id}")]
+    [HttpGet("appointments/{id}")]
     public async Task<IActionResult> GetAppointment(int businessId, int id)
     {
         var appointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
@@ -113,7 +113,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
         return Ok(responseDto);
     }
 
-    [HttpPost("/appointments")]
+    [HttpPost("appointments")]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
         var appointment = mapper.Map<Appointment>(request);
@@ -128,7 +128,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
             responseDto);
     }
 
-    [HttpPut("/appointments/{id}")]
+    [HttpPut("appointments/{id}")]
     public async Task<IActionResult> UpdateAppointment(int businessId, int id, AppointmentRequestDto request)
     {
         var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
@@ -142,7 +142,7 @@ public class AppointmentController(AppointmentService appointmentService, IMappe
         return Ok(responseDto);
     }
 
-    [HttpDelete("/appointments/{id}")]
+    [HttpDelete("appointments/{id}")]
     public async Task<IActionResult> DeleteAppointment(int businessId, int id)
     {
         var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);

@@ -10,7 +10,7 @@ namespace Shopipy.CategoryManagement.Controllers;
 [Route("[controller]/{businessId}")]
 public class CategoryController(CategoryService categoryService, IMapper mapper) : ControllerBase
 {
-    [HttpGet("/categories")]
+    [HttpGet("categories")]
     public async Task<IActionResult> GetAllCategories(int businessId)
     {
         var categories = await categoryService.GetAllCategoriesInBusinessAsync(businessId);
@@ -18,7 +18,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         return Ok(responseDtos);
     }
 
-    [HttpGet("/categories/{id}")]
+    [HttpGet("categories/{id}")]
     public async Task<IActionResult> GetCategoryById(int businessId, int id)
     {
         var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
@@ -28,7 +28,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         return Ok(responseDto);
     }
 
-    [HttpPost("/categories")]
+    [HttpPost("categories")]
     public async Task<IActionResult> CreateCategory(int businessId, CategoryRequestDto request)
     {
         var category = mapper.Map<Category>(request);
@@ -43,7 +43,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             responseDto);
     }
 
-    [HttpPut("/categories/{id}")]
+    [HttpPut("categories/{id}")]
     public async Task<IActionResult> UpdateCategory(int businessId, int id, CategoryRequestDto request)
     {
         var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
@@ -56,7 +56,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         return Ok(responseDto);
     }
 
-    [HttpDelete("/categories/{id}")]
+    [HttpDelete("categories/{id}")]
     public async Task<IActionResult> DeleteCategory(int businessId, int id)
     {
         var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
