@@ -4,40 +4,42 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
+using Shopipy.Shared.DTOs;
 using Shopipy.UserManagement.Dtos;
+using Shopipy.UserManagement.Services;
 
 namespace Shopipy.UserManagement.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-public class UsersController(UserManager<User> userManager, IMapper mapper) : ControllerBase
+public class UsersController(UserManager<User> userManager, IMapper mapper, UserService userService) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<UserResponseDto>> Create([FromBody] UserRequestDto request)
     {
-        // Todo: perform role authorized checking
         var user = mapper.Map<User>(request);
-        var result = await userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
-        return Created("", mapper.Map<UserResponseDto>(user));
+        await userService.CreateUserAsync(user, request.Password);
+        return CreatedAtAction(nameof(GetUserById), new { userId = user.Id }, mapper.Map<UserResponseDto>(user));
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<UserResponseDto>> Get()
+    public async Task<ActionResult<PaginationResultDto<UserResponseDto>>> GetUsers([FromQuery] int? top, [FromQuery] int? skip)
     {
-        // Todo: return subset of users depending on role
-        return Ok(userManager.Users.Select(u => mapper.Map<UserResponseDto>(u)));
+        var users = await userService.GetAllUsersAsync(top, skip);
+        var count = await userService.GetUserCountAsync();
+        
+        return Ok(new PaginationResultDto<UserResponseDto>
+        {
+            Data = users.Select(mapper.Map<UserResponseDto>),
+            Count = count
+        });
     }
     
     [HttpGet("{userId}")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> Get(string userId)
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUserById(string userId)
     {
-        // Todo: authorization check
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userService.GetUserByIdAsync(userId);
         if (user == null)
         {
             return NotFound();
@@ -48,7 +50,6 @@ public class UsersController(UserManager<User> userManager, IMapper mapper) : Co
     [HttpPut("{userId}")]
     public async Task<ActionResult<UserResponseDto>> Update(string userId, [FromBody] UserUpdateRequestDto request)
     {
-        // Todo: auth check
         // Todo: password changing logic in auth management
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
@@ -56,11 +57,7 @@ public class UsersController(UserManager<User> userManager, IMapper mapper) : Co
             return NotFound();
         }
         mapper.Map(request, user);
-        var result = await userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
+        await userService.UpdateUserAsync(user);
         return Ok(mapper.Map<UserResponseDto>(user));
     }
     
@@ -68,17 +65,7 @@ public class UsersController(UserManager<User> userManager, IMapper mapper) : Co
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> Delete(string userId)
     {
         // Todo: authorization check
-        var user = await userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        var result = await userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
-        }
-        return NoContent();
+        var deleted = await userService.DeleteUserAsync(userId);
+        return deleted ? NoContent() : NotFound();
     }
 }

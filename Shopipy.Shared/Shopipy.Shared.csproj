@@ -10,4 +10,8 @@
         <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
+    </ItemGroup>
+
 </Project>

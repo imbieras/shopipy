@@ -1,9 +1,10 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.BusinessManagement.Services;
 
-public class BusinessService
+public class BusinessService : IBusinessService
 {
     private readonly IGenericRepository<Business> _businessRepository;
     public BusinessService(IGenericRepository<Business> businessRepository)
@@ -16,7 +17,7 @@ public class BusinessService
         return await _businessRepository.GetAllAsync();
     }
 
-    public async Task<Business> GetBusinessByIdAsync(int id)
+    public async Task<Business?> GetBusinessByIdAsync(int id)
     {
         return await _businessRepository.GetByIdAsync(id);
     }
