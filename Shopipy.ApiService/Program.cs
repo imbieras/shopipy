@@ -29,7 +29,6 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
-builder.Services.AddScoped<BusinessService>();
 
 var isLocalDevelopment = builder.Environment.IsEnvironment("LocalDevelopment");
 
