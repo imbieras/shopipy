@@ -1,19 +1,17 @@
-using System.Collections;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Shopipy.CategoryManagement.Services;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
 using Shopipy.ServiceManagement.Mappings;
-using Shopipy.ServiceManagement.Services;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Controllers;
 
 [ApiController]
 [Route("[controller]/{businessId}")]
 public class ServiceController(
-    ServiceManagementService serviceManagementService, 
-    CategoryService categoryService, 
+    IServiceManagementService serviceManagementService, 
+    ICategoryService categoryService, 
     IMapper mapper
 ) : ControllerBase
 {

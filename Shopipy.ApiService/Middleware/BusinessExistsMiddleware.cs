@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Shopipy.BusinessManagement.Services;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.Persistence.Data.Middleware
 {
@@ -12,7 +13,7 @@ namespace Shopipy.Persistence.Data.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, BusinessService businessService)
+        public async Task InvokeAsync(HttpContext context, IBusinessService businessService)
         {
             if (context.Request.Path.StartsWithSegments("/swagger") || 
                 context.Request.Path.StartsWithSegments("/Business") ||

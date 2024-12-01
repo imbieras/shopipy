@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Shopipy.CategoryManagement.DTOs;
 using Shopipy.CategoryManagement.Services;
 using Shopipy.Persistence.Models;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.CategoryManagement.Controllers;
 
 [ApiController]
 [Route("[controller]/{businessId}")]
-public class CategoryController(CategoryService categoryService, IMapper mapper) : ControllerBase
+public class CategoryController(ICategoryService categoryService, IMapper mapper) : ControllerBase
 {
     [HttpGet("categories")]
     public async Task<IActionResult> GetAllCategories(int businessId)

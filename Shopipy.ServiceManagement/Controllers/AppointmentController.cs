@@ -2,13 +2,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
+using Shopipy.Shared.Services;
 
 
 namespace Shopipy.ServiceManagement.Services;
 
 [ApiController]
 [Route("[controller]/{businessId}")]
-public class AppointmentController(AppointmentService appointmentService, IMapper mapper) : ControllerBase
+public class AppointmentController(IAppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
     
     [HttpGet("employees/available")]

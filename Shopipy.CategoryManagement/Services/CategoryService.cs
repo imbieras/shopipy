@@ -1,9 +1,10 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.CategoryManagement.Services;
 
-public class CategoryService(IGenericRepository<Category> categoryRepository)
+public class CategoryService(IGenericRepository<Category> categoryRepository) : ICategoryService
 {
     public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
     {

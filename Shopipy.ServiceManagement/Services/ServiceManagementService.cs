@@ -1,9 +1,10 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
 
-public class ServiceManagementService(IGenericRepository<Service> serviceRepository)
+public class ServiceManagementService(IGenericRepository<Service> serviceRepository) : IServiceManagementService
 {
     
     public async Task<Service> GetServiceByIdInBusiness(int businessId ,int id)

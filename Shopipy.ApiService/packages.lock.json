@@ -895,13 +895,6 @@
         "resolved": "8.0.0",
         "contentHash": "7mu9v0QDv66ar3DpGSZHg9NuNcxDaaAcnMULuZlaTpP9+hwXhrxNGsF5GmLkSHxFdb5bBc1TzeujsRgTrPWi+Q=="
       },
-      "shopipy.appointmentmanagement": {
-        "type": "Project",
-        "dependencies": {
-          "AutoMapper": "[13.0.1, )",
-          "Shopipy.Persistence": "[1.0.0, )"
-        }
-      },
       "shopipy.businessmanagement": {
         "type": "Project",
         "dependencies": {
@@ -914,7 +907,8 @@
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
-          "Shopipy.Persistence": "[1.0.0, )"
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.persistence": {
@@ -940,8 +934,8 @@
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
-          "Shopipy.CategoryManagement": "[1.0.0, )",
-          "Shopipy.Persistence": "[1.0.0, )"
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.shared": {

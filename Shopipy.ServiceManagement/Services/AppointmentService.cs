@@ -2,6 +2,7 @@ using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
+using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
 
@@ -9,7 +10,7 @@ public class AppointmentService(
     IGenericRepository<Appointment> appointmentRepository,
     IGenericRepository<Service> serviceRepository,
     IGenericRepository<User> userRepository
-)
+) : IAppointmentService
 {
 
     public async Task<IEnumerable<Appointment>> GetAllAppointments()
