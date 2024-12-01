@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Shopipy.Persistence.Data;
 
@@ -16,7 +17,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         return await _context.Set<T>().ToListAsync();
     }
+    
+    public async Task<IEnumerable<T>> GetAllByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _context.Set<T>()
+            .Where(predicate) 
+            .ToListAsync();
+    }
 
+    public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+    }
+    
     public async Task<T> GetByIdAsync(int id)
     {
         return await _context.Set<T>().FindAsync(id);

@@ -720,8 +720,10 @@
           "AutoMapper": "[13.0.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.11, )",
           "Shopipy.BusinessManagement": "[1.0.0, )",
+          "Shopipy.CategoryManagement": "[1.0.0, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.ServiceDefaults": "[1.0.0, )",
+          "Shopipy.ServiceManagement": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )",
           "Shopipy.UserManagement": "[1.0.0, )",
           "Swashbuckle.AspNetCore": "[6.9.0, )",
@@ -729,6 +731,14 @@
         }
       },
       "shopipy.businessmanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
+        }
+      },
+      "shopipy.categorymanagement": {
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
@@ -753,6 +763,14 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
+        }
+      },
+      "shopipy.servicemanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.shared": {

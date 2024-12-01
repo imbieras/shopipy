@@ -10,10 +10,16 @@ using Shopipy.ApiService.ExceptionFilters;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
+using Shopipy.BusinessManagement.Services;
+using Shopipy.CategoryManagement;
+using Shopipy.CategoryManagement.Mappings;
 using Shopipy.Persistence.Data;
+using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared;
+using Shopipy.ServiceManagement;
+using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
 
@@ -41,10 +47,13 @@ else
     builder.AddNpgsqlDbContext<AppDbContext>(connectionName: "postgresdb");
 }
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
+builder.Services.AddServiceManagement();
+builder.Services.AddCategoryManagement();
 
 builder.Services.AddControllers(options =>
 {
@@ -123,6 +132,8 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<BusinessExistsMiddleware>();
+
 app.MapDefaultEndpoints();
 
 app.MapControllers();
@@ -145,7 +156,9 @@ using (var serviceScope = app.Services.CreateScope())
     // Seed database
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin, Email = "admin@shopipy.com", PhoneNumber = "+37065011111"}, "Seeded_password1234");
-
+    await userManager.CreateAsync(new User("test_worker") { Name = "Employee", Role = UserRole.Employee, BusinessId = 1 },
+        "Test_password1234");
+    
     dbContext.SaveChanges();
     
     var mapper = serviceScope.ServiceProvider.GetRequiredService<IMapper>();

@@ -903,6 +903,14 @@
           "Shopipy.Shared": "[1.0.0, )"
         }
       },
+      "shopipy.categorymanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
+        }
+      },
       "shopipy.persistence": {
         "type": "Project",
         "dependencies": {
@@ -920,6 +928,14 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.9.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
+        }
+      },
+      "shopipy.servicemanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.shared": {
