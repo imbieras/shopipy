@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
+using Shopipy.Shared.DTOs;
 using Shopipy.UserManagement.Dtos;
 using Shopipy.UserManagement.Services;
 
@@ -23,10 +24,16 @@ public class UsersController(UserManager<User> userManager, IMapper mapper, User
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
+    public async Task<ActionResult<PaginationResultDto<UserResponseDto>>> GetUsers([FromQuery] int? top, [FromQuery] int? skip)
     {
-        var users = await userService.GetAllUsersAsync();
-        return Ok(users.Select(mapper.Map<UserResponseDto>));
+        var users = await userService.GetAllUsersAsync(top, skip);
+        var count = await userService.GetUserCountAsync();
+        
+        return Ok(new PaginationResultDto<UserResponseDto>
+        {
+            Data = users.Select(mapper.Map<UserResponseDto>),
+            Count = count
+        });
     }
     
     [HttpGet("{userId}")]

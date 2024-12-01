@@ -16,17 +16,25 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
         }
     }
 
-    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    public async Task<IEnumerable<User>> GetAllUsersAsync(int? top = null, int? skip = null)
     {
         var currentUser = await currentUserService.GetCurrentUserAsync();
-        if (currentUser.Role == UserRole.SuperAdmin)
-        {
-            return userManager.Users;
-        }
-
-        return userManager.Users.Where(user =>
+        var query = currentUser.Role == UserRole.SuperAdmin ? userManager.Users : userManager.Users.Where(user =>
             user.BusinessId == currentUser.BusinessId
         );
+        query = query.OrderBy(user => user.Id).Skip(skip ?? 0);
+        if (top is not null)
+        {
+            query = query.Take(top.Value);
+        }
+        
+        return query;
+    }
+
+    public async Task<int> GetUserCountAsync()
+    {
+        var users = await GetAllUsersAsync();
+        return users.Count();
     }
 
     public async Task<User?> GetUserByIdAsync(string userId)
