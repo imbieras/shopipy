@@ -7,7 +7,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddBusinessManagement(this IServiceCollection services)
     {
-        services.AddScoped<BusinessService>();
         services.AddScoped<IBusinessService, BusinessService>();
         return services;
     }
