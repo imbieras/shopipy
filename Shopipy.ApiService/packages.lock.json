@@ -945,7 +945,10 @@
         }
       },
       "shopipy.shared": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Shopipy.Persistence": "[1.0.0, )"
+        }
       },
       "shopipy.usermanagement": {
         "type": "Project",

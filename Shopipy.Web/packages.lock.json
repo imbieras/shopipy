@@ -743,6 +743,7 @@
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
           "Shopipy.Persistence": "[1.0.0, )"
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.persistence": {
@@ -764,12 +765,20 @@
           "OpenTelemetry.Instrumentation.Runtime": "[1.9.0, )"
         }
       },
+      "shopipy.shared": {
+        "type": "Project",
+        "dependencies": {
+          "Shopipy.Persistence": "[1.0.0, )"
+        }
+      },
+      "shopipy.usermanagement": {
       "shopipy.servicemanagement": {
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
           "Shopipy.CategoryManagement": "[1.0.0, )",
-          "Shopipy.Persistence": "[1.0.0, )"
         }
       },
       "shopipy.shared": {
