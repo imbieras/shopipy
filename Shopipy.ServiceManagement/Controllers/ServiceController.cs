@@ -16,7 +16,7 @@ public class ServiceController(
 ) : ControllerBase
 {
     
-    [HttpGet("services")]
+    [HttpGet("")]
     public async Task<IActionResult> GetServices(int businessId, [FromQuery] int? categoryId = null)
     {
         if (categoryId.HasValue)
@@ -32,7 +32,7 @@ public class ServiceController(
         return Ok(mapper.Map<IEnumerable<ServiceResponseDto>>(allServices));
     }
 
-    [HttpGet("services/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetService(int businessId, int id)
     {
         var service = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
@@ -61,7 +61,7 @@ public class ServiceController(
         return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, id = createdService.ServiceId }, responseDto);
     }
 
-    [HttpPut("services/{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateService(int businessId, int id, ServiceRequestDto request)
     {
         var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
@@ -76,7 +76,7 @@ public class ServiceController(
         return Ok(responseDto);
     }
 
-    [HttpDelete("services/{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteService(int businessId, int id)
     {
         var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
