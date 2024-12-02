@@ -94,7 +94,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
     }
     
 
-    [HttpGet("appointments")]
+    [HttpGet]
     public async Task<IActionResult> GetAppointments(int businessId)
     {
         var appointments = await appointmentService.GetAllAppointmentsInBusinessAsync(businessId);
@@ -103,7 +103,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDtos);
     }
 
-    [HttpGet("appointments/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetAppointment(int businessId, int id)
     {
         var appointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
@@ -114,22 +114,29 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDto);
     }
 
-    [HttpPost("appointments")]
+    [HttpPost]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
         var appointment = mapper.Map<Appointment>(request);
-        appointment.BusinessId = businessId; // Associate with the business
+        appointment.BusinessId = businessId;
 
-        var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment);
+        try
+        {
+            var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment);
+            
+            var responseDto = mapper.Map<AppointmentResponseDto>(createdAppointment);
 
-        var responseDto = mapper.Map<AppointmentResponseDto>(createdAppointment);
-
-        return CreatedAtAction(nameof(GetAppointment), 
-            new { businessId = businessId, id = createdAppointment.AppointmentId }, 
-            responseDto);
+            return CreatedAtAction(nameof(GetAppointment), 
+                new { businessId = businessId, id = createdAppointment.AppointmentId }, 
+                responseDto);
+        }
+        catch (InvalidOperationException)
+        {
+            return BadRequest("Appointment can't overlap with an existing appointment");
+        }
     }
 
-    [HttpPut("appointments/{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAppointment(int businessId, int id, AppointmentRequestDto request)
     {
         var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
@@ -143,7 +150,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDto);
     }
 
-    [HttpDelete("appointments/{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAppointment(int businessId, int id)
     {
         var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);

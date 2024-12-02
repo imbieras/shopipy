@@ -166,6 +166,18 @@ public class AppointmentService(
 
         appointment.EndTime = appointment.StartTime.AddMinutes(service.ServiceDuration);
 
+        var overlappingAppointments = await appointmentRepository.GetAllByConditionAsync(a =>
+            a.BusinessId == appointment.BusinessId &&
+            a.EmployeeId == appointment.EmployeeId &&
+            a.StartTime < appointment.EndTime && 
+            appointment.StartTime < a.EndTime
+        );
+        
+        if (overlappingAppointments.Any())
+        {
+            throw new InvalidOperationException("This time slot is already booked. Please choose another time.");
+        }
+        
         return await appointmentRepository.AddAsync(appointment);
     }
 
