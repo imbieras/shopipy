@@ -16,7 +16,7 @@ public class ServiceController(
 ) : ControllerBase
 {
     
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetServices(int businessId, [FromQuery] int? categoryId = null)
     {
         if (categoryId.HasValue)
@@ -43,7 +43,7 @@ public class ServiceController(
         return Ok(responseDto);
     }
 
-    [HttpPost("")]
+    [HttpPost]
     public async Task<IActionResult> CreateService(int businessId, ServiceRequestDto request)
     {
         var categoryExists = await categoryService.GetCategoryByIdAsync(request.CategoryId);
