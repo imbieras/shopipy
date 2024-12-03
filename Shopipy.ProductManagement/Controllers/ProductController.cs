@@ -8,7 +8,7 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ProductManagement.Controllers
 {
-    [Route("[controller]")]
+    [Route("{businessId}/products")]
     [ApiController]
     public class ProductController : ControllerBase
     {

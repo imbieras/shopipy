@@ -9,7 +9,7 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ProductManagement.Controllers
 {
-    [Route("api/{businessId}/products/{productId}/variations")]
+    [Route("{businessId}/products/{productId}/variations")]
     [ApiController]
     public class ProductVariationController : ControllerBase
     {
