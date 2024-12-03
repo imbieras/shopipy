@@ -10,9 +10,9 @@ using Shopipy.ApiService.ExceptionFilters;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
 using Shopipy.BusinessManagement.Mappings;
-using Shopipy.BusinessManagement.Services;
 using Shopipy.CategoryManagement;
 using Shopipy.CategoryManagement.Mappings;
+using Shopipy.ProductManagement.Mappings;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
@@ -48,7 +48,7 @@ else
 }
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
-    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile));
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(ProductVariationMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
@@ -149,18 +149,49 @@ app.UseSwaggerUI(c =>
 using (var serviceScope = app.Services.CreateScope())
 {
     var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-    
+
     Console.WriteLine("Applying migrations...");
     dbContext.Database.Migrate();
-    Console.WriteLine("Migrations applied successfully.");    
+    Console.WriteLine("Migrations applied successfully.");
+
     // Seed database
+    if (!dbContext.Businesses.Any(b => b.BusinessId == 1))
+    {
+        Console.WriteLine("Seeding default business...");
+        dbContext.Businesses.Add(new Business
+        {
+            BusinessId = 1,
+            Name = "Default Business",
+            Address = "123 Default St, Default City",
+            Email = "contact@defaultbusiness.com",
+            Phone = "+1234567890",
+            VatNumber = "VAT123456",
+            BusinessType = BusinessType.Retail,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        dbContext.SaveChanges();
+        Console.WriteLine("Default business seeded successfully.");
+    }
+
     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    await userManager.CreateAsync(new User("seeded_superuser") {Name = "Admin", Role = UserRole.SuperAdmin, Email = "admin@shopipy.com", PhoneNumber = "+37065011111"}, "Seeded_password1234");
-    await userManager.CreateAsync(new User("test_worker") { Name = "Employee", Role = UserRole.Employee, BusinessId = 1 },
-        "Test_password1234");
-    
+    await userManager.CreateAsync(new User("seeded_superuser")
+    {
+        Name = "Admin",
+        Role = UserRole.SuperAdmin,
+        Email = "admin@shopipy.com",
+        PhoneNumber = "+37065011111"
+    }, "Seeded_password1234");
+
+    await userManager.CreateAsync(new User("test_worker")
+    {
+        Name = "Employee",
+        Role = UserRole.Employee,
+        BusinessId = 1
+    }, "Test_password1234");
+
     dbContext.SaveChanges();
-    
+
     var mapper = serviceScope.ServiceProvider.GetRequiredService<IMapper>();
     mapper.ConfigurationProvider.AssertConfigurationIsValid();
 }

@@ -11,6 +11,7 @@
   </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Shopipy.ProductManagement\Shopipy.ProductManagement.csproj" />
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
         <ProjectReference Include="..\Shopipy.Shared\Shopipy.Shared.csproj" />
         <ProjectReference Include="..\Shopipy.UserManagement\Shopipy.UserManagement.csproj" />
