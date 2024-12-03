@@ -35,12 +35,19 @@ namespace Shopipy.ProductManagement.Controllers
             variation.CreatedAt = DateTime.UtcNow;
             variation.UpdatedAt = DateTime.UtcNow;
 
-            var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
-            var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
+            try
+            {
+                var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
+                var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
 
-            return CreatedAtAction(nameof(GetVariationByIdAsync),
-                new { businessId, productId, variationId = createdVariation.VariationId },
-                variationResponseDTO);
+                return CreatedAtAction(nameof(GetVariationByIdAsync),
+                    new { businessId, productId, variationId = createdVariation.VariationId },
+                    variationResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex, details = productId });
+            }
         }
 
         [HttpGet("{variationId}")]
