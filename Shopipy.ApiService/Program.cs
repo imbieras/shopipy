@@ -22,6 +22,7 @@ using Shopipy.ServiceManagement;
 using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
+using Shopipy.ProductManagement;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddBusinessManagement();
 builder.Services.AddServiceManagement();
 builder.Services.AddCategoryManagement();
+builder.Services.AddProductManagement();
 
 builder.Services.AddControllers(options =>
 {

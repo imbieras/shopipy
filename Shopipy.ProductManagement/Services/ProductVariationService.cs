@@ -4,17 +4,8 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ProductManagement.Services
 {
-    public class ProductVariationService : IProductVariationService
+    public class ProductVariationService(IGenericRepository<ProductVariation> _variationRepository, IGenericRepository<Product> _productRepository) : IProductVariationService
     {
-        private readonly IGenericRepository<ProductVariation> _variationRepository;
-        private readonly IGenericRepository<Product> _productRepository;
-
-        public ProductVariationService(IGenericRepository<ProductVariation> variationRepository, IGenericRepository<Product> productRepository)
-        {
-            _variationRepository = variationRepository;
-            _productRepository = productRepository;
-        }
-
         public async Task<ProductVariation> CreateVariationAsync(ProductVariation variation, int productId, int businessId)
         {
             var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);

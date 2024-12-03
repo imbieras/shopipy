@@ -5,10 +5,11 @@ namespace Shopipy.ProductManagement
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddCategoryManagement(this IServiceCollection categories)
+        public static IServiceCollection AddProductManagement(this IServiceCollection products)
         {
-            categories.AddScoped<IProductService, ProductService>();
-            return categories;
+            products.AddScoped<IProductService, ProductService>();
+            products.AddScoped<IProductVariationService, ProductVariationService>();
+            return products;
         }
     }
 }
