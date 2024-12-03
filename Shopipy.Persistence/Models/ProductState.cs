@@ -1,8 +1,7 @@
-﻿namespace Shopipy.Persistence.Models
+﻿namespace Shopipy.Persistence.Models;
+
+public enum ProductState
 {
-    public enum ProductState
-    {
-        Available,
-        Unavailable
-    }
+    Available,
+    Unavailable
 }

@@ -7,87 +7,85 @@ using Shopipy.Persistence.Models;
 using Shopipy.Shared;
 using Shopipy.Shared.Services;
 
-namespace Shopipy.ProductManagement.Controllers
+namespace Shopipy.ProductManagement.Controllers;
+
+[Route("{businessId}/products/{productId}/variations")]
+[ApiController]
+public class ProductVariationController : ControllerBase
 {
-    [Route("{businessId}/products/{productId}/variations")]
-    [ApiController]
-    public class ProductVariationController : ControllerBase
+    private readonly IProductVariationService _variationService;
+    private readonly IMapper _mapper;
+
+    public ProductVariationController(IProductVariationService variationService, IMapper mapper)
     {
-        private readonly IProductVariationService _variationService;
-        private readonly IMapper _mapper;
+        _variationService = variationService;
+        _mapper = mapper;
+    }
 
-        public ProductVariationController(IProductVariationService variationService, IMapper mapper)
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariationAsync(int businessId, int productId, ProductVariationRequestDTO dto)
+    {
+        if (!ModelState.IsValid)
         {
-            _variationService = variationService;
-            _mapper = mapper;
+            return BadRequest(new { error = "Invalid data provided", details = ModelState });
         }
 
-        [HttpPost]
-        [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-        public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariationAsync(int businessId, int productId, ProductVariationRequestDTO dto)
+        var variation = _mapper.Map<ProductVariation>(dto);
+        variation.CreatedAt = DateTime.UtcNow;
+        variation.UpdatedAt = DateTime.UtcNow;
+
+        try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new { error = "Invalid data provided", details = ModelState });
-            }
+            var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
+            var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
 
-            var variation = _mapper.Map<ProductVariation>(dto);
-            variation.CreatedAt = DateTime.UtcNow;
-            variation.UpdatedAt = DateTime.UtcNow;
-
-            try
-            {
-                var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
-                var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
-
-                return CreatedAtAction(nameof(GetVariationByIdAsync),
-                    new { businessId, productId, variationId = createdVariation.VariationId },
-                    variationResponseDTO);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex, details = productId });
-            }
+            return CreatedAtAction(nameof(GetVariationByIdAsync),
+                new { businessId, productId, variationId = createdVariation.VariationId },
+                variationResponseDTO);
         }
-
-        [HttpGet("{variationId}")]
-        public async Task<ActionResult<ProductVariationResponseDTO>> GetVariationByIdAsync(int businessId, int productId, int variationId)
+        catch (Exception ex)
         {
-            var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
-            if (variation == null) return NotFound();
-
-            var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(variation);
-            return Ok(variationResponseDTO);
-        }
-
-        [HttpPut("{variationId}")]
-        [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-        public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariationAsync(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new { error = "Invalid data provided", details = ModelState });
-            }
-
-            var variation = _mapper.Map<ProductVariation>(dto);
-            variation.UpdatedAt = DateTime.UtcNow;
-
-            var updatedVariation = await _variationService.UpdateVariationAsync(variationId, variation, productId, businessId);
-            if (updatedVariation == null) return NotFound();
-
-            var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(updatedVariation);
-            return Ok(variationResponseDTO);
-        }
-
-        [HttpDelete("{variationId}")]
-        [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-        public async Task<IActionResult> DeleteVariationAsync(int businessId, int productId, int variationId)
-        {
-            var success = await _variationService.DeleteVariationAsync(variationId, productId, businessId);
-            if (!success) return NotFound();
-
-            return NoContent();
+            return BadRequest(new { error = ex, details = productId });
         }
     }
 
+    [HttpGet("{variationId}")]
+    public async Task<ActionResult<ProductVariationResponseDTO>> GetVariationByIdAsync(int businessId, int productId, int variationId)
+    {
+        var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
+        if (variation == null) return NotFound();
+
+        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(variation);
+        return Ok(variationResponseDTO);
+    }
+
+    [HttpPut("{variationId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariationAsync(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { error = "Invalid data provided", details = ModelState });
+        }
+
+        var variation = _mapper.Map<ProductVariation>(dto);
+        variation.UpdatedAt = DateTime.UtcNow;
+
+        var updatedVariation = await _variationService.UpdateVariationAsync(variationId, variation, productId, businessId);
+        if (updatedVariation == null) return NotFound();
+
+        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(updatedVariation);
+        return Ok(variationResponseDTO);
+    }
+
+    [HttpDelete("{variationId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<IActionResult> DeleteVariationAsync(int businessId, int productId, int variationId)
+    {
+        var success = await _variationService.DeleteVariationAsync(variationId, productId, businessId);
+        if (!success) return NotFound();
+
+        return NoContent();
+    }
 }

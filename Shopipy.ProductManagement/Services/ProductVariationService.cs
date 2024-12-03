@@ -2,59 +2,58 @@
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared.Services;
 
-namespace Shopipy.ProductManagement.Services
+namespace Shopipy.ProductManagement.Services;
+
+public class ProductVariationService(IGenericRepository<ProductVariation> _variationRepository, IGenericRepository<Product> _productRepository) : IProductVariationService
 {
-    public class ProductVariationService(IGenericRepository<ProductVariation> _variationRepository, IGenericRepository<Product> _productRepository) : IProductVariationService
+    public async Task<ProductVariation> CreateVariationAsync(ProductVariation variation, int productId, int businessId)
     {
-        public async Task<ProductVariation> CreateVariationAsync(ProductVariation variation, int productId, int businessId)
+        var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
+        if (product == null)
         {
-            var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
-            if (product == null)
-            {
-                throw new ArgumentException("Product not found for the specified business.");
-            }
-
-            variation.ProductId = productId;
-
-            return await _variationRepository.AddAsync(variation);
+            throw new ArgumentException("Product not found for the specified business.");
         }
 
-        public async Task<ProductVariation?> GetVariationByIdAsync(int variationId, int productId, int businessId)
-        {
-            var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
-            if (product == null)
-            {
-                return null; 
-            }
+        variation.ProductId = productId;
 
-            return await _variationRepository.GetByConditionAsync(v => v.VariationId == variationId && v.ProductId == productId);
+        return await _variationRepository.AddAsync(variation);
+    }
+
+    public async Task<ProductVariation?> GetVariationByIdAsync(int variationId, int productId, int businessId)
+    {
+        var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
+        if (product == null)
+        {
+            return null; 
         }
 
-        public async Task<ProductVariation?> UpdateVariationAsync(int variationId, ProductVariation variation, int productId, int businessId)
+        return await _variationRepository.GetByConditionAsync(v => v.VariationId == variationId && v.ProductId == productId);
+    }
+
+    public async Task<ProductVariation?> UpdateVariationAsync(int variationId, ProductVariation variation, int productId, int businessId)
+    {
+        var existingVariation = await GetVariationByIdAsync(variationId, productId, businessId);
+        if (existingVariation == null)
         {
-            var existingVariation = await GetVariationByIdAsync(variationId, productId, businessId);
-            if (existingVariation == null)
-            {
-                return null;
-            }
-
-            existingVariation.Name = variation.Name;
-            existingVariation.PriceModifier = variation.PriceModifier;
-            existingVariation.ProductState = variation.ProductState;
-            existingVariation.UpdatedAt = variation.UpdatedAt;
-
-            return await _variationRepository.UpdateAsync(existingVariation);
+            return null;
         }
 
-        public async Task<bool> DeleteVariationAsync(int variationId, int productId, int businessId)
-        {
-            var existingVariation = await GetVariationByIdAsync(variationId, productId, businessId);
-            if (existingVariation == null)
-            {
-                return false;
-            }
+        existingVariation.Name = variation.Name;
+        existingVariation.PriceModifier = variation.PriceModifier;
+        existingVariation.ProductState = variation.ProductState;
+        existingVariation.UpdatedAt = variation.UpdatedAt;
 
-            return await _variationRepository.DeleteAsync(existingVariation.VariationId);
+        return await _variationRepository.UpdateAsync(existingVariation);
+    }
+
+    public async Task<bool> DeleteVariationAsync(int variationId, int productId, int businessId)
+    {
+        var existingVariation = await GetVariationByIdAsync(variationId, productId, businessId);
+        if (existingVariation == null)
+        {
+            return false;
         }
+
+        return await _variationRepository.DeleteAsync(existingVariation.VariationId);
     }
 }

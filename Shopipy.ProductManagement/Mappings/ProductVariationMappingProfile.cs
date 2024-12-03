@@ -2,20 +2,19 @@
 using AutoMapper;
 using Shopipy.ProductManagement.DTOs;
 
-namespace Shopipy.ProductManagement.Mappings
+namespace Shopipy.ProductManagement.Mappings;
+
+public class ProductVariationMappingProfile : Profile
 {
-    public class ProductVariationMappingProfile : Profile
+    public ProductVariationMappingProfile()
     {
-        public ProductVariationMappingProfile()
-        {
-            CreateMap<ProductVariation, ProductVariationResponseDTO>();
+        CreateMap<ProductVariation, ProductVariationResponseDTO>();
 
-            CreateMap<ProductVariationRequestDTO, ProductVariation>()
-                .ForMember(dest => dest.VariationId, opt => opt.Ignore()) 
-                .ForMember(dest => dest.ProductId, opt => opt.Ignore()) 
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
-                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore()); 
+        CreateMap<ProductVariationRequestDTO, ProductVariation>()
+            .ForMember(dest => dest.VariationId, opt => opt.Ignore()) 
+            .ForMember(dest => dest.ProductId, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore()); 
 
-        }
     }
 }
