@@ -25,6 +25,11 @@ namespace Shopipy.ProductManagement.Controllers
         [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
         public async Task<ActionResult<ProductResponseDTO>> CreateProductAsync(ProductRequestDTO dto, int businessId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Invalid data provided", details = ModelState });
+            }
+
             var product = _mapper.Map<Product>(dto);
             var createdProduct = await _productService.CreateProductAsync(product, businessId);
 
@@ -49,6 +54,11 @@ namespace Shopipy.ProductManagement.Controllers
         [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
         public async Task<ActionResult<ProductResponseDTO>> UpdateProductAsync(int productId, ProductRequestDTO dto, int businessId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Invalid data provided", details = ModelState });
+            }
+
             var existingProduct = await _productService.GetProductByIdAsync(productId, businessId);
 
             if (existingProduct == null) return NotFound();

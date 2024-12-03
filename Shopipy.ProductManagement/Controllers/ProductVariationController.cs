@@ -26,6 +26,11 @@ namespace Shopipy.ProductManagement.Controllers
         [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
         public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariationAsync(int businessId, int productId, ProductVariationRequestDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Invalid data provided", details = ModelState });
+            }
+
             var variation = _mapper.Map<ProductVariation>(dto);
             variation.CreatedAt = DateTime.UtcNow;
             variation.UpdatedAt = DateTime.UtcNow;
@@ -52,6 +57,11 @@ namespace Shopipy.ProductManagement.Controllers
         [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
         public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariationAsync(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Invalid data provided", details = ModelState });
+            }
+
             var variation = _mapper.Map<ProductVariation>(dto);
             variation.UpdatedAt = DateTime.UtcNow;
 
