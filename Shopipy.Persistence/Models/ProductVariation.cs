@@ -19,8 +19,8 @@ public class ProductVariation
 
     public required ProductState ProductState { get; set; }
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 }

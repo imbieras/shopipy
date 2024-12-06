@@ -4,41 +4,43 @@ using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.ProductManagement.DTOs;
 using Shopipy.Shared;
+using Shopipy.Shared.DTOs;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.ProductManagement.Controllers;
 
-[Route("{businessId}/products")]
+[Route("Product/{businessId}/products")]
 [ApiController]
-public class ProductController : ControllerBase
+public class ProductController(IProductService _productService, IMapper _mapper) : ControllerBase
 {
-    private readonly IProductService _productService;
-    private readonly IMapper _mapper;
-
-    public ProductController(IProductService productService, IMapper mapper)
-    {
-        _productService = productService;
-        _mapper = mapper;
-    }
-
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductResponseDTO>> CreateProductAsync(ProductRequestDTO dto, int businessId)
+    public async Task<IActionResult> CreateProduct(ProductRequestDTO dto, int businessId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { error = "Invalid data provided", details = ModelState });
-        }
-
         var product = _mapper.Map<Product>(dto);
+
         var createdProduct = await _productService.CreateProductAsync(product, businessId);
 
         var productResponseDTO = _mapper.Map<ProductResponseDTO>(createdProduct);
-        return CreatedAtAction(nameof(GetProductByIdAsync), new { productId = createdProduct.ProductId }, productResponseDTO);
+
+        return CreatedAtAction(nameof(GetProductById), new { businessId, productId = createdProduct.ProductId }, productResponseDTO);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllProducts(int businessId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
+    {
+        var products = await _productService.GetAllProductsOfBusinessAsync(businessId, top, skip);
+        var count = await _productService.GetProductCountAsync(businessId);
+
+        return Ok(new PaginationResultDto<ProductResponseDTO>
+        {
+            Data = products.Select(_mapper.Map<ProductResponseDTO>),
+            Count = count
+        });
     }
 
     [HttpGet("{productId}")]
-    public async Task<ActionResult<ProductResponseDTO>> GetProductByIdAsync(int productId, int businessId)
+    public async Task<ActionResult<ProductResponseDTO>> GetProductById(int businessId, int productId)
     {
         var product = await _productService.GetProductByIdAsync(productId, businessId);
         if (product == null)
@@ -52,13 +54,8 @@ public class ProductController : ControllerBase
 
     [HttpPut("{productId}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductResponseDTO>> UpdateProductAsync(int productId, ProductRequestDTO dto, int businessId)
+    public async Task<ActionResult<ProductResponseDTO>> UpdateProduct(int productId, ProductRequestDTO dto, int businessId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { error = "Invalid data provided", details = ModelState });
-        }
-
         var existingProduct = await _productService.GetProductByIdAsync(productId, businessId);
 
         if (existingProduct == null) return NotFound();
@@ -66,7 +63,7 @@ public class ProductController : ControllerBase
         _mapper.Map(dto, existingProduct);
         existingProduct.UpdatedAt = DateTime.UtcNow;
 
-        var updatedProduct = await _productService.UpdateProductAsync(productId, existingProduct, businessId);
+        var updatedProduct = await _productService.UpdateProductAsync(existingProduct);
         var productResponseDTO = _mapper.Map<ProductResponseDTO>(updatedProduct);
 
         return Ok(productResponseDTO);
@@ -74,7 +71,7 @@ public class ProductController : ControllerBase
 
     [HttpDelete("{productId}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<IActionResult> DeleteProductAsync(int productId, int businessId)
+    public async Task<IActionResult> DeleteProduct(int productId, int businessId)
     {
         var success = await _productService.DeleteProductAsync(productId, businessId);
         if (!success)

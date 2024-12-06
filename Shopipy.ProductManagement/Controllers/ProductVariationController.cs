@@ -2,56 +2,48 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.ProductManagement.DTOs;
-using Shopipy.ProductManagement.Services;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
 using Shopipy.Shared.Services;
+using Shopipy.Shared.DTOs;
+using Shopipy.ProductManagement.Services;
 
 namespace Shopipy.ProductManagement.Controllers;
 
-[Route("{businessId}/products/{productId}/variations")]
+[Route("[controller]/{businessId}/products/{productId}/variations")]
 [ApiController]
-public class ProductVariationController : ControllerBase
+public class ProductVariationController(IProductVariationService _variationService, IMapper _mapper) : ControllerBase
 {
-    private readonly IProductVariationService _variationService;
-    private readonly IMapper _mapper;
-
-    public ProductVariationController(IProductVariationService variationService, IMapper mapper)
-    {
-        _variationService = variationService;
-        _mapper = mapper;
-    }
-
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariationAsync(int businessId, int productId, ProductVariationRequestDTO dto)
+    public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariation(int businessId, int productId, ProductVariationRequestDTO dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { error = "Invalid data provided", details = ModelState });
-        }
-
         var variation = _mapper.Map<ProductVariation>(dto);
-        variation.CreatedAt = DateTime.UtcNow;
-        variation.UpdatedAt = DateTime.UtcNow;
 
-        try
-        {
-            var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
-            var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
+        var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
+        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
 
-            return CreatedAtAction(nameof(GetVariationByIdAsync),
-                new { businessId, productId, variationId = createdVariation.VariationId },
-                variationResponseDTO);
-        }
-        catch (Exception ex)
+        return CreatedAtAction(nameof(GetVariationById),
+            new { businessId, productId, variationId = createdVariation.VariationId },
+            variationResponseDTO);       
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PaginationResultDto<ProductVariationResponseDTO>>> GetAllVariationsOfProductInBusiness(int businessId, int productId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
+    {
+        var variations = await _variationService.GetAllVariationsOfProductInBusinessAsync(productId, businessId, top, skip);
+
+        var count = await _variationService.GetVariationCountOfProductAsync(productId, businessId);
+
+        return Ok(new PaginationResultDto<ProductVariationResponseDTO>
         {
-            return BadRequest(new { error = ex, details = productId });
-        }
+            Data = variations.Select(_mapper.Map<ProductVariationResponseDTO>),
+            Count = count
+        });
     }
 
     [HttpGet("{variationId}")]
-    public async Task<ActionResult<ProductVariationResponseDTO>> GetVariationByIdAsync(int businessId, int productId, int variationId)
+    public async Task<ActionResult<ProductVariationResponseDTO>> GetVariationById(int businessId, int productId, int variationId)
     {
         var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
         if (variation == null) return NotFound();
@@ -62,20 +54,19 @@ public class ProductVariationController : ControllerBase
 
     [HttpPut("{variationId}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariationAsync(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
+    public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariation(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { error = "Invalid data provided", details = ModelState });
-        }
+        var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
 
-        var variation = _mapper.Map<ProductVariation>(dto);
+        if (variation == null) return NotFound();
+
+        _mapper.Map(dto, variation);
+
         variation.UpdatedAt = DateTime.UtcNow;
 
-        var updatedVariation = await _variationService.UpdateVariationAsync(variationId, variation, productId, businessId);
-        if (updatedVariation == null) return NotFound();
-
+        var updatedVariation = await _variationService.UpdateVariationAsync(variation);
         var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(updatedVariation);
+
         return Ok(variationResponseDTO);
     }
 

@@ -9,11 +9,32 @@ public class ProductService(IGenericRepository<Product> _productRepository) : IP
     public async Task<Product> CreateProductAsync(Product product, int businessId)
     {
         product.BusinessId = businessId;
-        product.CreatedAt = DateTime.UtcNow;
-        product.UpdatedAt = DateTime.UtcNow;
 
         var createdProduct = await _productRepository.AddAsync(product);
         return createdProduct;
+    }
+
+    public async Task<IEnumerable<Product>> GetAllProductsOfBusinessAsync(int businessId, int? top = null, int? skip = null)
+    {
+        var products = await _productRepository.GetAllByConditionAsync(p => p.BusinessId == businessId);
+
+        if (skip.HasValue)
+        {
+            products = products.Skip(skip.Value);
+        }
+
+        if (top.HasValue)
+        {
+            products = products.Take(top.Value);
+        }
+
+        return products;
+    }
+
+    public async Task<int> GetProductCountAsync(int businessId)
+    {
+        var products = await _productRepository.GetAllByConditionAsync(p => p.BusinessId == businessId);
+        return products.Count();
     }
 
     public async Task<Product?> GetProductByIdAsync(int productId, int businessId)
@@ -22,20 +43,9 @@ public class ProductService(IGenericRepository<Product> _productRepository) : IP
         return product;
     }
 
-    public async Task<Product?> UpdateProductAsync(int productId, Product product, int businessId)
+    public async Task<Product> UpdateProductAsync(Product product)
     {
-        var existingProduct = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
-        if (existingProduct == null) return null;
-
-        existingProduct.Name = product.Name;
-        existingProduct.Description = product.Description;
-        existingProduct.BasePrice = product.BasePrice;
-        existingProduct.ProductState = product.ProductState;
-        existingProduct.CategoryId = product.CategoryId;
-        existingProduct.UpdatedAt = DateTime.UtcNow;
-
-        var updatedProduct = await _productRepository.UpdateAsync(existingProduct);
-        return updatedProduct;
+        return await _productRepository.UpdateAsync(product);
     }
 
     public async Task<bool> DeleteProductAsync(int productId, int businessId)
