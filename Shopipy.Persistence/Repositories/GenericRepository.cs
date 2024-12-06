@@ -25,6 +25,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<T>> GetAllByConditionWithPaginationAsync(Expression<Func<T, bool>> predicate, int skip, int take)
+    {
+        return await _context.Set<T>().Where(predicate).Skip(skip).Take(take).ToListAsync();           
+    }
+
+    public async Task<int> GetCountByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _context.Set<T>().Where(predicate).CountAsync();           
+    }
+
     public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate)
     {
         return await _context.Set<T>().FirstOrDefaultAsync(predicate);

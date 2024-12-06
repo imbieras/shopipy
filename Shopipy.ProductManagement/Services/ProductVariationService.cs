@@ -19,7 +19,7 @@ public class ProductVariationService(IGenericRepository<ProductVariation> _varia
         return await _variationRepository.AddAsync(variation);
     }
 
-    public async Task<IEnumerable<ProductVariation>> GetAllVariationsOfProductInBusinessAsync(int productId, int businessId, int? top = null, int? skip = null)
+    public async Task<IEnumerable<ProductVariation>> GetAllVariationsOfProductInBusinessAsync(int productId, int businessId, int? top = null, int? skip = 0)
     {
         var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
 
@@ -28,28 +28,23 @@ public class ProductVariationService(IGenericRepository<ProductVariation> _varia
             throw new ArgumentException("Product not found for the specified business.");
         }
 
-        var variations = await _variationRepository.GetAllByConditionAsync(v => v.ProductId == productId);
-
-        if (top.HasValue || skip.HasValue)
-        {
-            variations = variations
-                .Skip(skip ?? 0)
-                .Take(top ?? int.MaxValue);
-        }
-
-        return variations;
+        return await _variationRepository.GetAllByConditionWithPaginationAsync(
+            v => v.ProductId == productId,
+            skip ?? 0,   
+            top ?? int.MaxValue  
+        );
     }
 
     public async Task<int> GetVariationCountOfProductAsync(int productId, int businessId)
     {
         var product = await _productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
+
         if (product == null)
         {
             throw new ArgumentException("Product not found for the specified business.");
         }
 
-        var count = (await _variationRepository.GetAllByConditionAsync(v => v.ProductId == productId)).Count();
-        return count;
+        return await _variationRepository.GetCountByConditionAsync(v => v.ProductId == productId);
     }
 
     public async Task<ProductVariation?> GetVariationByIdAsync(int variationId, int productId, int businessId)
