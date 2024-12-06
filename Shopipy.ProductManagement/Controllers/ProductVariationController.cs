@@ -10,6 +10,7 @@ using Shopipy.ProductManagement.Services;
 
 namespace Shopipy.ProductManagement.Controllers;
 
+[Authorize]
 [Route("[controller]/{businessId}/products/{productId}/variations")]
 [ApiController]
 public class ProductVariationController(IProductVariationService _variationService, IMapper _mapper) : ControllerBase
@@ -61,8 +62,6 @@ public class ProductVariationController(IProductVariationService _variationServi
         if (variation == null) return NotFound();
 
         _mapper.Map(dto, variation);
-
-        variation.UpdatedAt = DateTime.UtcNow;
 
         var updatedVariation = await _variationService.UpdateVariationAsync(variation);
         var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(updatedVariation);

@@ -45,6 +45,7 @@ public class ProductService(IGenericRepository<Product> _productRepository) : IP
 
     public async Task<Product> UpdateProductAsync(Product product)
     {
+        product.UpdatedAt = DateTime.UtcNow;
         return await _productRepository.UpdateAsync(product);
     }
 

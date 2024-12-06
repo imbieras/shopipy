@@ -9,6 +9,7 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ProductManagement.Controllers;
 
+[Authorize]
 [Route("Product/{businessId}/products")]
 [ApiController]
 public class ProductController(IProductService _productService, IMapper _mapper) : ControllerBase
@@ -61,7 +62,6 @@ public class ProductController(IProductService _productService, IMapper _mapper)
         if (existingProduct == null) return NotFound();
 
         _mapper.Map(dto, existingProduct);
-        existingProduct.UpdatedAt = DateTime.UtcNow;
 
         var updatedProduct = await _productService.UpdateProductAsync(existingProduct);
         var productResponseDTO = _mapper.Map<ProductResponseDTO>(updatedProduct);

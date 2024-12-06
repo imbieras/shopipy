@@ -65,6 +65,7 @@ public class ProductVariationService(IGenericRepository<ProductVariation> _varia
 
     public async Task<ProductVariation> UpdateVariationAsync(ProductVariation variation)
     {
+        variation.UpdatedAt = DateTime.UtcNow;
         return await _variationRepository.UpdateAsync(variation);
     }
 
