@@ -23,8 +23,6 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="13.0.1" />
-      <PackageReference Include="AWSSDK.Core" Version="3.7.400.59" />
-      <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.59" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
         <PrivateAssets>all</PrivateAssets>
@@ -32,6 +30,7 @@
       </PackageReference>
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
+      <PackageReference Include="Twilio" Version="7.8.0" />
     </ItemGroup>
 
     <ItemGroup>

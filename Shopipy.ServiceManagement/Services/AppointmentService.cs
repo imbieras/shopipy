@@ -2,6 +2,7 @@ using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
+using Shopipy.ServiceManagement.Interfaces;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
@@ -9,7 +10,8 @@ namespace Shopipy.ServiceManagement.Services;
 public class AppointmentService(
     IGenericRepository<Appointment> appointmentRepository,
     IGenericRepository<Service> serviceRepository,
-    IGenericRepository<User> userRepository
+    IGenericRepository<User> userRepository,
+    ISMSService smsService
 ) : IAppointmentService
 {
 
@@ -178,9 +180,20 @@ public class AppointmentService(
             throw new InvalidOperationException("This time slot is already booked. Please choose another time.");
         }
         
-        return await appointmentRepository.AddAsync(appointment);
-    }
+        var createdAppointment = await appointmentRepository.AddAsync(appointment);
 
+        try
+        {
+            await smsService.SendAppointmentConfirmationAsync(createdAppointment, service.ServiceName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send SMS confirmation: {ex.Message}");
+        }
+
+        return createdAppointment;
+    }
+    
     public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
     {
         return await appointmentRepository.UpdateAsync(appointment);
