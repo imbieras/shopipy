@@ -11,6 +11,8 @@
     
     <ItemGroup>
       <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.2.2" />
+      <PackageReference Include="AWSSDK.Core" Version="3.7.400.59" />
+      <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.59" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
         <PrivateAssets>all</PrivateAssets>

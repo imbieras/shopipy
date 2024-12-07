@@ -2,6 +2,21 @@
   "version": 1,
   "dependencies": {
     "net8.0": {
+      "AWSSDK.Core": {
+        "type": "Direct",
+        "requested": "[3.7.400.59, )",
+        "resolved": "3.7.400.59",
+        "contentHash": "JpF1RLRti7AJsN3Y8kbmKhZ7Q0/6wujYrxYIF0A22CJB9ndYJ95TgKmcV/7KLmrG9AFH3cwJ1HEv6jsCpteveQ=="
+      },
+      "AWSSDK.SimpleNotificationService": {
+        "type": "Direct",
+        "requested": "[3.7.400.59, )",
+        "resolved": "3.7.400.59",
+        "contentHash": "7xYFU13I3f04aT/S/2/BymwFeeBr4PFTfmq3oncOhWufIbMwVizUyG2QrEvLTe3quKl+/75SPd6kzgb2n9QiYw==",
+        "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, 4.0.0)"
+        }
+      },
       "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": {
         "type": "Transitive",
         "resolved": "8.2.2",
@@ -717,6 +732,8 @@
       "shopipy.apiservice": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "AutoMapper": "[13.0.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.11, )",
           "Shopipy.BusinessManagement": "[1.0.0, )",
@@ -733,6 +750,8 @@
       "shopipy.businessmanagement": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "AutoMapper": "[13.0.1, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )"
@@ -741,6 +760,8 @@
       "shopipy.categorymanagement": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "AutoMapper": "[13.0.1, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )"
@@ -749,6 +770,8 @@
       "shopipy.persistence": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": "[8.2.2, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.11, )"
         }
@@ -756,6 +779,8 @@
       "shopipy.servicedefaults": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "Microsoft.Extensions.Http.Resilience": "[8.7.0, )",
           "Microsoft.Extensions.ServiceDiscovery": "[8.1.0, )",
           "OpenTelemetry.Exporter.OpenTelemetryProtocol": "[1.9.0, )",
@@ -768,6 +793,8 @@
       "shopipy.servicemanagement": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "AutoMapper": "[13.0.1, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )"
@@ -776,12 +803,16 @@
       "shopipy.shared": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "Shopipy.Persistence": "[1.0.0, )"
         }
       },
       "shopipy.usermanagement": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.Core": "[3.7.400.59, )",
+          "AWSSDK.SimpleNotificationService": "[3.7.400.59, )",
           "AutoMapper": "[13.0.1, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )"
