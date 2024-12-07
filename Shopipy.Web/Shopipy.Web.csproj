@@ -20,4 +20,9 @@
       </Content>
     </ItemGroup>
 
+
+    <ItemGroup>
+      <PackageReference Include="Twilio.AspNet.Core" Version="8.1.1" />
+    </ItemGroup>
+
 </Project>

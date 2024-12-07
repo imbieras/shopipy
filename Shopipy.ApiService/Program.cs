@@ -23,6 +23,8 @@ using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
 using Shopipy.ProductManagement;
+using Shopipy.ServiceManagement.Interfaces;
+using Shopipy.ServiceManagement.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -125,6 +127,13 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 builder.Services.AddShared();
 builder.Services.AddUserManagement();
+
+builder.Services.AddSingleton<ISMSService>(provider => 
+    new TwilioSMSService(
+        builder.Configuration["TwilioAccountSid"]!,
+        builder.Configuration["TwilioAuthToken"]!,
+        builder.Configuration["TwilioPhoneNumber"]!
+    ));
 
 var app = builder.Build();
 
