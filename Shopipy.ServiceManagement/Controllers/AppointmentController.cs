@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
@@ -7,6 +8,7 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
 
+[Authorize]
 [ApiController]
 [Route("[controller]/{businessId}")]
 public class AppointmentController(IAppointmentService appointmentService, IMapper mapper) : ControllerBase
