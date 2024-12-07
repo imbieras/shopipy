@@ -33,9 +33,25 @@ public class TwilioSMSService: ISMSService
                 to: new Twilio.Types.PhoneNumber(appointment.CustomerPhone)
             );
         }
+        catch (Twilio.Exceptions.ApiException apiEx)
+        {
+            // invalid credentials, invalid etc.
+            Console.WriteLine($"Twilio API Error: {apiEx.Message}, Code: {apiEx.Code}");
+        }
+        catch (Twilio.Exceptions.TwilioException twilioEx)
+        {
+            // general twilio errors
+            Console.WriteLine($"Twilio Error: {twilioEx.Message}");
+        }
+        catch (ArgumentException argEx)
+        {
+            // invalid phone number
+            Console.WriteLine($"Invalid phone number format: {argEx.Message}");
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to send SMS: {ex.Message}");
+            // unexpected error
+            Console.WriteLine($"Unexpected error sending SMS: {ex.Message}");
         }
     }
     

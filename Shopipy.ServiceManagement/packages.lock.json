@@ -11,16 +11,16 @@
           "Microsoft.Extensions.Options": "6.0.0"
         }
       },
-      "Twilio": {
+      "Twilio.AspNet.Core": {
         "type": "Direct",
-        "requested": "[7.8.0, )",
-        "resolved": "7.8.0",
-        "contentHash": "GsW+XAwXX1F2YKHoQuO7T73/awAxOskdVgtvsCi6mnHYVq0cffM1CZUQdERmRt9UiCmEvt32sPe7qy/On5TBzg==",
+        "requested": "[8.1.1, )",
+        "resolved": "8.1.1",
+        "contentHash": "vDpdhytp3iRsL3IiNFq34xbrngfOjPacFUSNb/+wB3Rg9Vw7dDm2TBJg2p/rJP+GOCVyycONd3djjobLzjeSjg==",
         "dependencies": {
-          "Microsoft.IdentityModel.Tokens": "6.34.0",
-          "Newtonsoft.Json": "13.0.1",
-          "System.Collections.Specialized": "4.3.0",
-          "System.IdentityModel.Tokens.Jwt": "6.34.0"
+          "Microsoft.Extensions.Configuration.Binder": "8.0.2",
+          "Microsoft.Extensions.Http": "8.0.1",
+          "Twilio": "7.8.0",
+          "Twilio.AspNet.Common": "8.1.1"
         }
       },
       "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": {
@@ -158,6 +158,16 @@
         "resolved": "8.0.2",
         "contentHash": "3iE7UF7MQkCv1cxzCahz+Y/guQbTqieyxyaWKhrRO91itI9cOKO76OHeQDahqG4MmW5umr3CcCvGmK92lWNlbg=="
       },
+      "Microsoft.Extensions.Diagnostics": {
+        "type": "Transitive",
+        "resolved": "8.0.1",
+        "contentHash": "doVPCUUCY7c6LhBsEfiy3W1bvS7Mi6LkfQMS8nlC22jZWNxBv8VO8bdfeyvpYFst6Kxqk7HBC6lytmEoBssvSQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "8.0.0",
+          "Microsoft.Extensions.Diagnostics.Abstractions": "8.0.1",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "8.0.0"
+        }
+      },
       "Microsoft.Extensions.Diagnostics.Abstractions": {
         "type": "Transitive",
         "resolved": "8.0.1",
@@ -211,6 +221,19 @@
           "Microsoft.Extensions.Diagnostics.Abstractions": "8.0.1",
           "Microsoft.Extensions.FileProviders.Abstractions": "8.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "8.0.2"
+        }
+      },
+      "Microsoft.Extensions.Http": {
+        "type": "Transitive",
+        "resolved": "8.0.1",
+        "contentHash": "kDYeKJUzh0qeg/AI+nSr3ffthmXYQTEb0nS9qRC7YhSbbuN4M4NPbaB77AJwtkTnCV9XZ7qYj3dkZaNcyl73EA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Diagnostics": "8.0.1",
+          "Microsoft.Extensions.Logging": "8.0.1",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Options": "8.0.2"
         }
       },
       "Microsoft.Extensions.Identity.Core": {
@@ -620,19 +643,33 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "Twilio": {
+        "type": "Transitive",
+        "resolved": "7.8.0",
+        "contentHash": "GsW+XAwXX1F2YKHoQuO7T73/awAxOskdVgtvsCi6mnHYVq0cffM1CZUQdERmRt9UiCmEvt32sPe7qy/On5TBzg==",
+        "dependencies": {
+          "Microsoft.IdentityModel.Tokens": "6.34.0",
+          "Newtonsoft.Json": "13.0.1",
+          "System.Collections.Specialized": "4.3.0",
+          "System.IdentityModel.Tokens.Jwt": "6.34.0"
+        }
+      },
+      "Twilio.AspNet.Common": {
+        "type": "Transitive",
+        "resolved": "8.1.1",
+        "contentHash": "o4y2Vm9AfFrjuHOTksPshvsEbz/UJEUkzwHR6aTQaG/4ic3CaB2RQWNFwHjEbwR38YjGbHslOCjBsudBbB+Ukw=="
+      },
       "shopipy.persistence": {
         "type": "Project",
         "dependencies": {
           "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": "[8.2.2, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.11, )",
-          "Twilio": "[7.8.0, )"
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.11, )"
         }
       },
       "shopipy.shared": {
         "type": "Project",
         "dependencies": {
-          "Shopipy.Persistence": "[1.0.0, )",
-          "Twilio": "[7.8.0, )"
+          "Shopipy.Persistence": "[1.0.0, )"
         }
       }
     }

@@ -182,14 +182,7 @@ public class AppointmentService(
         
         var createdAppointment = await appointmentRepository.AddAsync(appointment);
 
-        try
-        {
-            await smsService.SendAppointmentConfirmationAsync(createdAppointment, service.ServiceName);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to send SMS confirmation: {ex.Message}");
-        }
+        await smsService.SendAppointmentConfirmationAsync(createdAppointment, service.ServiceName);
 
         return createdAppointment;
     }
