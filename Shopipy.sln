@@ -1,32 +1,36 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-#
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.AppHost", "Shopipy.AppHost\Shopipy.AppHost.csproj", "{CE05A877-3237-4E43-86DF-ADBD9260B3C8}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.AppHost", "Shopipy.AppHost\Shopipy.AppHost.csproj", "{CE05A877-3237-4E43-86DF-ADBD9260B3C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.ServiceDefaults", "Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj", "{711BF0FD-7715-4681-A65E-3F7525163276}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ServiceDefaults", "Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj", "{711BF0FD-7715-4681-A65E-3F7525163276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.ApiService", "Shopipy.ApiService\Shopipy.ApiService.csproj", "{A840AF9E-2122-4945-A13F-14EEA6C49296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ApiService", "Shopipy.ApiService\Shopipy.ApiService.csproj", "{A840AF9E-2122-4945-A13F-14EEA6C49296}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Tests", "Shopipy.Tests\Shopipy.Tests.csproj", "{A9F36946-974A-4371-B907-A08B90EBB42D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Tests", "Shopipy.Tests\Shopipy.Tests.csproj", "{A9F36946-974A-4371-B907-A08B90EBB42D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Web", "Shopipy.Web\Shopipy.Web.csproj", "{1A0E45D8-272B-469D-B173-71AE5D57BC77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Web", "Shopipy.Web\Shopipy.Web.csproj", "{1A0E45D8-272B-469D-B173-71AE5D57BC77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.UserManagement", "Shopipy.UserManagement\Shopipy.UserManagement.csproj", "{AE18BA20-80F0-4941-8064-E1DF92D15894}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.UserManagement", "Shopipy.UserManagement\Shopipy.UserManagement.csproj", "{AE18BA20-80F0-4941-8064-E1DF92D15894}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{399E5849-C540-4F9E-A191-CFA8A0F435A4}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Persistence", "Shopipy.Persistence\Shopipy.Persistence.csproj", "{FFE4FD5C-215C-43DA-8402-BA0F8572E68C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Persistence", "Shopipy.Persistence\Shopipy.Persistence.csproj", "{FFE4FD5C-215C-43DA-8402-BA0F8572E68C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.BusinessManagement", "Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj", "{28E09A15-E90B-43E9-9488-459F5912A8D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.BusinessManagement", "Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj", "{28E09A15-E90B-43E9-9488-459F5912A8D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.ServiceManagement", "Shopipy.ServiceManagement\Shopipy.ServiceManagement.csproj", "{32707215-4A32-4A49-B2AE-5AEAAD477E98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ServiceManagement", "Shopipy.ServiceManagement\Shopipy.ServiceManagement.csproj", "{32707215-4A32-4A49-B2AE-5AEAAD477E98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.CategoryManagement", "Shopipy.CategoryManagement\Shopipy.CategoryManagement.csproj", "{40C61A63-0167-43A5-97D5-52A6D18A679C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.CategoryManagement", "Shopipy.CategoryManagement\Shopipy.CategoryManagement.csproj", "{40C61A63-0167-43A5-97D5-52A6D18A679C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.Shared", "Shopipy.Shared\Shopipy.Shared.csproj", "{A6A38CD9-F5F7-4015-805C-D5292424ABDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Shared", "Shopipy.Shared\Shopipy.Shared.csproj", "{A6A38CD9-F5F7-4015-805C-D5292424ABDD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ProductManagement", "Shopipy.ProductManagement\Shopipy.ProductManagement.csproj", "{AC4EB225-384E-4416-96AB-230DCC9012FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,5 +82,12 @@ Global
 		{A6A38CD9-F5F7-4015-805C-D5292424ABDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6A38CD9-F5F7-4015-805C-D5292424ABDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6A38CD9-F5F7-4015-805C-D5292424ABDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

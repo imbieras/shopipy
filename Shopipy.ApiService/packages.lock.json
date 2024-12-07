@@ -918,6 +918,14 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.11, )"
         }
       },
+      "shopipy.productmanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
+        }
+      },
       "shopipy.servicedefaults": {
         "type": "Project",
         "dependencies": {
