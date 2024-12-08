@@ -5,16 +5,15 @@ using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
 using Shopipy.Shared.Services;
 
-
 namespace Shopipy.ServiceManagement.Services;
 
 [Authorize]
 [ApiController]
-[Route("[controller]/{businessId}")]
+[Route("businesses/{businessId}/appointments")]
 public class AppointmentController(IAppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
     
-    [HttpGet("employees/available")]
+    [HttpGet("available-employees")]
     public async Task<IActionResult> GetAvailableEmployees(int businessId, [FromQuery] int serviceId, [FromQuery] DateTime time)
     {
         try
@@ -40,7 +39,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         }
     }
     
-    [HttpGet("employees/{employeeId}/appointments")]
+    [HttpGet("employees/{employeeId}")]
     public async Task<IActionResult> GetAppointmentsOfEmployee(
         int businessId,
         Guid employeeId,
@@ -66,7 +65,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(result);
     }
     
-    [HttpGet("employees/{employeeId}/slots/{serviceId}")]
+    [HttpGet("employees/{employeeId}/services/{serviceId}/slots")]
     public async Task<IActionResult> GetAvailableTimeSlots(
         int businessId, 
         Guid employeeId, 
@@ -105,10 +104,10 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDtos);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetAppointment(int businessId, int id)
+    [HttpGet("{appointmentId}")]
+    public async Task<IActionResult> GetAppointment(int businessId, int appointmentId)
     {
-        var appointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var appointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, appointmentId);
         if (appointment == null) return NotFound();
 
         var responseDto = mapper.Map<AppointmentResponseDto>(appointment);
@@ -138,10 +137,10 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAppointment(int businessId, int id, AppointmentRequestDto request)
+    [HttpPut("{appointmentId}")]
+    public async Task<IActionResult> UpdateAppointment(int businessId, int appointmentId, AppointmentRequestDto request)
     {
-        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, appointmentId);
         if (existingAppointment == null) return NotFound();
 
         mapper.Map(request, existingAppointment);
@@ -152,13 +151,13 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDto);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAppointment(int businessId, int id)
+    [HttpDelete("{appointmentId}")]
+    public async Task<IActionResult> DeleteAppointment(int businessId, int appointmentId)
     {
-        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, appointmentId);
         if (existingAppointment == null) return NotFound();
 
-        var success = await appointmentService.DeleteAppointmentAsync(id);
+        var success = await appointmentService.DeleteAppointmentAsync(appointmentId);
         if (!success) return BadRequest("Failed to delete appointment.");
 
         return NoContent();

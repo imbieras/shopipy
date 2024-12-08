@@ -17,7 +17,7 @@ public class UserService(IHttpClientFactory httpClientFactory)
 
         try
         {
-            _currentUser = await _httpClient.GetFromJsonAsync<UserResponseDto>($"/Users/{userId}", new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+            _currentUser = await _httpClient.GetFromJsonAsync<UserResponseDto>($"/users/{userId}", new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
         }
         catch (Exception)
         {

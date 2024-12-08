@@ -9,7 +9,7 @@ using Shopipy.Shared.Services;
 namespace Shopipy.BusinessManagement.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("businesses")]
 [Authorize(Policy = AuthorizationPolicies.RequireSuperAdmin)]
 public class BusinessController(IBusinessService businessService, IMapper mapper) : ControllerBase
 {
@@ -21,10 +21,10 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
         return Ok(responseDtos);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetBusiness(int id)
+    [HttpGet("{businessId}")]
+    public async Task<IActionResult> GetBusiness(int businessId)
     {
-        var business = await businessService.GetBusinessByIdAsync(id);
+        var business = await businessService.GetBusinessByIdAsync(businessId);
         if (business == null) return NotFound();
 
         var responseDto = mapper.Map<BusinessResponseDto>(business);
@@ -39,10 +39,10 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
         return CreatedAtAction(nameof(GetBusiness), new { id = createdBusiness.BusinessId }, responseDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateBusiness(int id, BusinessRequestDto request)
+    [HttpPut("{businessId}")]
+    public async Task<IActionResult> UpdateBusiness(int businessId, BusinessRequestDto request)
     {
-        var existingBusiness = await businessService.GetBusinessByIdAsync(id);
+        var existingBusiness = await businessService.GetBusinessByIdAsync(businessId);
         if (existingBusiness == null) return NotFound();
 
         mapper.Map(request, existingBusiness); 
@@ -54,10 +54,10 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
         return Ok(responseDto);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteBusiness(int id)
+    [HttpDelete("{businessId}")]
+    public async Task<IActionResult> DeleteBusiness(int businessId)
     {
-        var success = await businessService.DeleteBusinessAsync(id);
+        var success = await businessService.DeleteBusinessAsync(businessId);
         if (!success) return NotFound();
         return NoContent();
     }
