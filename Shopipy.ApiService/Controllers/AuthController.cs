@@ -7,7 +7,7 @@ using Shopipy.Persistence.Models;
 namespace Shopipy.ApiService.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("auth/")]
 public class AuthController(UserManager<User> userManager, SignInManager<User> signInManager, AuthService authService)
     : ControllerBase
 {

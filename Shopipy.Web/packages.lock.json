@@ -941,6 +941,7 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.11, )",
           "Shopipy.BusinessManagement": "[1.0.0, )",
           "Shopipy.CategoryManagement": "[1.0.0, )",
+          "Shopipy.DiscountManagement": "[1.0.0, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.ProductManagement": "[1.0.0, )",
           "Shopipy.ServiceDefaults": "[1.0.0, )",
@@ -961,6 +962,14 @@
         }
       },
       "shopipy.categorymanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
+        }
+      },
+      "shopipy.discountmanagement": {
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[13.0.1, )",
