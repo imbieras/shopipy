@@ -4,9 +4,9 @@ using Shopipy.TaxManagement.DTOs;
 
 namespace Shopipy.TaxManagement.Mappings;
 
-public class TaxRateProfile : Profile
+public class TaxRateMappingProfile : Profile
 {
-    public TaxRateProfile()
+    public TaxRateMappingProfile()
     {
         CreateMap<TaxRate, TaxRateResponseDto>();
         CreateMap<TaxRateRequestDto, TaxRate>()
