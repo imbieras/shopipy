@@ -55,6 +55,7 @@ public class TaxManagementController(ITaxService taxService, IMapper mapper) : C
         if (existingTaxRate == null) return NotFound();
 
         mapper.Map(request, existingTaxRate);
+        existingTaxRate.BusinessId = businessId;
         var updatedTaxRate = await taxService.UpdateTaxRateAsync(existingTaxRate);
         var responseDto = mapper.Map<TaxRateResponseDto>(updatedTaxRate);
 
