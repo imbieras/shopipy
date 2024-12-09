@@ -48,20 +48,20 @@ public class TaxManagementController(ITaxService taxService, IMapper mapper) : C
         return CreatedAtAction(nameof(GetTaxRate), new { businessId, id = createdTaxRate.TaxRateId }, responseDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTaxRate(int businessId, int id, TaxRateRequestDto request)
+    [HttpPut("{taxId}")]
+    public async Task<IActionResult> UpdateTaxRate(
+        int businessId,
+        int taxId,
+        [FromBody] DateTime? effectiveTo)
     {
-        var existingTaxRate = await taxService.GetTaxRateByIdAndBusinessAsync(id, businessId); 
+        var existingTaxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId);
         if (existingTaxRate == null) return NotFound();
 
-        mapper.Map(request, existingTaxRate);
-        existingTaxRate.BusinessId = businessId;
-        var updatedTaxRate = await taxService.UpdateTaxRateAsync(existingTaxRate);
-        var responseDto = mapper.Map<TaxRateResponseDto>(updatedTaxRate);
+        var updatedTaxRate = await taxService.UpdateTaxRateAsync(existingTaxRate, effectiveTo);
 
+        var responseDto = mapper.Map<TaxRateResponseDto>(updatedTaxRate);
         return Ok(responseDto);
     }
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTaxRate(int businessId, int id)
     {

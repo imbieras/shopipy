@@ -1,28 +1,21 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.TaxManagement.Services
 {
     public class TaxService(IGenericRepository<TaxRate> taxRateRepository) : ITaxService
     {
-        // Get all tax rates
         public async Task<IEnumerable<TaxRate>> GetAllTaxRatesAsync()
         {
             return await taxRateRepository.GetAllAsync();
         }
 
-        // Get tax rate by ID
         public async Task<TaxRate> GetTaxRateByIdAsync(int id)
         {
             return await taxRateRepository.GetByIdAsync(id);
         }
 
-        // Add a new tax rate
         public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId, int? top = null, int? skip = null)
         {
             if (skip.HasValue || top.HasValue)
@@ -50,16 +43,18 @@ namespace Shopipy.TaxManagement.Services
             return await taxRateRepository.AddAsync(taxRate);
         }
 
-        // Update an existing tax rate
-        public async Task<TaxRate> UpdateTaxRateAsync(TaxRate taxRate)
+        public async Task<TaxRate> UpdateTaxRateAsync(TaxRate taxRate, DateTime? effectiveTo)
         {
+            taxRate.EffectiveTo = effectiveTo;
             return await taxRateRepository.UpdateAsync(taxRate);
         }
 
-        // Delete a tax rate
         public async Task<bool> DeleteTaxRateAsync(int id)
         {
-            return await taxRateRepository.DeleteAsync(id);
+            var taxRate = await taxRateRepository.GetByIdAsync(id);
+            taxRate.EffectiveTo = DateTime.UtcNow;
+            await taxRateRepository.UpdateAsync(taxRate);
+            return true;
         }
     }
 }
