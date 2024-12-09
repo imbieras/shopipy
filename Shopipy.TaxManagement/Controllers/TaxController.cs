@@ -9,7 +9,7 @@ using Shopipy.TaxManagement.DTOs;
 
 namespace Shopipy.TaxManagement.Controllers;
 [ApiController]
-[Route("Tax/{businessId}")]
+[Route("/businesses/{businessId}/taxrates/")]
 [Tags("Tax")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 public class TaxManagementController(ITaxService taxService, IMapper mapper) : ControllerBase
@@ -27,10 +27,10 @@ public class TaxManagementController(ITaxService taxService, IMapper mapper) : C
         });
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetTaxRate(int businessId, int id)
+    [HttpGet("{taxId}")]
+    public async Task<IActionResult> GetTaxRate(int businessId, int taxId)
     {
-        var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(id, businessId); 
+        var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId); 
         if (taxRate == null) return NotFound();
 
         var responseDto = mapper.Map<TaxRateResponseDto>(taxRate);
@@ -62,13 +62,13 @@ public class TaxManagementController(ITaxService taxService, IMapper mapper) : C
         var responseDto = mapper.Map<TaxRateResponseDto>(updatedTaxRate);
         return Ok(responseDto);
     }
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTaxRate(int businessId, int id)
+    [HttpDelete("{taxId}")]
+    public async Task<IActionResult> DeleteTaxRate(int businessId, int taxId)
     {
-        var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(id, businessId); 
+        var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId); 
         if (taxRate == null) return NotFound();
 
-        var success = await taxService.DeleteTaxRateAsync(id);
+        var success = await taxService.DeleteTaxRateAsync(taxId);
         if (!success) return NotFound();
 
         return NoContent();
