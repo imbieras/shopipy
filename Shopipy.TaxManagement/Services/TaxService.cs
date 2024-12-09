@@ -23,11 +23,22 @@ namespace Shopipy.TaxManagement.Services
         }
 
         // Add a new tax rate
-        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId)
+        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId, int? top = null, int? skip = null)
         {
+            if (skip.HasValue || top.HasValue)
+            {
+                return await taxRateRepository.GetAllByConditionWithPaginationAsync(
+                    tr => tr.BusinessId == businessId,
+                    skip ?? 0,
+                    top ?? int.MaxValue
+                );
+            }
             return await taxRateRepository.GetAllByConditionAsync(tr => tr.BusinessId == businessId);
         }
-
+        public async Task<int> GetTaxRateCountAsync(int businessId)
+        {
+            return await taxRateRepository.GetCountByConditionAsync(tr => tr.BusinessId == businessId);
+        }
         public async Task<TaxRate?> GetTaxRateByIdAndBusinessAsync(int taxRateId, int businessId)
         {
             return await taxRateRepository.GetByConditionAsync(tr => tr.TaxRateId == taxRateId && tr.BusinessId == businessId);
