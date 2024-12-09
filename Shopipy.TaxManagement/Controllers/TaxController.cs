@@ -45,7 +45,7 @@ public class TaxManagementController(ITaxService taxService, IMapper mapper) : C
         var createdTaxRate = await taxService.AddTaxRateAsync(taxRate);
         var responseDto = mapper.Map<TaxRateResponseDto>(createdTaxRate);
 
-        return CreatedAtAction(nameof(GetTaxRate), new { businessId, id = createdTaxRate.TaxRateId }, responseDto);
+        return CreatedAtAction(nameof(GetTaxRate), new { businessId, taxId = createdTaxRate.TaxRateId }, responseDto);
     }
 
     [HttpPut("{taxId}")]

@@ -12,6 +12,7 @@ public class TaxRateMappingProfile : Profile
         CreateMap<TaxRateRequestDto, TaxRate>()
             .ForMember(dest => dest.TaxRateId, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.BusinessId, opt => opt.Ignore());
     }
 }
