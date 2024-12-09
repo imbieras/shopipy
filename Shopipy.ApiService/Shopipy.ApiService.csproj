@@ -20,6 +20,7 @@
         <ProjectReference Include="..\Shopipy.CategoryManagement\Shopipy.CategoryManagement.csproj" />
         <ProjectReference Include="..\Shopipy.DiscountManagement\Shopipy.DiscountManagement.csproj" />
         <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
+        <ProjectReference Include="..\Shopipy.TaxManagement\Shopipy.TaxManagement.csproj" />
     </ItemGroup>
 
     <ItemGroup>

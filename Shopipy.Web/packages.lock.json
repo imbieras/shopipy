@@ -947,6 +947,7 @@
           "Shopipy.ServiceDefaults": "[1.0.0, )",
           "Shopipy.ServiceManagement": "[1.0.0, )",
           "Shopipy.Shared": "[1.0.0, )",
+          "Shopipy.TaxManagement": "[1.0.0, )",
           "Shopipy.UserManagement": "[1.0.0, )",
           "Swashbuckle.AspNetCore": "[6.9.0, )",
           "System.IdentityModel.Tokens.Jwt": "[8.2.1, )",
@@ -1017,6 +1018,14 @@
         "type": "Project",
         "dependencies": {
           "Shopipy.Persistence": "[1.0.0, )"
+        }
+      },
+      "shopipy.taxmanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
         }
       },
       "shopipy.usermanagement": {
