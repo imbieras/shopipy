@@ -1,17 +1,18 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.CategoryManagement.DTOs;
-using Shopipy.CategoryManagement.Services;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.CategoryManagement.Controllers;
 
+[Authorize]
 [ApiController]
-[Route("[controller]/{businessId}")]
+[Route("businesses/{businessId}/categories")]
 public class CategoryController(ICategoryService categoryService, IMapper mapper) : ControllerBase
 {
-    [HttpGet("categories")]
+    [HttpGet]
     public async Task<IActionResult> GetAllCategories(int businessId)
     {
         var categories = await categoryService.GetAllCategoriesInBusinessAsync(businessId);
@@ -19,17 +20,17 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
         return Ok(responseDtos);
     }
 
-    [HttpGet("categories/{id}")]
-    public async Task<IActionResult> GetCategoryById(int businessId, int id)
+    [HttpGet("{categoryId}")]
+    public async Task<IActionResult> GetCategoryById(int businessId, int categoryId)
     {
-        var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);
         if (category == null) return NotFound();
 
         var responseDto = mapper.Map<CategoryResponseDto>(category);
         return Ok(responseDto);
     }
 
-    [HttpPost("categories")]
+    [HttpPost]
     public async Task<IActionResult> CreateCategory(int businessId, CategoryRequestDto request)
     {
         var category = mapper.Map<Category>(request);
@@ -44,10 +45,10 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
             responseDto);
     }
 
-    [HttpPut("categories/{id}")]
-    public async Task<IActionResult> UpdateCategory(int businessId, int id, CategoryRequestDto request)
+    [HttpPut("{categoryId}")]
+    public async Task<IActionResult> UpdateCategory(int businessId, int categoryId, CategoryRequestDto request)
     {
-        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);
         if (existingCategory == null) return NotFound();
 
         mapper.Map(request, existingCategory);
@@ -57,13 +58,13 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
         return Ok(responseDto);
     }
 
-    [HttpDelete("categories/{id}")]
-    public async Task<IActionResult> DeleteCategory(int businessId, int id)
+    [HttpDelete("{categoryId}")]
+    public async Task<IActionResult> DeleteCategory(int businessId, int categoryId)
     {
-        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, id);
+        var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);
         if (existingCategory == null) return NotFound();
 
-        var success = await categoryService.DeleteCategoryAsync(id);
+        var success = await categoryService.DeleteCategoryAsync(categoryId);
         if (!success) return BadRequest("Failed to delete category.");
         return NoContent();
     }

@@ -5,13 +5,17 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <NoDefaultLaunchSettingsFile>True</NoDefaultLaunchSettingsFile>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
+        <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj"/>
+        <ProjectReference Include="..\Shopipy.Shared\Shopipy.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="13.0.1"/>
     </ItemGroup>
 
 

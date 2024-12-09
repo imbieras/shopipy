@@ -20,4 +20,5 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<ProductVariation> ProductVariations { get; set; }
     public DbSet<TaxRate> TaxRates { get; set; }
+    public DbSet<Discount> Discounts { get; set; }
 }

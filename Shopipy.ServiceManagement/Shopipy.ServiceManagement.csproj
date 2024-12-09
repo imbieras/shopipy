@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="13.0.1" />
+        <PackageReference Include="Twilio.AspNet.Core" Version="8.1.1" />
     </ItemGroup>
 
 
@@ -23,5 +24,8 @@
     <ItemGroup>
       <None Remove="Properties\launchSettings.json" />
     </ItemGroup>
+
+
+
 
 </Project>

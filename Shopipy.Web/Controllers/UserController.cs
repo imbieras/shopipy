@@ -31,7 +31,7 @@ public class UserController(UserService userService, ILogger<UserController> log
         }
 
         var client = httpClientFactory.CreateClient("Shopipy.ApiService");
-        var response = await client.PostAsJsonAsync("/Auth/login", loginRequest);
+        var response = await client.PostAsJsonAsync("/auth/login", loginRequest);
 
         var responseContent = await response.Content.ReadAsStringAsync();
 

@@ -18,6 +18,7 @@
         <ProjectReference Include="..\Shopipy.BusinessManagement\Shopipy.BusinessManagement.csproj" />
         <ProjectReference Include="..\Shopipy.ServiceManagement\Shopipy.ServiceManagement.csproj" />
         <ProjectReference Include="..\Shopipy.CategoryManagement\Shopipy.CategoryManagement.csproj" />
+        <ProjectReference Include="..\Shopipy.DiscountManagement\Shopipy.DiscountManagement.csproj" />
         <ProjectReference Include="..\Shopipy.Persistence\Shopipy.Persistence.csproj" />
         <ProjectReference Include="..\Shopipy.TaxManagement\Shopipy.TaxManagement.csproj" />
     </ItemGroup>
@@ -31,6 +32,7 @@
       </PackageReference>
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
+      <PackageReference Include="Twilio.AspNet.Core" Version="8.1.1" />
     </ItemGroup>
 
     <ItemGroup>

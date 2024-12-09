@@ -6,12 +6,11 @@ using Shopipy.Persistence.Models;
 using Shopipy.Shared;
 using Shopipy.Shared.Services;
 using Shopipy.Shared.DTOs;
-using Shopipy.ProductManagement.Services;
 
 namespace Shopipy.ProductManagement.Controllers;
 
 [Authorize]
-[Route("[controller]/{businessId}/products/{productId}/variations")]
+[Route("businesses/{businessId}/products/{productId}/variations")]
 [ApiController]
 public class ProductVariationController(IProductVariationService _variationService, IMapper _mapper) : ControllerBase
 {

@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ProductManagement",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.TaxManagement", "Shopipy.TaxManagement\Shopipy.TaxManagement.csproj", "{94F47028-DCF8-4E30-A582-BD369CE222A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.DiscountManagement", "Shopipy.DiscountManagement\Shopipy.DiscountManagement.csproj", "{94603F68-56B8-4427-AB55-D2E16C246F97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94603F68-56B8-4427-AB55-D2E16C246F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94603F68-56B8-4427-AB55-D2E16C246F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94603F68-56B8-4427-AB55-D2E16C246F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94603F68-56B8-4427-AB55-D2E16C246F97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,7 +11,7 @@ using Shopipy.UserManagement.Services;
 namespace Shopipy.UserManagement.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("users")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 public class UsersController(UserManager<User> userManager, IMapper mapper, UserService userService) : ControllerBase
 {

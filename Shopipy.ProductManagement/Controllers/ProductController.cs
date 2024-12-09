@@ -10,7 +10,7 @@ using Shopipy.Shared.Services;
 namespace Shopipy.ProductManagement.Controllers;
 
 [Authorize]
-[Route("Product/{businessId}/products")]
+[Route("businesses/{businessId}/products")]
 [ApiController]
 public class ProductController(IProductService _productService, IMapper _mapper) : ControllerBase
 {
