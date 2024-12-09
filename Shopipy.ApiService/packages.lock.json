@@ -1131,6 +1131,14 @@
           "Shopipy.Shared": "[1.0.0, )"
         }
       },
+      "shopipy.discountmanagement": {
+        "type": "Project",
+        "dependencies": {
+          "AutoMapper": "[13.0.1, )",
+          "Shopipy.Persistence": "[1.0.0, )",
+          "Shopipy.Shared": "[1.0.0, )"
+        }
+      },
       "shopipy.persistence": {
         "type": "Project",
         "dependencies": {

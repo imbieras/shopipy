@@ -10,7 +10,7 @@ namespace Shopipy.ServiceManagement.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]/{businessId}")]
+[Route("businesses/{businessId}/services")]
 public class ServiceController(
     IServiceManagementService serviceManagementService, 
     ICategoryService categoryService, 
@@ -34,10 +34,10 @@ public class ServiceController(
         return Ok(mapper.Map<IEnumerable<ServiceResponseDto>>(allServices));
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetService(int businessId, int id)
+    [HttpGet("{serviceId}")]
+    public async Task<IActionResult> GetService(int businessId, int serviceId)
     {
-        var service = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
+        var service = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);
         if (service == null) return NotFound();
         
         var responseDto = mapper.Map<ServiceResponseDto>(service);
@@ -63,10 +63,10 @@ public class ServiceController(
         return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, id = createdService.ServiceId }, responseDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateService(int businessId, int id, ServiceRequestDto request)
+    [HttpPut("{serviceId}")]
+    public async Task<IActionResult> UpdateService(int businessId, int serviceId, ServiceRequestDto request)
     {
-        var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
+        var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);
         if (existingService == null) return NotFound();
 
         mapper.Map(request, existingService);
@@ -78,13 +78,13 @@ public class ServiceController(
         return Ok(responseDto);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteService(int businessId, int id)
+    [HttpDelete("{serviceId}")]
+    public async Task<IActionResult> DeleteService(int businessId, int serviceId)
     {
-        var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, id);
+        var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);
         if (existingService == null) return NotFound();
 
-        var success = await serviceManagementService.DeleteService(id);
+        var success = await serviceManagementService.DeleteService(serviceId);
         if (!success) return BadRequest("Failed to delete the service.");
 
         return NoContent();
