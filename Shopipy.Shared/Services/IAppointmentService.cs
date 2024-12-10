@@ -12,7 +12,7 @@ public interface IAppointmentService
     Task<IEnumerable<Appointment>> GetAppointmentsOfEmployee(int businessId, Guid employeeId, DateTime time, bool week);
     Task<Appointment> GetAppointmentById(int id);
     Task<Appointment> GetAppointmentByIdInBusinessAsync(int businessId, int id);
-    Task<Appointment> CreateAppointmentAsync(Appointment appointment);
-    Task<Appointment> UpdateAppointmentAsync(Appointment appointment);
+    Task<Appointment> CreateAppointmentAsync(Appointment appointment, bool smsNotification);
+    Task<Appointment> UpdateAppointmentAsync(Appointment appointment, bool smsNotification);
     Task<bool> DeleteAppointmentAsync(int id);
 }

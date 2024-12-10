@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
 using Shopipy.Shared.Services;
@@ -9,6 +10,7 @@ namespace Shopipy.ServiceManagement.Services;
 
 [Authorize]
 [ApiController]
+[EnableRateLimiting("fixed")]
 [Route("businesses/{businessId}/appointments")]
 public class AppointmentController(IAppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
@@ -114,7 +116,8 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
 
         return Ok(responseDto);
     }
-
+    
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
@@ -123,20 +126,26 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
 
         try
         {
-            var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment);
-            
+            var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment, request.SendSmsNotification);
             var responseDto = mapper.Map<AppointmentResponseDto>(createdAppointment);
 
-            return CreatedAtAction(nameof(GetAppointment), 
-                new { businessId = businessId, id = createdAppointment.AppointmentId }, 
-                responseDto);
+            return CreatedAtAction(
+                nameof(GetAppointment), 
+                new { businessId = businessId, appointmentId = createdAppointment.AppointmentId },
+                responseDto
+            );
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex) when (ex.Message.Contains("past"))
         {
-            return BadRequest("Appointment can't overlap with an existing appointment");
+            return BadRequest("Cannot create appointments in the past.");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already booked"))
+        {
+            return BadRequest("This time slot is already booked. Please choose another time.");
         }
     }
 
+    [AllowAnonymous]
     [HttpPut("{appointmentId}")]
     public async Task<IActionResult> UpdateAppointment(int businessId, int appointmentId, AppointmentRequestDto request)
     {
@@ -144,13 +153,14 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         if (existingAppointment == null) return NotFound();
 
         mapper.Map(request, existingAppointment);
-        var updatedAppointment = await appointmentService.UpdateAppointmentAsync(existingAppointment);
+        var updatedAppointment = await appointmentService.UpdateAppointmentAsync(existingAppointment, request.SendSmsNotification);
 
         var responseDto = mapper.Map<AppointmentResponseDto>(updatedAppointment);
 
         return Ok(responseDto);
     }
 
+    [AllowAnonymous]
     [HttpDelete("{appointmentId}")]
     public async Task<IActionResult> DeleteAppointment(int businessId, int appointmentId)
     {

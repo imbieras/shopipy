@@ -156,11 +156,11 @@ public class AppointmentService(
     {
         return await appointmentRepository.GetByConditionAsync(a => a.BusinessId == businessId && a.AppointmentId == id);
     }
-
-    public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
+    
+    public async Task<Appointment> CreateAppointmentAsync(Appointment appointment, bool smsNotification)
     {
         var service = await serviceRepository.GetByIdAsync(appointment.ServiceId);
-        
+    
         if (service == null)
         {
             throw new ArgumentException("Service not found");
@@ -168,32 +168,84 @@ public class AppointmentService(
 
         appointment.EndTime = appointment.StartTime.AddMinutes(service.ServiceDuration);
 
-        var overlappingAppointments = await appointmentRepository.GetAllByConditionAsync(a =>
-            a.BusinessId == appointment.BusinessId &&
-            a.EmployeeId == appointment.EmployeeId &&
-            a.StartTime < appointment.EndTime && 
-            appointment.StartTime < a.EndTime
-        );
-        
-        if (overlappingAppointments.Any())
-        {
-            throw new InvalidOperationException("This time slot is already booked. Please choose another time.");
-        }
-        
+        await ValidateAppointmentOverlap(appointment);
+    
         var createdAppointment = await appointmentRepository.AddAsync(appointment);
-
-        await smsService.SendAppointmentConfirmationAsync(createdAppointment, service.ServiceName);
+        
+        if (smsNotification)
+        {
+            var message = $"Your appointment for {service.ServiceName} has been CREATED for {createdAppointment.StartTime:g}. " +
+                          $"Thank you for booking with us!";
+            await smsService.SendSMSAsync(createdAppointment.CustomerPhone, message);   
+        }
 
         return createdAppointment;
-    }
-    
-    public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
+}
+
+    public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment, bool smsNotification)
     {
-        return await appointmentRepository.UpdateAsync(appointment);
+        var service = await serviceRepository.GetByIdAsync(appointment.ServiceId);
+    
+        if (service == null)
+        {
+            throw new ArgumentException("Service not found");
+        }
+
+        appointment.EndTime = appointment.StartTime.AddMinutes(service.ServiceDuration);
+
+        await ValidateAppointmentOverlap(appointment, appointment.AppointmentId);
+    
+        var updatedAppointment = await appointmentRepository.UpdateAsync(appointment);
+
+        if (smsNotification)
+        {
+            var message = $"Your appointment for {service.ServiceName} has been UPDATED for {updatedAppointment.StartTime:g}. " +
+                          $"Thank you for booking with us!";
+            await smsService.SendSMSAsync(updatedAppointment.CustomerPhone, message);   
+        }
+
+        return updatedAppointment;
     }
 
     public async Task<bool> DeleteAppointmentAsync(int id)
     {
+        var deletedAppointment = await appointmentRepository.GetByIdAsync(id);
+        var service = await serviceRepository.GetByIdAsync(deletedAppointment.ServiceId);
+        
+        if (service == null)
+        {
+            throw new ArgumentException("Service not found");
+        }
+
+        var message = $"Your appointment for {service.ServiceName} has been CANCELLED.";
+        
+        //await smsService.SendSMSAsync(deletedAppointment.CustomerPhone, message);
         return await appointmentRepository.DeleteAsync(id);
+    }
+    
+    private async Task ValidateAppointmentOverlap(Appointment appointment, int? excludeAppointmentId = null)
+    {
+        if (appointment.StartTime < DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("Cannot create appointments in the past.");
+        }
+
+        var overlappingAppointments = await appointmentRepository.GetAllByConditionAsync(a =>
+            a.BusinessId == appointment.BusinessId &&
+            a.EmployeeId == appointment.EmployeeId &&
+            (
+                (a.StartTime <= appointment.StartTime && a.EndTime > appointment.StartTime) ||
+                (a.StartTime < appointment.EndTime && a.StartTime >= appointment.StartTime)
+            ));
+
+        if (excludeAppointmentId.HasValue)
+        {
+            overlappingAppointments = overlappingAppointments.Where(a => a.AppointmentId != excludeAppointmentId.Value);
+        }
+
+        if (overlappingAppointments.Any())
+        {
+            throw new InvalidOperationException("This time slot is already booked. Please choose another time.");
+        }
     }
 }
