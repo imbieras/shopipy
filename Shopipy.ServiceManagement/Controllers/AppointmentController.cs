@@ -8,7 +8,6 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
 
-[Authorize]
 [ApiController]
 [EnableRateLimiting("fixed")]
 [Route("businesses/{businessId}/appointments")]
@@ -117,7 +116,6 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         return Ok(responseDto);
     }
     
-    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
@@ -144,8 +142,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
             return BadRequest("This time slot is already booked. Please choose another time.");
         }
     }
-
-    [AllowAnonymous]
+    
     [HttpPut("{appointmentId}")]
     public async Task<IActionResult> UpdateAppointment(int businessId, int appointmentId, AppointmentRequestDto request)
     {
@@ -159,8 +156,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
 
         return Ok(responseDto);
     }
-
-    [AllowAnonymous]
+    
     [HttpDelete("{appointmentId}")]
     public async Task<IActionResult> DeleteAppointment(int businessId, int appointmentId, [FromQuery] bool smsNotification = false)
     {
