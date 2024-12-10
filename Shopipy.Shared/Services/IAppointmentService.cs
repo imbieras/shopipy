@@ -14,5 +14,5 @@ public interface IAppointmentService
     Task<Appointment> GetAppointmentByIdInBusinessAsync(int businessId, int id);
     Task<Appointment> CreateAppointmentAsync(Appointment appointment, bool smsNotification);
     Task<Appointment> UpdateAppointmentAsync(Appointment appointment, bool smsNotification);
-    Task<bool> DeleteAppointmentAsync(int id);
+    Task<bool> DeleteAppointmentAsync(int id, bool smsNotification);
 }

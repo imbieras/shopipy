@@ -162,12 +162,12 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
 
     [AllowAnonymous]
     [HttpDelete("{appointmentId}")]
-    public async Task<IActionResult> DeleteAppointment(int businessId, int appointmentId)
+    public async Task<IActionResult> DeleteAppointment(int businessId, int appointmentId, [FromQuery] bool smsNotification = false)
     {
         var existingAppointment = await appointmentService.GetAppointmentByIdInBusinessAsync(businessId, appointmentId);
         if (existingAppointment == null) return NotFound();
 
-        var success = await appointmentService.DeleteAppointmentAsync(appointmentId);
+        var success = await appointmentService.DeleteAppointmentAsync(appointmentId, smsNotification);
         if (!success) return BadRequest("Failed to delete appointment.");
 
         return NoContent();

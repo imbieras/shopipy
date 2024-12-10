@@ -207,7 +207,7 @@ public class AppointmentService(
         return updatedAppointment;
     }
 
-    public async Task<bool> DeleteAppointmentAsync(int id)
+    public async Task<bool> DeleteAppointmentAsync(int id, bool smsNotification)
     {
         var deletedAppointment = await appointmentRepository.GetByIdAsync(id);
         var service = await serviceRepository.GetByIdAsync(deletedAppointment.ServiceId);
@@ -217,9 +217,12 @@ public class AppointmentService(
             throw new ArgumentException("Service not found");
         }
 
-        var message = $"Your appointment for {service.ServiceName} has been CANCELLED.";
-        
-        //await smsService.SendSMSAsync(deletedAppointment.CustomerPhone, message);
+        if (smsNotification)
+        {
+            var message = $"Your appointment for {service.ServiceName} has been CANCELLED.";
+            await smsService.SendSMSAsync(deletedAppointment.CustomerPhone, message);            
+        }
+
         return await appointmentRepository.DeleteAsync(id);
     }
     
