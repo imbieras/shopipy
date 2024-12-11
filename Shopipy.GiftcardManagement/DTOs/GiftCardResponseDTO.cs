@@ -4,7 +4,6 @@ public class GiftCardResponseDTO
 {
     public int GiftCardId { get; set; }
     public int BusinessId { get; set; }
-    public int CategoryId { get; set; }
     public decimal AmountOriginal { get; set; }
     public decimal AmountLeft { get; set; }
     public required string GiftCardCode { get; set; }

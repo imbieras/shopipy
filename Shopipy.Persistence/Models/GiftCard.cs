@@ -11,9 +11,6 @@ public class GiftCard
     [ForeignKey("Business")]
     public required int BusinessId { get; set; }
 
-    [ForeignKey("Category")]
-    public required int CategoryId { get; set; }
-
     public required decimal AmountOriginal { get; set; }
 
     public required decimal AmountLeft { get; set; }
