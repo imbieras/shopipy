@@ -27,6 +27,8 @@ using Shopipy.ServiceManagement.Interfaces;
 using Shopipy.ServiceManagement.Services;
 using Shopipy.DiscountManagement;
 using Shopipy.DiscountManagement.Mappings;
+using Shopipy.GiftcardManagement;
+using Shopipy.GiftcardManagement.Mappings;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,7 +55,7 @@ else
 }
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
-    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile));
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile), typeof(GiftCardMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
@@ -61,6 +63,7 @@ builder.Services.AddServiceManagement();
 builder.Services.AddCategoryManagement();
 builder.Services.AddProductManagement();
 builder.Services.AddDiscountManagement();
+builder.Services.AddGiftCardManagement();
 
 builder.Services.AddControllers(options =>
 {
