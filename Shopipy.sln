@@ -32,9 +32,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Shared", "Shopipy.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ProductManagement", "Shopipy.ProductManagement\Shopipy.ProductManagement.csproj", "{AC4EB225-384E-4416-96AB-230DCC9012FD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.DiscountManagement", "Shopipy.DiscountManagement\Shopipy.DiscountManagement.csproj", "{94603F68-56B8-4427-AB55-D2E16C246F97}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.GiftCardManagement", "Shopipy.GiftcardManagement\Shopipy.GiftCardManagement.csproj", "{18C93194-D011-42AB-B991-EA0277F71381}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.TaxManagement", "Shopipy.TaxManagement\Shopipy.TaxManagement.csproj", "{94F47028-DCF8-4E30-A582-BD369CE222A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopipy.DiscountManagement", "Shopipy.DiscountManagement\Shopipy.DiscountManagement.csproj", "{94603F68-56B8-4427-AB55-D2E16C246F97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +92,10 @@ Global
 		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC4EB225-384E-4416-96AB-230DCC9012FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94F47028-DCF8-4E30-A582-BD369CE222A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{94603F68-56B8-4427-AB55-D2E16C246F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{94603F68-56B8-4427-AB55-D2E16C246F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94603F68-56B8-4427-AB55-D2E16C246F97}.Release|Any CPU.ActiveCfg = Release|Any CPU

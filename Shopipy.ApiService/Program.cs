@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -23,6 +25,8 @@ using Shopipy.ServiceManagement.Mappings;
 using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
 using Shopipy.ProductManagement;
+using Shopipy.TaxManagement;
+using Shopipy.TaxManagement.Mappings;
 using Shopipy.ServiceManagement.Interfaces;
 using Shopipy.ServiceManagement.Services;
 using Shopipy.DiscountManagement;
@@ -55,7 +59,8 @@ else
 }
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
-    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile), typeof(GiftCardMappingProfile));
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile), typeof(GiftCardMappingProfile), typeof(TaxRateMappingProfile));
+
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
@@ -64,6 +69,8 @@ builder.Services.AddCategoryManagement();
 builder.Services.AddProductManagement();
 builder.Services.AddDiscountManagement();
 builder.Services.AddGiftCardManagement();
+builder.Services.AddTaxManagement();
+
 
 builder.Services.AddControllers(options =>
 {
@@ -140,6 +147,18 @@ builder.Services.AddSingleton<ISMSService>(provider =>
         builder.Configuration["TwilioAuthToken"]!,
         builder.Configuration["TwilioPhoneNumber"]!
     ));
+
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+    });
+});
+
 
 var app = builder.Build();
 

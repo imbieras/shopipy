@@ -4,5 +4,5 @@ namespace Shopipy.ServiceManagement.Interfaces;
 
 public interface ISMSService
 {
-    Task SendAppointmentConfirmationAsync(Appointment appointment, string serviceName);
+    Task SendSMSAsync(string phoneNumber, string message);
 }
