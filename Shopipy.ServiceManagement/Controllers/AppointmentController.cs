@@ -164,7 +164,7 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
         if (existingAppointment == null) return NotFound();
 
         var success = await appointmentService.DeleteAppointmentAsync(appointmentId, smsNotification);
-        if (!success) return BadRequest("Failed to delete appointment with ID.");
+        if (!success) return BadRequest($"Failed to delete appointment with ID: {existingAppointment.AppointmentId}.");
 
         return NoContent();
     }
