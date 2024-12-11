@@ -174,7 +174,7 @@ public class AppointmentService(
         
         if (smsNotification)
         {
-            var message = $"Your appointment for {service.ServiceName} has been CREATED for {createdAppointment.StartTime:g}. " +
+            var message = $"Your appointment (ID: {createdAppointment.AppointmentId}) for {service.ServiceName} has been CREATED for {createdAppointment.StartTime:g}. " +
                           $"Thank you for booking with us!";
             await smsService.SendSMSAsync(createdAppointment.CustomerPhone, message);   
         }
@@ -199,7 +199,7 @@ public class AppointmentService(
 
         if (smsNotification)
         {
-            var message = $"Your appointment for {service.ServiceName} has been UPDATED for {updatedAppointment.StartTime:g}. " +
+            var message = $"Your appointment (ID : {updatedAppointment.AppointmentId}) for {service.ServiceName} has been UPDATED for {updatedAppointment.StartTime:g}. " +
                           $"Thank you for booking with us!";
             await smsService.SendSMSAsync(updatedAppointment.CustomerPhone, message);   
         }
@@ -219,7 +219,7 @@ public class AppointmentService(
 
         if (smsNotification)
         {
-            var message = $"Your appointment for {service.ServiceName} has been CANCELLED.";
+            var message = $"Your appointment (ID : {deletedAppointment.AppointmentId}) for {service.ServiceName} has been CANCELLED.";
             await smsService.SendSMSAsync(deletedAppointment.CustomerPhone, message);            
         }
 
