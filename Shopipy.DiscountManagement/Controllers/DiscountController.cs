@@ -10,6 +10,7 @@ namespace Shopipy.DiscountManagement.Controllers;
 
 [ApiController]
 [Route("businesses/{businessId}/discounts")]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 public class DiscountController(IDiscountService discountService, IMapper mapper) : ControllerBase
 {
