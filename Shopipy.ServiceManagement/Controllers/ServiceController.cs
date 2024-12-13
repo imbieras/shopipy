@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
 using Shopipy.ServiceManagement.Mappings;
+using Shopipy.Shared;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Controllers;
@@ -11,6 +12,7 @@ namespace Shopipy.ServiceManagement.Controllers;
 [Authorize]
 [ApiController]
 [Route("businesses/{businessId}/services")]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class ServiceController(
     IServiceManagementService serviceManagementService, 
     ICategoryService categoryService, 
