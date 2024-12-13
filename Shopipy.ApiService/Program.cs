@@ -16,7 +16,6 @@ using Shopipy.CategoryManagement;
 using Shopipy.CategoryManagement.Mappings;
 using Shopipy.ProductManagement.Mappings;
 using Shopipy.Persistence.Data;
-using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared;
@@ -164,8 +163,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
-
-app.UseMiddleware<BusinessExistsMiddleware>();
 
 app.MapDefaultEndpoints();
 
