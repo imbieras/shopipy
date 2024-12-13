@@ -107,7 +107,8 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
     private async Task ValidateAccessToUser(User user)
     {
         var currentUser = await currentUserService.GetCurrentUserAsync();
-        if (currentUser.Role != UserRole.SuperAdmin && user.BusinessId != currentUser.BusinessId)
+        if (currentUser.Role != UserRole.SuperAdmin && (user.BusinessId != currentUser.BusinessId ||
+                                                        (currentUser.Role != UserRole.BusinessOwner && currentUser.Id != user.Id)))
         {
             throw new UnauthorizedAccessException(
                 "No permission to use Business that current user is not the owner of");
