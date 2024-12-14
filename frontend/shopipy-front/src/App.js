@@ -1,16 +1,34 @@
 // App.js
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthLayout } from './components/layouts/AuthLayout';
 import LoginPage from "./components/auth/LoginPage";
+import { authService } from './components/auth/services/AuthService';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const handleLogin = async (email, password) => {
-    // Login logic
-    setIsAuthenticated(true)
-  }
+  useEffect(() => {
+    setIsAuthenticated(authService.isAuthenticated());
+  }, [])
+
+  const handleLogin = async (username, password) => {
+    try {
+        const response = await authService.login(username, password);
+        setIsAuthenticated(true);
+        console.log("Login successful:", response);
+        return response;
+    } catch (error) {
+        console.error("Login failed:", error);
+        setIsAuthenticated(false);
+        throw error;
+    }
+};
+
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+  } 
 
   return (
     <BrowserRouter>

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Button } from "./../ui/Button"
 import { Input } from "./../ui/Input"
 
-export default function LoginPage(onLogin) {
+export default function LoginPage({onLogin}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -10,12 +10,12 @@ export default function LoginPage(onLogin) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     try {
       await onLogin(username, password)
       // Reset form on success if needed
-      // setEmail("")
-      // setPassword("")
+      setUsername("");
+      setPassword("");
     } catch (error) {
       console.error("Login error:", error)
     } finally {
@@ -60,14 +60,6 @@ export default function LoginPage(onLogin) {
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
-      <div className="text-center text-sm">
-        <button
-          onClick={() => {/* handle forgot password */}}
-          className="text-primary hover:underline cursor-pointer"
-        >
-          Forgot password?
-        </button>
-      </div>
     </div>
   )
 }
