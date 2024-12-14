@@ -32,6 +32,8 @@ using Shopipy.ServiceManagement.Interfaces;
 using Shopipy.ServiceManagement.Services;
 using Shopipy.DiscountManagement;
 using Shopipy.DiscountManagement.Mappings;
+using Shopipy.OrderManagement;
+using Shopipy.OrderManagement.Mappings;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,7 +60,7 @@ else
 }
 
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(BusinessMappingProfile), typeof(ServiceMappingProfile), 
-    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile), typeof(TaxRateMappingProfile));
+    typeof(AppointmentMappingProfile), typeof(CategoryMappingProfile), typeof(ProductMappingProfile), typeof(DiscountMappingProfile), typeof(TaxRateMappingProfile), typeof(OrderMappingProfile));
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddBusinessManagement();
@@ -142,6 +144,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, RequireBusinessAccessRequir
 builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 builder.Services.AddShared();
 builder.Services.AddUserManagement();
+builder.Services.AddOrderManagement();
 
 builder.Services.AddSingleton<ISMSService>(provider => 
     new TwilioSMSService(

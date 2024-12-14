@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shopipy.Persistence.Data;
 
 #nullable disable
 
-namespace Shopipy.ApiService.Data.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241214170335_ProductQuantity nullable")]
+    partial class ProductQuantitynullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -382,12 +385,19 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
                     b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ProductQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ProductVariationId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ServiceId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("TaxRateId")
@@ -399,10 +409,6 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.HasKey("OrderItemId");
 
                     b.ToTable("OrderItems");
-
-                    b.HasDiscriminator().HasValue("OrderItem");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Shopipy.Persistence.Models.Product", b =>
@@ -647,32 +653,6 @@ namespace Shopipy.ApiService.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.ProductOrderItem", b =>
-                {
-                    b.HasBaseType("Shopipy.Persistence.Models.OrderItem");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ProductVariationId")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue("ProductOrderItem");
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.ServiceOrderItem", b =>
-                {
-                    b.HasBaseType("Shopipy.Persistence.Models.OrderItem");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue("ServiceOrderItem");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

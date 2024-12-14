@@ -7,7 +7,7 @@ namespace Shopipy.ServiceManagement.Services;
 public class ServiceManagementService(IGenericRepository<Service> serviceRepository) : IServiceManagementService
 {
     
-    public async Task<Service> GetServiceByIdInBusiness(int businessId ,int id)
+    public async Task<Service?> GetServiceByIdInBusiness(int businessId ,int id)
     {
         return await serviceRepository.GetByConditionAsync(s => s.BusinessId == businessId && s.ServiceId == id);
     }

@@ -23,5 +23,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<ProductOrderItem> ProductOrderItems { get; set; }
+    public DbSet<ServiceOrderItem> ServiceOrderItems { get; set; }
     public DbSet<OrderDiscount> OrderDiscounts { get; set; }
 }
