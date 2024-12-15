@@ -80,7 +80,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ArgumentExceptionFilter>();
 }).AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
 });
 
 builder.Services.AddEndpointsApiExplorer();
