@@ -29,12 +29,14 @@ public class OrderService(
             orderItem.OrderItemId = order.OrderId;
             await AddOrderItemAsync(orderItem, saveChanges: false);
         }
+
         await orderRepository.SaveChangesAsync();
         return order;
     }
 
-    private async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
+    public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
+        // TODO: check if there are order items with same product id and disallow
         if (orderItem is ProductOrderItem productOrderItem)
         {
             var product =
@@ -52,10 +54,11 @@ public class OrderService(
             productOrderItem.UnitPrice = product.BasePrice;
             if (productOrderItem.ProductVariationId is null)
             {
-                var item =  await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
+                var item = await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
                 if (saveChanges) await orderItemRepository.SaveChangesAsync();
                 return item;
             }
+
             var variation = await productVariationService.GetVariationByIdAsync(
                 productOrderItem.ProductVariationId.Value,
                 productOrderItem.ProductId, productOrderItem.BusinessId);
@@ -72,7 +75,7 @@ public class OrderService(
             }
 
             productOrderItem.UnitPrice += variation.PriceModifier;
-            var item2 =  await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
+            var item2 = await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
             if (saveChanges) await orderItemRepository.SaveChangesAsync();
             return item2;
         }
@@ -92,7 +95,7 @@ public class OrderService(
         }
 
         serviceOrderItem.UnitPrice = service.ServiceBasePrice;
-            
+
         var item3 = await orderItemRepository.AddWithoutSavingChangesAsync(serviceOrderItem);
         if (saveChanges) await orderItemRepository.SaveChangesAsync();
         return item3;
@@ -104,22 +107,30 @@ public class OrderService(
         {
             return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
         }
+
         return orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
     }
-    
+
     public Task<IEnumerable<Order>> GetOrdersAsync(int businessId)
     {
         return orderRepository.GetOrdersWithItemsAsync(businessId);
     }
-    
+
     public async Task<Order> CancelOrderAsync(Order order)
     {
         if (order.OrderStatus != OrderStatus.Open)
         {
             throw new ArgumentException($"Order with id {order.OrderId} is not open");
         }
+
         order.OrderStatus = OrderStatus.Cancelled;
         await orderRepository.UpdateAsync(order);
         return order;
+    }
+
+    public Task DeleteOrderItemAsync(int businessId, int orderId, int orderItemId)
+    {
+        return orderItemRepository.DeleteByConditionAsync(i =>
+            i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
     }
 }

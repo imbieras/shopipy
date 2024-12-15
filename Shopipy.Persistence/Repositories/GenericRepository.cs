@@ -74,6 +74,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         await _context.SaveChangesAsync();
         return true;
     }
+    
+    public async Task<bool> DeleteByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        var entity = _context.Set<T>().FirstOrDefault(predicate);
+        if (entity == null) return false;
+
+        _context.Set<T>().Remove(entity);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
     public Task SaveChangesAsync()
     {
