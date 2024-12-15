@@ -1,0 +1,46 @@
+import { create } from 'zustand';
+import axiosInstance from '../services/axios';
+
+const API_URL = 'https://localhost:7417';
+
+export const useUser = create((set, get) => ({
+  // State
+  id: null,
+  username: null,
+  email: null,
+  name: null,
+  role: null,
+  loggedIn: false,
+  fetched: false,
+  isLoading: false,
+  error: null,
+
+  fetchUser: async (userId) => {
+    if (!userId) return;
+    set({ isLoading: true });
+    set({id: userId})
+    try {
+      const response = await axiosInstance.get(API_URL + `/users/${userId}`);
+      console.log("Response: ", response);
+      set({
+        email: response.data.email,
+        name: response.data.name,
+        role: response.data.role,
+        fetched: true,
+        isLoading: false
+      });
+    } catch (error) {
+      set({
+        error: error.message,
+        isLoading: false
+      });
+      throw error;
+    }
+  },
+
+
+  // Getters
+  getUserId: () => get().id,
+  getUsername: () => get().username,
+  getDisplayName: () => get().displayName
+}));

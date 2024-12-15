@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Button } from "./../ui/Button"
-import { Input } from "./../ui/Input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function LoginPage({onLogin}) {
   const [username, setUsername] = useState("");

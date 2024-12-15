@@ -6,7 +6,9 @@ const TOKEN_COOKIE = 'auth_token';
 const COOKIE_OPTIONS = {
     expires: 7,
     secure: false,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    path: '/',
+    domain: 'localhost'
 };
 
 const authAxios = axios.create({
@@ -27,6 +29,7 @@ export const authService = {
             
             if (response.data?.token) {
                 Cookies.set(TOKEN_COOKIE, response.data.token, COOKIE_OPTIONS);
+
                 return response.data;
             }
             throw new Error('No token received');

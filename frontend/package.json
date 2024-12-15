@@ -1,9 +1,8 @@
 {
   "devDependencies": {
-    "web-vitals": "^4.2.4"
-  },
-  "dependencies": {
-    "axios": "^1.7.9",
-    "react-router-dom": "^7.0.2"
+    "@types/node": "^22.10.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16"
   }
 }
