@@ -41,24 +41,15 @@ public class ProductController(IProductService _productService, ICategoryService
         {
             var category = await categoryService.GetCategoryByIdAsync(categoryId.Value);
             if (category == null) return NotFound("Category does not exist");
-
-            var products = await _productService.GetAllProductsOfCategoryBusinessAsync(businessId, categoryId.Value, top, skip);
-            var count = await _productService.GetProductCountCategoryAsync(businessId, categoryId.Value);
-
-            return Ok(new PaginationResultDto<ProductResponseDTO>
-            {
-                Data = products.Select(_mapper.Map<ProductResponseDTO>),
-                Count = count
-            });
         }
 
-        var allProducts = await _productService.GetAllProductsOfBusinessAsync(businessId, top, skip);
-        var allCount = await _productService.GetProductCountAsync(businessId);
+        var products = await _productService.GetAllProductsAsync(businessId, categoryId, top, skip);
+        var count = await _productService.GetProductCountAsync(businessId, categoryId);
 
         return Ok(new PaginationResultDto<ProductResponseDTO>
         {
-            Data = allProducts.Select(_mapper.Map<ProductResponseDTO>),
-            Count = allCount
+            Data = products.Select(_mapper.Map<ProductResponseDTO>),
+            Count = count
         });
     }
 
