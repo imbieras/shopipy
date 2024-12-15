@@ -9,4 +9,5 @@ public class Order
     public decimal TotalTip { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ClosedAt { get; set; }
+    public IEnumerable<OrderItem>? OrderItems { get; set; }
 }

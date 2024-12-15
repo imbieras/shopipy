@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Shopipy.OrderManagement.DTOs;
-using Shopipy.Persistence.Models;
 
 namespace Shopipy.OrderManagement.Mappings;
 

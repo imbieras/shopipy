@@ -1,3 +1,4 @@
+using Shopipy.OrderManagement.Repositories;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared.Services;
@@ -7,7 +8,7 @@ namespace Shopipy.OrderManagement.Services;
 
 public class OrderService(
     UserService userService,
-    IGenericRepository<Order> orderRepository,
+    OrderRepository orderRepository,
     IGenericRepository<OrderItem> orderItemRepository,
     IProductService productService,
     IProductVariationService productVariationService,
@@ -32,7 +33,7 @@ public class OrderService(
         return order;
     }
 
-    public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
+    private async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
         if (orderItem is ProductOrderItem productOrderItem)
         {
@@ -95,5 +96,10 @@ public class OrderService(
         var item3 = await orderItemRepository.AddWithoutSavingChangesAsync(serviceOrderItem);
         if (saveChanges) await orderItemRepository.SaveChangesAsync();
         return item3;
+    }
+
+    public Task<Order?> GetOrderByIdAsync(int businessId, int orderId)
+    {
+        return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
     }
 }
