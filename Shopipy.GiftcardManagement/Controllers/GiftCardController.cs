@@ -9,9 +9,9 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.GiftCardManagement.Controllers;
 
-[Authorize]
 [Route("businesses/{businessId}/giftcards")]
 [ApiController]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class GiftCardController(IGiftCardService _giftCardService, IMapper _mapper) : ControllerBase
 {
     [HttpPost]
@@ -27,6 +27,7 @@ public class GiftCardController(IGiftCardService _giftCardService, IMapper _mapp
     }
 
     [HttpGet]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> GetAllGiftCards(int businessId, int? top = null, int? skip = null)
     {
         var giftCards = await _giftCardService.GetAllGiftCardsOfBusinessAsync(businessId, top, skip);
