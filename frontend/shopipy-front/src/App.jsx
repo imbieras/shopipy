@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import { AuthLayout } from './core/layouts/AuthLayout';
 import LoginPage from "./core/auth/LoginPage";
 import { authService } from './core/auth/services/AuthService';
-import Services from "./core/serviceManagement/Services";
+import Services from "./core/serviceManagement/ServiceManagement";
 import { useUser } from './hooks/useUser';
 import { jwtDecode } from 'jwt-decode';
 import Navbar from './core/ui/Navbar';
+import ServiceManagement from './core/serviceManagement/ServiceManagement';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -73,7 +74,7 @@ function App() {
             path="/services"
             element={
               isAuthenticated ? (
-                <Services onLogout={handleLogout} />
+                <ServiceManagement/>
               ) : (
                 <Navigate to="/" />
               )

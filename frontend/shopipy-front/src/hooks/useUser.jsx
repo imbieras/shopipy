@@ -10,6 +10,7 @@ export const useUser = create((set, get) => ({
   email: null,
   name: null,
   role: null,
+  businessId: 0,
   loggedIn: false,
   fetched: false,
   isLoading: false,
@@ -26,6 +27,7 @@ export const useUser = create((set, get) => ({
         email: response.data.email,
         name: response.data.name,
         role: response.data.role,
+        businessId: response.data.businessId,
         fetched: true,
         isLoading: false
       });
