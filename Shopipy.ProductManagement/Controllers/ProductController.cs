@@ -13,12 +13,18 @@ namespace Shopipy.ProductManagement.Controllers;
 [Route("businesses/{businessId}/products")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ProductController(IProductService _productService, IMapper _mapper) : ControllerBase
+public class ProductController(IProductService _productService, ICategoryService categoryService, IMapper _mapper) : ControllerBase
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> CreateProduct(ProductRequestDTO dto, int businessId)
     {
+        var categoryExists = await categoryService.GetCategoryByIdAsync(dto.CategoryId);
+        if (categoryExists == null)
+        {
+            return NotFound("Category does not exist");
+        }
+
         var product = _mapper.Map<Product>(dto);
 
         var createdProduct = await _productService.CreateProductAsync(product, businessId);
@@ -29,15 +35,30 @@ public class ProductController(IProductService _productService, IMapper _mapper)
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProducts(int businessId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
+    public async Task<IActionResult> GetAllProducts(int businessId, [FromQuery] int? top = null, [FromQuery] int? skip = null, [FromQuery] int? categoryId = null)
     {
-        var products = await _productService.GetAllProductsOfBusinessAsync(businessId, top, skip);
-        var count = await _productService.GetProductCountAsync(businessId);
+        if (categoryId.HasValue)
+        {
+            var category = await categoryService.GetCategoryByIdAsync(categoryId.Value);
+            if (category == null) return NotFound("Category does not exist");
+
+            var products = await _productService.GetAllProductsOfCategoryBusinessAsync(businessId, categoryId.Value, top, skip);
+            var count = await _productService.GetProductCountCategoryAsync(businessId, categoryId.Value);
+
+            return Ok(new PaginationResultDto<ProductResponseDTO>
+            {
+                Data = products.Select(_mapper.Map<ProductResponseDTO>),
+                Count = count
+            });
+        }
+
+        var allProducts = await _productService.GetAllProductsOfBusinessAsync(businessId, top, skip);
+        var allCount = await _productService.GetProductCountAsync(businessId);
 
         return Ok(new PaginationResultDto<ProductResponseDTO>
         {
-            Data = products.Select(_mapper.Map<ProductResponseDTO>),
-            Count = count
+            Data = allProducts.Select(_mapper.Map<ProductResponseDTO>),
+            Count = allCount
         });
     }
 
@@ -58,6 +79,12 @@ public class ProductController(IProductService _productService, IMapper _mapper)
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<ProductResponseDTO>> UpdateProduct(int productId, ProductRequestDTO dto, int businessId)
     {
+        var categoryExists = await categoryService.GetCategoryByIdAsync(dto.CategoryId);
+        if (categoryExists == null)
+        {
+            return NotFound("Category does not exist");
+        }
+
         var existingProduct = await _productService.GetProductByIdAsync(productId, businessId);
 
         if (existingProduct == null) return NotFound();

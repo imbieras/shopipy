@@ -28,6 +28,25 @@ public class ProductService(IGenericRepository<Product> _productRepository) : IP
         return await _productRepository.GetAllByConditionAsync(p => p.BusinessId == businessId);
     }
 
+    public async Task<IEnumerable<Product>> GetAllProductsOfCategoryBusinessAsync(int businessId, int categoryId, int? top = null, int? skip = 0)
+    {
+        if (skip.HasValue || top.HasValue)
+        {
+            return await _productRepository.GetAllByConditionWithPaginationAsync(
+                p => p.BusinessId == businessId && p.CategoryId == categoryId,
+                skip ?? 0,
+                top ?? int.MaxValue
+            );
+        }
+
+        return await _productRepository.GetAllByConditionAsync(p => p.BusinessId == businessId && p.CategoryId == categoryId);
+    }
+
+    public async Task<int> GetProductCountCategoryAsync(int businessId, int categoryId)
+    {
+        return await _productRepository.GetCountByConditionAsync(p => p.BusinessId == businessId && p.CategoryId == categoryId);
+    }
+
     public async Task<int> GetProductCountAsync(int businessId)
     {
         return await _productRepository.GetCountByConditionAsync(p => p.BusinessId == businessId);
