@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from '@/components/ui/switch';
 import {
   Card,
   CardContent,
@@ -45,7 +46,7 @@ const ServiceManagement = () => {
       const response = await categoryApi.getCategories(businessId);
       setCategories(response);
     } catch (error) {
-      console.error('Error fetching categories: ', err);
+      console.error('Error fetching categories: ', error);
     }
   }
 
@@ -53,6 +54,7 @@ const ServiceManagement = () => {
     try {
       setLoading(true);
       const response = await serviceApi.getServices(businessId);
+
       setServices(response);
       setError(null);
     } catch (err) {
@@ -67,18 +69,18 @@ const ServiceManagement = () => {
     try {
       setLoading(true);
       const service = await serviceApi.getServiceById(businessId, serviceId);
-      console.log("Service: ", service);
-      console.log("Service base price: ", service.serviceBasePrice);
+      console.log(service);
       if(service) {
         setSelectedService(service);
         setEditedService({
           id: service.serviceId,
-          name: service.serviceName || '',
-          duration: service.serviceDuration || 0,
-          price: service.serviceBasePrice || 0,
-          category: service.categoryId || '',
-          description: service.serviceDescription || '',
-        })
+          serviceName: service.serviceName || '',
+          serviceDuration: service.serviceDuration || 0,
+          servicePrice: service.serviceBasePrice || 0,
+          categoryId: service.categoryId.toString() || '',
+          serviceDescription: service.serviceDescription || '',
+          isServiceActive: service.isServiceActive
+        });
       }
       setError(null);
     } catch (err) {
@@ -93,8 +95,16 @@ const ServiceManagement = () => {
     if (editedService) {
       try {
         setLoading(true);
-        await serviceApi.updateService(businessId, editedService.id, editedService);
-        await fetchServices(); // Refresh the services list
+        const serviceRequestDto = {
+          categoryId: editedService.categoryId,
+          serviceName: editedService.serviceName,
+          serviceDescription: editedService.serviceDescription,
+          servicePrice: editedService.servicePrice,
+          serviceDuration: editedService.serviceDuration,
+          isServiceActive: editedService.isServiceActive
+        };
+        await serviceApi.updateService(businessId, editedService.id, serviceRequestDto);
+        await fetchServices();
         setSelectedService(null);
         setEditedService(null);
         setServiceId('');
@@ -128,7 +138,6 @@ const ServiceManagement = () => {
   };
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <Card>
@@ -139,7 +148,7 @@ const ServiceManagement = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-      <div className="space-y-4 w-full max-w-xl">
+        <div className="space-y-4 w-full max-w-xl">
           <div className="flex gap-4">
             <Input
               placeholder="Enter Service ID"
@@ -166,14 +175,19 @@ const ServiceManagement = () => {
             </div>
           )}
         </div>
+        {error && (
+          <div className="text-red-600">
+            Error: {error}
+          </div>
+        )}
         {selectedService && editedService && (
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={editedService.name}
-                onChange={(e) => setEditedService({ ...editedService, name: e.target.value })}
+                value={editedService.serviceName}
+                onChange={(e) => setEditedService({ ...editedService, serviceName: e.target.value })}
               />
             </div>
             <div>
@@ -181,10 +195,10 @@ const ServiceManagement = () => {
               <Input
                 id="duration"
                 type="number"
-                value={editedService.duration}
+                value={editedService.serviceDuration}
                 onChange={(e) => setEditedService({ 
                   ...editedService, 
-                  duration: parseInt(e.target.value, 10) 
+                  serviceDuration: parseInt(e.target.value, 10) 
                 })}
               />
             </div>
@@ -193,25 +207,28 @@ const ServiceManagement = () => {
               <Input
                 id="price"
                 type="number"
-                value={editedService.price}
+                value={editedService.servicePrice}
                 onChange={(e) => setEditedService({ 
                   ...editedService, 
-                  price: parseFloat(e.target.value) 
+                  servicePrice: parseFloat(e.target.value) 
                 })}
               />
             </div>
             <div>
               <Label htmlFor="category">Category</Label>
               <Select
-                value={editedService.category}
+                defaultValue={editedService.categoryId?.toString()}
+                value={editedService.categoryId?.toString()}
                 onValueChange={(value) => setEditedService({ 
                   ...editedService, 
-                  category: value 
+                  categoryId: value 
                 })}
               >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
+              <SelectTrigger id="category">
+                <SelectValue defaultValue={categories.find(cat => cat.categoryId === selectedService.categoryId)?.name}>
+                  {categories.find(cat => cat.categoryId.toString() === editedService.categoryId?.toString())?.name}
+                </SelectValue>
+              </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem 
@@ -222,18 +239,29 @@ const ServiceManagement = () => {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+            </Select>
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
               <Input
                 id="description"
-                value={editedService.description}
+                value={editedService.serviceDescription}
                 onChange={(e) => setEditedService({ 
                   ...editedService, 
-                  description: e.target.value 
+                  serviceDescription: e.target.value 
                 })}
               />
+            </div>
+            <div className="flex items-center space-x-2">
+            <Switch
+                id="active"
+                checked={editedService.isServiceActive}
+                onCheckedChange={(checked) => setEditedService(prev => ({
+                  ...prev,
+                  isServiceActive: checked
+                }))}
+              />
+              <Label htmlFor="active">Service Active</Label>
             </div>
           </div>
         )}
