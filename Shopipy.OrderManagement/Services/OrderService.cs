@@ -98,8 +98,28 @@ public class OrderService(
         return item3;
     }
 
-    public Task<Order?> GetOrderByIdAsync(int businessId, int orderId)
+    public Task<Order?> GetOrderByIdAsync(int businessId, int orderId, bool withItems = true)
     {
-        return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
+        if (withItems)
+        {
+            return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
+        }
+        return orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+    }
+    
+    public Task<IEnumerable<Order>> GetOrdersAsync(int businessId)
+    {
+        return orderRepository.GetOrdersWithItemsAsync(businessId);
+    }
+    
+    public async Task<Order> CancelOrderAsync(Order order)
+    {
+        if (order.OrderStatus != OrderStatus.Open)
+        {
+            throw new ArgumentException($"Order with id {order.OrderId} is not open");
+        }
+        order.OrderStatus = OrderStatus.Cancelled;
+        await orderRepository.UpdateAsync(order);
+        return order;
     }
 }

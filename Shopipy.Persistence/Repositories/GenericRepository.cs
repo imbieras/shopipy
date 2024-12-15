@@ -35,7 +35,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _context.Set<T>().Where(predicate).CountAsync();           
     }
 
-    public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate)
+    public async Task<T?> GetByConditionAsync(Expression<Func<T, bool>> predicate)
     {
         return await _context.Set<T>().FirstOrDefaultAsync(predicate);
     }

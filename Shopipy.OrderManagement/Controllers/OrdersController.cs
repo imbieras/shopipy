@@ -14,7 +14,7 @@ namespace Shopipy.OrderManagement.Controllers;
 public class OrdersController(OrderService orderService, IMapper mapper) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
+    public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
     {
         var order = await orderService.CreateOrderWithItemsAsync(businessId, request.UserId, request.OrderItems.Select(
             i =>
@@ -23,6 +23,30 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
                 item.BusinessId = businessId;
                 return item;
             }));
+        return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId = order.OrderId }, mapper.Map<OrderDto>(order));
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(int businessId)
+    {
+        var orders = await orderService.GetOrdersAsync(businessId);
+        return Ok(mapper.Map<IEnumerable<OrderDto>>(orders));
+    }
+    
+    [HttpGet("{orderId}")]
+    public async Task<ActionResult<OrderDto>> GetOrderById(int businessId, int orderId)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId);
+        if (order == null) return NotFound();
+        return Ok(mapper.Map<OrderDto>(order));
+    }
+
+    [HttpPost("{orderId}/cancel")]
+    public async Task<IActionResult> CancelOrder(int businessId, int orderId)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId, withItems: false);
+        if (order == null) return NotFound();
+        await orderService.CancelOrderAsync(order);
         return Ok();
     }
 }
