@@ -11,6 +11,15 @@ namespace Shopipy.GiftcardManagement.Services
             giftCard.BusinessId = businessId;
             giftCard.GiftCardCode = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
 
+            if (giftCard.AmountOriginal < 0)
+            {
+                throw new ArgumentException("The amount has to be positive.");
+            }
+            if (giftCard.ValidFrom > giftCard.ValidUntil)
+            {
+                throw new ArgumentException("The expiration date must be later than the start date.");
+            }
+
             var createdGiftCard = await _giftCardRepository.AddAsync(giftCard);
             return createdGiftCard;
         }
