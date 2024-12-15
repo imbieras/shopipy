@@ -3,11 +3,13 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shopipy.ApiService.Authorization;
 using Shopipy.ApiService.ExceptionFilters;
 using Shopipy.ApiService.Services;
 using Shopipy.BusinessManagement;
@@ -16,7 +18,6 @@ using Shopipy.CategoryManagement;
 using Shopipy.CategoryManagement.Mappings;
 using Shopipy.ProductManagement.Mappings;
 using Shopipy.Persistence.Data;
-using Shopipy.Persistence.Data.Middleware;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Shopipy.Shared;
@@ -135,7 +136,13 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin,
         policy => policy.RequireClaim(ClaimTypes.Role, UserRole.BusinessOwner.ToString(),
             UserRole.SuperAdmin.ToString()));
+    options.AddPolicy(AuthorizationPolicies.RequireBusinessAccess, policy =>
+    {
+        policy.AddRequirements(new RequireBusinessAccessRequirement());
+    });
 });
+
+builder.Services.AddSingleton<IAuthorizationHandler, RequireBusinessAccessRequirementHandler>();
 
 builder.Services.AddScoped<AuthService>(_ => new AuthService(signingCredentials, issuer, audience));
 builder.Services.AddShared();
@@ -169,8 +176,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
-
-app.UseMiddleware<BusinessExistsMiddleware>();
 
 app.MapDefaultEndpoints();
 

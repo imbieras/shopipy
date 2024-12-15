@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.DTOs;
+using Shopipy.Shared;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.ServiceManagement.Services;
@@ -11,6 +12,7 @@ namespace Shopipy.ServiceManagement.Services;
 [ApiController]
 [EnableRateLimiting("fixed")]
 [Route("businesses/{businessId}/appointments")]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class AppointmentController(IAppointmentService appointmentService, IMapper mapper) : ControllerBase
 {
     

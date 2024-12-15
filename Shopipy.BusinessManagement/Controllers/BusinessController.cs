@@ -22,6 +22,7 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
     }
 
     [HttpGet("{businessId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
     public async Task<IActionResult> GetBusiness(int businessId)
     {
         var business = await businessService.GetBusinessByIdAsync(businessId);
@@ -40,6 +41,7 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
     }
 
     [HttpPut("{businessId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
     public async Task<IActionResult> UpdateBusiness(int businessId, BusinessRequestDto request)
     {
         var existingBusiness = await businessService.GetBusinessByIdAsync(businessId);
@@ -55,6 +57,7 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
     }
 
     [HttpDelete("{businessId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
     public async Task<IActionResult> DeleteBusiness(int businessId)
     {
         var success = await businessService.DeleteBusinessAsync(businessId);

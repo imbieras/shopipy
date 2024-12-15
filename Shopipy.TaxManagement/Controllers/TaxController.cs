@@ -8,10 +8,12 @@ using Shopipy.Shared.Services;
 using Shopipy.TaxManagement.DTOs;
 
 namespace Shopipy.TaxManagement.Controllers;
+
 [ApiController]
 [Route("/businesses/{businessId}/taxrates/")]
 [Tags("Tax")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class TaxManagementController(ITaxService taxService, IMapper mapper) : ControllerBase
 {
     [HttpGet]

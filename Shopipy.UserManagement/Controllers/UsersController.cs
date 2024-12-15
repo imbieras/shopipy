@@ -12,10 +12,11 @@ namespace Shopipy.UserManagement.Controllers;
 
 [ApiController]
 [Route("users")]
-[Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+[Authorize]
 public class UsersController(UserManager<User> userManager, IMapper mapper, UserService userService) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<UserResponseDto>> Create([FromBody] UserRequestDto request)
     {
         var user = mapper.Map<User>(request);
@@ -24,6 +25,7 @@ public class UsersController(UserManager<User> userManager, IMapper mapper, User
     }
 
     [HttpGet]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<PaginationResultDto<UserResponseDto>>> GetUsers([FromQuery] int? top, [FromQuery] int? skip)
     {
         var users = await userService.GetAllUsersAsync(top, skip);
@@ -48,6 +50,7 @@ public class UsersController(UserManager<User> userManager, IMapper mapper, User
     }
 
     [HttpPut("{userId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<UserResponseDto>> Update(string userId, [FromBody] UserUpdateRequestDto request)
     {
         // Todo: password changing logic in auth management
@@ -62,6 +65,7 @@ public class UsersController(UserManager<User> userManager, IMapper mapper, User
     }
     
     [HttpDelete("{userId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> Delete(string userId)
     {
         // Todo: authorization check

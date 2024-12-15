@@ -12,6 +12,7 @@ namespace Shopipy.ProductManagement.Controllers;
 [Authorize]
 [Route("businesses/{businessId}/products/{productId}/variations")]
 [ApiController]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class ProductVariationController(IProductVariationService _variationService, IMapper _mapper) : ControllerBase
 {
     [HttpPost]

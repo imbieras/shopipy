@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.CategoryManagement.DTOs;
 using Shopipy.Persistence.Models;
+using Shopipy.Shared;
 using Shopipy.Shared.Services;
 
 namespace Shopipy.CategoryManagement.Controllers;
@@ -10,6 +11,7 @@ namespace Shopipy.CategoryManagement.Controllers;
 [Authorize]
 [ApiController]
 [Route("businesses/{businessId}/categories")]
+[Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class CategoryController(ICategoryService categoryService, IMapper mapper) : ControllerBase
 {
     [HttpGet]
