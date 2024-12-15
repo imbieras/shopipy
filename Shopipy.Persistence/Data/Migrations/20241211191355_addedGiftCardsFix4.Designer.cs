@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shopipy.Persistence.Data;
 
 #nullable disable
 
-namespace Shopipy.ApiService.Data.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211191355_addedGiftCardsFix4")]
+    partial class addedGiftCardsFix4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -440,6 +443,9 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.Property<bool>("IsServiceActive")
                         .HasColumnType("boolean");
 
+                    b.Property<decimal>("ServiceBasePrice")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("ServiceDescription")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -453,7 +459,7 @@ namespace Shopipy.ApiService.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<decimal>("ServicePrice")
+                    b.Property<decimal>("ServiceServiceCharge")
                         .HasColumnType("numeric");
 
                     b.Property<DateTime>("UpdatedAt")
