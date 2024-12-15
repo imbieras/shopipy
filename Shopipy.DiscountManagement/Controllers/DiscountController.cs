@@ -11,7 +11,6 @@ namespace Shopipy.DiscountManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId}/discounts")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-[Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 public class DiscountController(IDiscountService discountService, IMapper mapper) : ControllerBase
 {
     [HttpGet]
@@ -31,6 +30,7 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
     }
     
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<DiscountResponseDto>> CreateDiscount(
         int businessId,
         [FromBody] DiscountRequestDto discountRequestDto
@@ -45,6 +45,7 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
     }
 
     [HttpPut("{discountId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<DiscountResponseDto>> UpdateDiscount(
         int businessId,
         int discountId,
@@ -59,6 +60,7 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
     }
 
     [HttpDelete("{discountId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult> DeleteDiscount(int businessId, int discountId)
     {
         var success = await discountService.DeleteDiscountAsync(discountId);
