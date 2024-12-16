@@ -122,7 +122,7 @@ public class OrderService(
             throw new ArgumentException($"Service with id {serviceOrderItem.ServiceId} is not active");
         }
 
-        serviceOrderItem.UnitPrice = service.ServiceBasePrice;
+        serviceOrderItem.UnitPrice = service.ServicePrice;
         await AddTaxRateToOrderItem(serviceOrderItem, service.CategoryId);
 
         var item3 = await orderItemRepository.AddWithoutSavingChangesAsync(serviceOrderItem);
