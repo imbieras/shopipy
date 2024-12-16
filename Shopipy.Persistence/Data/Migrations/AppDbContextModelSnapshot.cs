@@ -346,105 +346,6 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.ToTable("GiftCards");
                 });
 
-            modelBuilder.Entity("Shopipy.Persistence.Models.Order", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderId"));
-
-                    b.Property<int>("BusinessId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("OrderStatus")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TotalTip")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("OrderId");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.OrderDiscount", b =>
-                {
-                    b.Property<int>("OrderDiscountId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderDiscountId"));
-
-                    b.Property<int>("BusinessId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DiscountId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("OrderItemId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("OrderDiscountId");
-
-                    b.ToTable("OrderDiscounts");
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.OrderItem", b =>
-                {
-                    b.Property<int>("OrderItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderItemId"));
-
-                    b.Property<int>("BusinessId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("TaxRateId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("OrderItemId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderItems");
-
-                    b.HasDiscriminator().HasValue("OrderItem");
-
-                    b.UseTphMappingStrategy();
-                });
-
             modelBuilder.Entity("Shopipy.Persistence.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -686,32 +587,6 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Shopipy.Persistence.Models.ProductOrderItem", b =>
-                {
-                    b.HasBaseType("Shopipy.Persistence.Models.OrderItem");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ProductVariationId")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue("ProductOrderItem");
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.ServiceOrderItem", b =>
-                {
-                    b.HasBaseType("Shopipy.Persistence.Models.OrderItem");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue("ServiceOrderItem");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -763,15 +638,6 @@ namespace Shopipy.ApiService.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Shopipy.Persistence.Models.OrderItem", b =>
-                {
-                    b.HasOne("Shopipy.Persistence.Models.Order", null)
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Shopipy.Persistence.Models.User", b =>
                 {
                     b.HasOne("Shopipy.Persistence.Models.Business", "Business")
@@ -779,11 +645,6 @@ namespace Shopipy.ApiService.Data.Migrations
                         .HasForeignKey("BusinessId");
 
                     b.Navigation("Business");
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.Order", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }
