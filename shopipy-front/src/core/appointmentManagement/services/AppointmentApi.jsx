@@ -30,8 +30,7 @@ export const appointmentApi = {
     });
     return response.data;
   },
-
-  getAvailableTimeSlots: async (businessId, employeeId, serviceId, date) => {
+  getAvailableTimeSlots: async (businessId, employeeId, date, serviceId) => {
     const response = await axiosInstance.get(
       `/businesses/${businessId}/appointments/employees/${employeeId}/services/${serviceId}/slots`,
       {

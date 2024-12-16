@@ -19,7 +19,10 @@ axiosInstance.interceptors.request.use(
         return config;
     },
     (error) => {
-        return Promise.reject(error);
+        if (error.response?.status === 401) {
+          authService.logout();
+          window.location.href = '/';
+        }
     }
 );
 

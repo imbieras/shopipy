@@ -8,29 +8,61 @@ import { jwtDecode } from 'jwt-decode';
 import Navbar from './core/ui/Navbar';
 import Services from './core/serviceManagement/page';
 import Appointments from './core/appointmentManagement/Appointments';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { fetchUser, fetched } = useUser();
+  const { fetchUser, clearUser } = useUser();
+  const queryClient = useQueryClient();
+
+  const checkAuthentication = async () => {
+    const token = authService.getToken();
+    if (!token) {
+      setIsAuthenticated(false);
+      return;
+    }
+
+    try {
+      const decodedToken = jwtDecode(token);
+      if (decodedToken.exp * 1000 > Date.now()) {
+        if (decodedToken.sub) {
+          await fetchUser(decodedToken.sub);
+        }
+        setIsAuthenticated(true);
+      } else {
+        handleLogout();
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      handleLogout();
+    }
+  };
 
   useEffect(() => {
-    const checkAuthAndFetchUser = async () => {
-      const token = authService.getToken();
-      if (token) {
-        try {
-          const decodedToken = jwtDecode(token);
-          if (decodedToken.sub) {
-            await fetchUser(decodedToken.sub);
-          }
-        } catch (error) {
-          console.error("Error fetching user:", error);
-        }
-      }
-      setIsAuthenticated(authService.isAuthenticated());
-    };
+    checkAuthentication();
+  }, []);
 
-    checkAuthAndFetchUser();
-  }, [fetchUser]);
+  useQuery({
+    queryKey: ['auth'],
+    queryFn: async () => {
+      const token = authService.getToken();
+      if (!token) return null;
+
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.sub) {
+          await fetchUser(decodedToken.sub);
+        }
+        return decodedToken;
+      } catch (error) {
+        handleLogout();
+        return null;
+      }
+    },
+    enabled: !!authService.getToken(),
+    staleTime: Infinity, 
+  });
 
   const handleLogin = async (username, password) => {
     try {
@@ -51,12 +83,15 @@ function App() {
   const handleLogout = () => {
     authService.logout();
     setIsAuthenticated(false);
+    clearUser();
+    queryClient.invalidateQueries(['auth']);
+    queryClient.clear();
   };
 
   return (
     <BrowserRouter>
       <div className="App">
-      {isAuthenticated && <Navbar onLogout={handleLogout} />}
+        {isAuthenticated && <Navbar onLogout={handleLogout} />}
         <Routes>
           <Route
             path="/"
@@ -66,7 +101,7 @@ function App() {
                   <LoginPage onLogin={handleLogin} />
                 </AuthLayout>
               ) : (
-                <Navigate to="/services" />
+                <Navigate to="/services"/>
               )
             }
           />

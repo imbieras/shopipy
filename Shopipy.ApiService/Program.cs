@@ -250,7 +250,7 @@ using (var serviceScope = app.Services.CreateScope())
     {
         Name = "BusinessOwner",
         Role = UserRole.BusinessOwner,
-        BusinessId = 1
+        BusinessId = 2
     }, "Business_owner1234");
 
     dbContext.SaveChanges();

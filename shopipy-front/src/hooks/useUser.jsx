@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import axiosInstance from '../services/axios';
-
 const API_URL = 'https://localhost:7417';
 
-export const useUser = create((set, get) => ({
-  // State
+const initialState = {
   id: null,
   username: null,
   email: null,
@@ -15,6 +13,10 @@ export const useUser = create((set, get) => ({
   fetched: false,
   isLoading: false,
   error: null,
+};
+
+export const useUser = create((set, get) => ({
+  ...initialState, // Spread initial state
 
   fetchUser: async (userId) => {
     if (!userId) return;
@@ -39,6 +41,10 @@ export const useUser = create((set, get) => ({
     }
   },
 
+  // Reset all state to initial values
+  clearUser: () => {
+    set(initialState);
+  },
 
   // Getters
   getUserId: () => get().id,

@@ -1,68 +1,73 @@
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { appointmentApi } from "@/core/appointmentManagement/services/AppointmentApi"
 import { useUser } from "@/hooks/useUser"
+import { useQuery } from "@tanstack/react-query"
+import { appointmentApi } from "@/core/appointmentManagement/services/AppointmentApi"
 
-export default function StaffList({ selectedService, selectedDate, selectedTime, selectedStaff, onSelectStaff }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [availableStaff, setAvailableStaff] = useState([])
-  const { businessId } = useUser()
-
-  useEffect(() => {
-    const fetchAvailableStaff = async () => {
-      if (!selectedService || !selectedDate || !selectedTime) return
-
-      try {
-        setLoading(true)
-        setError(null)
-
-        // Combine date and time for the API call
-        const dateTime = new Date(selectedDate)
-        const [hours, minutes] = selectedTime.split(':')
-        dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
-
-        const response = await appointmentApi.getAvailableEmployees(
+export default function StaffList({
+    selectedService,
+    selectedDate,
+    selectedTime,
+    selectedStaff,
+    onSelectStaff
+  }) {
+    const { businessId } = useUser();
+    const getDateTime = () => {
+      if (!selectedDate) return null;
+      const dateTime = new Date(selectedDate);
+      dateTime.setHours(0, 0, 0, 0);
+      return dateTime;
+    };
+ 
+    const { data: availableStaff = [], isLoading, error } = useQuery({
+      queryKey: ['availableStaff', businessId, selectedService?.serviceId, selectedDate],
+      queryFn: async () => {
+        const dateTime = getDateTime();
+        if (!dateTime) return [];
+       
+        return await appointmentApi.getAvailableEmployees(
           businessId,
-          selectedService.serviceId || selectedService.id,
+          selectedService.serviceId,
           dateTime.toISOString()
-        )
+        );
+      },
+      enabled: !!(businessId && selectedService?.serviceId && selectedDate)
+    });
 
-        setAvailableStaff(response)
-      } catch (err) {
-        setError("Failed to load available staff. Please try again.")
-        console.error("Error fetching available staff:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
+  if (!selectedService) return null;
 
-    fetchAvailableStaff()
-  }, [businessId, selectedService, selectedDate, selectedTime])
-
-  if (!selectedService) {
-    return null
-  }
-
-  if (loading) {
-    return <div>Loading available staff...</div>
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>
-  }
-
-  if (!selectedDate || !selectedTime) {
+  if (!selectedDate) { // Removed selectedTime check
     return (
       <Card>
         <CardHeader>
           <CardTitle>Available Staff</CardTitle>
-          <CardDescription>Please select a date and time first</CardDescription>
+          <CardDescription>Please select a date first</CardDescription>
         </CardHeader>
       </Card>
-    )
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Loading Staff</CardTitle>
+          <CardDescription>Please wait while we check staff availability...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error Loading Staff</CardTitle>
+          <CardDescription>Failed to load available staff. Please try again.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   if (availableStaff.length === 0) {
@@ -70,21 +75,21 @@ export default function StaffList({ selectedService, selectedDate, selectedTime,
       <Card>
         <CardHeader>
           <CardTitle>No Staff Available</CardTitle>
-          <CardDescription>No staff members are available at the selected time. Please try another time slot.</CardDescription>
+          <CardDescription>No staff members are available on this date. Please try another date.</CardDescription>
         </CardHeader>
       </Card>
-    )
+    );
   }
 
   return (
-    <RadioGroup 
-      value={selectedStaff?.toString()} 
+    <RadioGroup
+      value={selectedStaff?.toString()}
       onValueChange={(value) => onSelectStaff(value)}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {availableStaff.map((staff) => (
-          <Card 
-            key={staff.employee_id} 
+          <Card
+            key={staff.employee_id}
             className={selectedStaff === staff.employee_id ? "border-primary" : ""}
           >
             <CardHeader>
@@ -92,9 +97,9 @@ export default function StaffList({ selectedService, selectedDate, selectedTime,
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value={staff.employee_id.toString()} 
-                  id={`staff-${staff.employee_id}`} 
+                <RadioGroupItem
+                  value={staff.employee_id.toString()}
+                  id={`staff-${staff.employee_id}`}
                 />
                 <Label htmlFor={`staff-${staff.employee_id}`}>Select this staff member</Label>
               </div>
@@ -103,5 +108,5 @@ export default function StaffList({ selectedService, selectedDate, selectedTime,
         ))}
       </div>
     </RadioGroup>
-  )
+  );
 }

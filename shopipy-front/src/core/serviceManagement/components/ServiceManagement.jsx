@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,27 +19,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from '@/hooks/useUser';
-import { useEffect } from 'react';
-import { serviceApi } from '../services/ServiceApi';
 import { categoryApi } from '../../categoryManagement/services/CategoryApi';
+import { serviceApi } from '../services/ServiceApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const ServiceManagement = () => {
-  const [serviceId, setServiceId] = useState('');
-  const [businessId, setBusinessId] = useState('');
-  const [selectedService, setSelectedService] = useState(null);
-  const [editedService, setEditedService] = useState(null);
-  const [services, setServices] = useState([]);
+const ServiceManagement = ({ service, onClose, mode = 'edit', onServiceSaved }) => {
+  const initialState = {
+    serviceName: '',
+    serviceDuration: 30,
+    servicePrice: 0,
+    categoryId: '',
+    serviceDescription: '',
+    isServiceActive: true
+  };
+  const queryClient = useQueryClient()
+
+  const [serviceData, setServiceData] = useState(mode === 'edit' ? null : initialState);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { role } = useUser();
+  const { businessId } = useUser();
 
   useEffect(() => {
     if (businessId) {
-      fetchServices();
       fetchCategories();
     }
   }, [businessId]);
+
+  useEffect(() => {
+    if (mode === 'edit' && service) {
+      setServiceData({
+        id: service.serviceId,
+        serviceName: service.serviceName || '',
+        serviceDuration: service.serviceDuration || 30,
+        servicePrice: service.serviceBasePrice || 0,
+        categoryId: service.categoryId?.toString() || '',
+        serviceDescription: service.serviceDescription || '',
+        isServiceActive: service.isServiceActive ?? true
+      });
+    }
+  }, [service, mode]);
 
   const fetchCategories = async () => {
     try {
@@ -47,233 +66,156 @@ const ServiceManagement = () => {
       setCategories(response);
     } catch (error) {
       console.error('Error fetching categories: ', error);
+      setError('Failed to fetch categories');
     }
   }
 
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      const response = await serviceApi.getServices(businessId);
-
-      setServices(response);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch services');
-      console.error('Error fetching services:', err);
-    } finally {
-      setLoading(false);
+  const { mutate: updateService, isPending: isUpdating } = useMutation({
+    mutationFn: async (serviceData) => {
+      return await serviceApi.updateService(businessId, serviceData.id, serviceData)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', businessId] })
+      onClose?.()
+    },
+    onError: (error) => {
+      setError('Failed to save service: ' + error.message)
     }
-  };
+  })
 
-  const handleFindService = async () => {
-    try {
-      setLoading(true);
-      const service = await serviceApi.getServiceById(businessId, serviceId);
-      console.log(service);
-      if(service) {
-        setSelectedService(service);
-        setEditedService({
-          id: service.serviceId,
-          serviceName: service.serviceName || '',
-          serviceDuration: service.serviceDuration || 0,
-          servicePrice: service.serviceBasePrice || 0,
-          categoryId: service.categoryId.toString() || '',
-          serviceDescription: service.serviceDescription || '',
-          isServiceActive: service.isServiceActive
-        });
-      }
-      setError(null);
-    } catch (err) {
-      setError('Service not found');
-      console.error('Error finding service:', err);
-    } finally {
-      setLoading(false);
+  const handleSave = async () => {
+    if (!serviceData) return;
+    if (!serviceData.serviceName || !serviceData.categoryId) {
+      setError('Please fill in all required fields');
+      return;
     }
-  };
 
-  const handleUpdateService = async () => {
-    if (editedService) {
-      try {
-        setLoading(true);
-        const serviceRequestDto = {
-          categoryId: editedService.categoryId,
-          serviceName: editedService.serviceName,
-          serviceDescription: editedService.serviceDescription,
-          servicePrice: editedService.servicePrice,
-          serviceDuration: editedService.serviceDuration,
-          isServiceActive: editedService.isServiceActive
-        };
-        await serviceApi.updateService(businessId, editedService.id, serviceRequestDto);
-        await fetchServices();
-        setSelectedService(null);
-        setEditedService(null);
-        setServiceId('');
-        alert('Service updated successfully');
-      } catch (err) {
-        setError('Failed to update service');
-        console.error('Error updating service:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+    const serviceRequestDto = {
+      categoryId: parseInt(serviceData.categoryId),
+      serviceName: serviceData.serviceName,
+      serviceDescription: serviceData.serviceDescription || '',
+      servicePrice: parseFloat(serviceData.servicePrice) || 0,
+      serviceDuration: parseInt(serviceData.serviceDuration) || 30,
+      isServiceActive: Boolean(serviceData.isServiceActive)
+    };
 
-  const handleDeleteService = async () => {
-    if (selectedService) {
-      try {
-        setLoading(true);
-        await serviceApi.deleteService(businessId, selectedService.serviceId);
-        await fetchServices();
-        setSelectedService(null);
-        setEditedService(null);
-        setServiceId('');
-        alert('Service deleted successfully');
-      } catch (err) {
-        setError('Failed to delete service');
-        console.error('Error deleting service:', err);
-      } finally {
-        setLoading(false);
-      }
+    if (mode === 'edit') {
+      updateService({ ...serviceRequestDto, id: serviceData.id })
+    } else {
+      onServiceSaved(serviceRequestDto)
     }
   };
 
   if (loading) return <div>Loading...</div>;
+  if (mode === 'edit' && !service) return null;
+  if (!serviceData) return null;
 
   return (
-    <Card>
+    <Card className="border-0 shadow-none">
       <CardHeader>
-        <CardTitle>Manage Services</CardTitle>
+        <CardTitle>{mode === 'edit' ? 'Edit Service' : 'Create Service'}</CardTitle>
         <CardDescription>
-          Edit or delete services using the service ID from your SMS.
+          {mode === 'edit' 
+            ? `Make changes to ${service.serviceName}`
+            : 'Create a new service for your business'
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4 w-full max-w-xl">
-          <div className="flex gap-4">
-            <Input
-              placeholder="Enter Service ID"
-              value={serviceId}
-              onChange={(e) => setServiceId(e.target.value)}
-              className="flex-grow"
-            />
-            <Button 
-              onClick={handleFindService}
-              className="whitespace-nowrap"
-            >
-              Find Service
-            </Button>
-          </div>
-          
-          {role === 'SuperAdmin' && (
-            <div className="flex gap-4">
-              <Input
-                placeholder="Enter Business ID"
-                value={businessId}
-                onChange={(e) => setBusinessId(e.target.value)}
-                className="flex-grow"
-              />
-            </div>
-          )}
-        </div>
         {error && (
-          <div className="text-red-600">
+          <div className="text-red-600 mb-4">
             Error: {error}
           </div>
         )}
-        {selectedService && editedService && (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={editedService.serviceName}
-                onChange={(e) => setEditedService({ ...editedService, serviceName: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="duration">Duration (minutes)</Label>
-              <Input
-                id="duration"
-                type="number"
-                value={editedService.serviceDuration}
-                onChange={(e) => setEditedService({ 
-                  ...editedService, 
-                  serviceDuration: parseInt(e.target.value, 10) 
-                })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="price">Price ($)</Label>
-              <Input
-                id="price"
-                type="number"
-                value={editedService.servicePrice}
-                onChange={(e) => setEditedService({ 
-                  ...editedService, 
-                  servicePrice: parseFloat(e.target.value) 
-                })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Select
-                defaultValue={editedService.categoryId?.toString()}
-                value={editedService.categoryId?.toString()}
-                onValueChange={(value) => setEditedService({ 
-                  ...editedService, 
-                  categoryId: value 
-                })}
-              >
-              <SelectTrigger id="category">
-                <SelectValue defaultValue={categories.find(cat => cat.categoryId === selectedService.categoryId)?.name}>
-                  {categories.find(cat => cat.categoryId.toString() === editedService.categoryId?.toString())?.name}
-                </SelectValue>
-              </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem 
-                      key={category.categoryId} 
-                      value={category.categoryId.toString()}
-                    >
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-            </Select>
-            </div>
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={editedService.serviceDescription}
-                onChange={(e) => setEditedService({ 
-                  ...editedService, 
-                  serviceDescription: e.target.value 
-                })}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-            <Switch
-                id="active"
-                checked={editedService.isServiceActive}
-                onCheckedChange={(checked) => setEditedService(prev => ({
-                  ...prev,
-                  isServiceActive: checked
-                }))}
-              />
-              <Label htmlFor="active">Service Active</Label>
-            </div>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={serviceData.serviceName}
+              onChange={(e) => setServiceData({ ...serviceData, serviceName: e.target.value })}
+            />
           </div>
-        )}
+          <div>
+            <Label htmlFor="duration">Duration (minutes)</Label>
+            <Input
+              id="duration"
+              type="number"
+              value={serviceData.serviceDuration}
+              onChange={(e) => setServiceData({ 
+                ...serviceData, 
+                serviceDuration: parseInt(e.target.value, 10) 
+              })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="price">Price ($)</Label>
+            <Input
+              id="price"
+              type="number"
+              value={serviceData.servicePrice}
+              onChange={(e) => setServiceData({ 
+                ...serviceData, 
+                servicePrice: parseFloat(e.target.value) 
+              })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={serviceData.categoryId?.toString()}
+              onValueChange={(value) => setServiceData({ 
+                ...serviceData, 
+                categoryId: value 
+              })}
+            >
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem 
+                    key={category.categoryId} 
+                    value={category.categoryId.toString()}
+                  >
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Input
+              id="description"
+              value={serviceData.serviceDescription}
+              onChange={(e) => setServiceData({ 
+                ...serviceData, 
+                serviceDescription: e.target.value 
+              })}
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="active"
+              checked={serviceData.isServiceActive}
+              onCheckedChange={(checked) => setServiceData(prev => ({
+                ...prev,
+                isServiceActive: checked
+              }))}
+            />
+            <Label htmlFor="active">Service Active</Label>
+          </div>
+        </div>
       </CardContent>
-      {selectedService && (
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleDeleteService}>
-            Delete Service
-          </Button>
-          <Button onClick={handleUpdateService}>Update Service</Button>
-        </CardFooter>
-      )}
+      <CardFooter className="flex justify-end space-x-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleSave}>
+          {mode === 'edit' ? 'Save Changes' : 'Create Service'}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

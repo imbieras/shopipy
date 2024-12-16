@@ -33,6 +33,7 @@ export default function Appointments() {
     try {
       setLoading(true)
       const currentDate = new Date()
+      currentDate.setDate(currentDate.getDate() + 1);
       const response = await appointmentApi.getEmployeeAppointments(
         businessId,
         id,
