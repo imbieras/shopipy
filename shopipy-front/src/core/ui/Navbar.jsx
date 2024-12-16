@@ -6,7 +6,8 @@ const Navbar = ({ onLogout }) => {
  
   const navItems = [
     { name: 'Services', path: '/services' },
-    { name: 'Orders', path: '/orders' }
+    { name: 'Orders', path: '/orders' },
+    { name: 'Appointments', path: '/appointments'}
   ];
 
   const isActive = (path) => {

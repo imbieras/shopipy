@@ -7,6 +7,7 @@ import { useUser } from './hooks/useUser';
 import { jwtDecode } from 'jwt-decode';
 import Navbar from './core/ui/Navbar';
 import Services from './core/serviceManagement/page';
+import Appointments from './core/appointmentManagement/Appointments';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -76,6 +77,16 @@ function App() {
                 <Services/>
               ) : (
                 <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/appointments"
+            element={
+              isAuthenticated ? (
+                <Appointments/>
+              ) : (
+                <Navigate to="/"/>
               )
             }
           />
