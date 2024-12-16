@@ -8,7 +8,6 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.CategoryManagement.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("businesses/{businessId}/categories")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
@@ -33,6 +32,7 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> CreateCategory(int businessId, CategoryRequestDto request)
     {
         var category = mapper.Map<Category>(request);
@@ -48,6 +48,7 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
     }
 
     [HttpPut("{categoryId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> UpdateCategory(int businessId, int categoryId, CategoryRequestDto request)
     {
         var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);
@@ -61,6 +62,7 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
     }
 
     [HttpDelete("{categoryId}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteCategory(int businessId, int categoryId)
     {
         var existingCategory = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);

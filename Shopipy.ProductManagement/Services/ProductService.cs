@@ -14,23 +14,27 @@ public class ProductService(IGenericRepository<Product> _productRepository) : IP
         return createdProduct;
     }
 
-    public async Task<IEnumerable<Product>> GetAllProductsOfBusinessAsync(int businessId, int? top = null, int? skip = 0)
+    public async Task<IEnumerable<Product>> GetAllProductsAsync(int businessId, int? categoryId = null, int? top = null, int? skip = 0)
     {
         if (skip.HasValue || top.HasValue)
         {
             return await _productRepository.GetAllByConditionWithPaginationAsync(
-                p => p.BusinessId == businessId,
-                skip ?? 0,  
-                top ?? int.MaxValue 
+                p => p.BusinessId == businessId && (!categoryId.HasValue || p.CategoryId == categoryId),
+                skip ?? 0,
+                top ?? int.MaxValue
             );
         }
 
-        return await _productRepository.GetAllByConditionAsync(p => p.BusinessId == businessId);
+        return await _productRepository.GetAllByConditionAsync(
+            p => p.BusinessId == businessId && (!categoryId.HasValue || p.CategoryId == categoryId)
+        );
     }
 
-    public async Task<int> GetProductCountAsync(int businessId)
+    public async Task<int> GetProductCountAsync(int businessId, int? categoryId = null)
     {
-        return await _productRepository.GetCountByConditionAsync(p => p.BusinessId == businessId);
+        return await _productRepository.GetCountByConditionAsync(
+            p => p.BusinessId == businessId && (!categoryId.HasValue || p.CategoryId == categoryId)
+        );
     }
 
     public async Task<Product?> GetProductByIdAsync(int productId, int businessId)

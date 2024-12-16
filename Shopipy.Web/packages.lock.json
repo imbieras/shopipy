@@ -942,7 +942,7 @@
           "Shopipy.BusinessManagement": "[1.0.0, )",
           "Shopipy.CategoryManagement": "[1.0.0, )",
           "Shopipy.DiscountManagement": "[1.0.0, )",
-          "Shopipy.GiftcardManagement": "[1.0.0, )",
+          "Shopipy.GiftCardManagement": "[1.0.0, )",
           "Shopipy.Persistence": "[1.0.0, )",
           "Shopipy.ProductManagement": "[1.0.0, )",
           "Shopipy.ServiceDefaults": "[1.0.0, )",
