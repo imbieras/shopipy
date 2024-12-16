@@ -82,7 +82,9 @@ public class OrderService(
             if (productOrderItem.ProductVariationId is null)
             {
                 var item = await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
-                if (saveChanges) await orderItemRepository.SaveChangesAsync();
+                if (!saveChanges) return item;
+                await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
+                await orderItemRepository.SaveChangesAsync();
                 return item;
             }
 
@@ -102,9 +104,12 @@ public class OrderService(
             }
 
             await AddTaxRateToOrderItem(productOrderItem, product.CategoryId);
+            await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
             productOrderItem.UnitPrice += variation.PriceModifier;
             var item2 = await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
-            if (saveChanges) await orderItemRepository.SaveChangesAsync();
+            if (!saveChanges) return item2;
+            await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
+            await orderItemRepository.SaveChangesAsync();
             return item2;
         }
 
@@ -124,9 +129,11 @@ public class OrderService(
 
         serviceOrderItem.UnitPrice = service.ServicePrice;
         await AddTaxRateToOrderItem(serviceOrderItem, service.CategoryId);
-
+        await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
         var item3 = await orderItemRepository.AddWithoutSavingChangesAsync(serviceOrderItem);
-        if (saveChanges) await orderItemRepository.SaveChangesAsync();
+        if (!saveChanges) return item3;
+        await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
+        await orderItemRepository.SaveChangesAsync();
         return item3;
     }
 
@@ -154,6 +161,7 @@ public class OrderService(
     public async Task<OrderItem> UpdateOrderItemAsync(OrderItem orderItem)
     {
         await ValidateOrderAsync(orderItem.BusinessId, orderItem.OrderId);
+        await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId);
         return await orderItemRepository.UpdateAsync(orderItem);
     }
 
@@ -165,6 +173,7 @@ public class OrderService(
         }
 
         order.OrderStatus = OrderStatus.Cancelled;
+        order.UpdatedAt = DateTime.UtcNow;
         await orderRepository.UpdateAsync(order);
         return order;
     }
@@ -174,6 +183,7 @@ public class OrderService(
         await ValidateOrderAsync(businessId, orderId);
         await orderItemRepository.DeleteByConditionAsync(i =>
             i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
+        await UpdateOrderTime(businessId, orderId);
     }
 
     private async Task ValidateOrderAsync(int businessId, int orderId)
@@ -188,5 +198,13 @@ public class OrderService(
         {
             throw new ArgumentException("Order is not open");
         }
+    }
+
+    private async Task UpdateOrderTime(int businessId, int orderId)
+    {
+        var order = await GetOrderByIdAsync(businessId, orderId);
+        if (order is null) return;
+        order.UpdatedAt = DateTime.Now;
+        await orderRepository.UpdateAsync(order);
     }
 }

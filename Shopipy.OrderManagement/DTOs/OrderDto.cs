@@ -10,6 +10,7 @@ public class OrderDto
     public required OrderStatus OrderStatus { get; set; }
     public required decimal TotalTip { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
     public DateTime? ClosedAt { get; set; }
     public required IEnumerable<OrderItemDto> OrderItems { get; set; }
 }

@@ -8,6 +8,7 @@ public class Order
     public required OrderStatus OrderStatus { get; set; }
     public decimal TotalTip { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ClosedAt { get; set; }
     public IEnumerable<OrderItem>? OrderItems { get; set; }
 }
