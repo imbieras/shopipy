@@ -13,11 +13,7 @@ namespace Shopipy.ServiceManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId}/services")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ServiceController(
-    IServiceManagementService serviceManagementService, 
-    ICategoryService categoryService, 
-    IMapper mapper
-) : ControllerBase
+public class ServiceController(IServiceManagementService serviceManagementService, ICategoryService categoryService, IMapper mapper) : ControllerBase
 {
     
     [HttpGet]
