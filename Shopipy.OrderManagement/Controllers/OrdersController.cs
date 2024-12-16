@@ -51,7 +51,6 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         return Ok();
     }
 
-    // TODO: check if order is open
     [HttpPost("{orderId}/items")]
     public async Task<ActionResult<OrderItemDto>> CreateOrderItem(int businessId, int orderId,
         [FromBody] CreateOrderItemRequestDto request)
@@ -63,13 +62,21 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId }, mapper.Map<OrderItemDto>(result));
     }
     
-    // TODO
-    // [HttpPut("{orderId}/items/{orderItemId}")]
-    // public async Task<OrderItemDto> UpdateOrderItem(int businessId, int orderId, int orderItemId,
-    //     [FromBody] CHANGE request)
-    // {
-    //     
-    // }
+    [HttpPut("{orderId}/items/{orderItemId}")]
+    public async Task<ActionResult<OrderItemDto>> UpdateOrderItem(int businessId, int orderId, int orderItemId,
+        [FromBody] UpdateOrderItemDto request)
+    {
+        var orderItem = await orderService.GetOrderItemByIdAsync(businessId, orderId, orderItemId);
+        if (orderItem == null) return NotFound();
+        orderItem.TaxRateId = request.TaxRateId;
+        if (orderItem is ProductOrderItem productOrderItem && request.ProductQuantity is not null)
+        {
+            productOrderItem.ProductQuantity = request.ProductQuantity.Value;
+        }
+
+        var res = await orderService.UpdateOrderItemAsync(orderItem);
+        return Ok(mapper.Map<OrderItemDto>(res));
+    }
     
     [HttpDelete("{orderId}/items/{orderItemId}")]
     public async Task<IActionResult> DeleteOrderItem(int businessId, int orderId, int orderItemId)

@@ -10,6 +10,7 @@ public class OrderService(
     UserService userService,
     OrderRepository orderRepository,
     IGenericRepository<OrderItem> orderItemRepository,
+    IGenericRepository<ProductOrderItem> productOrderItemRepository,
     IProductService productService,
     IProductVariationService productVariationService,
     IServiceManagementService serviceManagementService)
@@ -36,9 +37,23 @@ public class OrderService(
 
     public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
-        // TODO: check if there are order items with same product id and disallow
+        var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
+        if (order is null)
+        {
+            throw new ArgumentException($"Order with id {orderItem.OrderId} not found");
+        }
+
+        if (order.OrderStatus != OrderStatus.Open)
+        {
+            throw new ArgumentException("Order is not open");
+        }
         if (orderItem is ProductOrderItem productOrderItem)
         {
+            var match = await productOrderItemRepository.GetByConditionAsync(i => i.BusinessId == orderItem.BusinessId && i.OrderItemId == productOrderItem.OrderItemId && i.OrderId == productOrderItem.OrderId && i.ProductId == productOrderItem.ProductId);
+            if (match is not null)
+            {
+                throw new ArgumentException("Product is already included");
+            }
             var product =
                 await productService.GetProductByIdAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
             if (product is null)
@@ -116,6 +131,17 @@ public class OrderService(
         return orderRepository.GetOrdersWithItemsAsync(businessId);
     }
 
+    public Task<OrderItem?> GetOrderItemByIdAsync(int businessId, int orderId, int orderItemId)
+    {
+        return orderItemRepository.GetByConditionAsync(i => i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
+    }
+
+    public async Task<OrderItem> UpdateOrderItemAsync(OrderItem orderItem)
+    {
+        await ValidateOrderAsync(orderItem.BusinessId, orderItem.OrderId);
+        return await orderItemRepository.UpdateAsync(orderItem);
+    }
+
     public async Task<Order> CancelOrderAsync(Order order)
     {
         if (order.OrderStatus != OrderStatus.Open)
@@ -128,9 +154,24 @@ public class OrderService(
         return order;
     }
 
-    public Task DeleteOrderItemAsync(int businessId, int orderId, int orderItemId)
+    public async Task DeleteOrderItemAsync(int businessId, int orderId, int orderItemId)
     {
-        return orderItemRepository.DeleteByConditionAsync(i =>
+        await ValidateOrderAsync(businessId, orderId);
+        await orderItemRepository.DeleteByConditionAsync(i =>
             i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
+    }
+
+    private async Task ValidateOrderAsync(int businessId, int orderId)
+    {
+        var order = await GetOrderByIdAsync(businessId, orderId);
+        if (order is null)
+        {
+            throw new ArgumentException($"Order with id {orderId} not found");
+        }
+
+        if (order.OrderStatus != OrderStatus.Open)
+        {
+            throw new ArgumentException("Order is not open");
+        }
     }
 }
