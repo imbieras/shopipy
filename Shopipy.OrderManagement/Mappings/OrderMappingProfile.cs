@@ -21,6 +21,15 @@ public class OrderMappingProfile : Profile
         
         CreateMap<CreateServiceOrderItemRequestDto, ServiceOrderItem>()
             .IncludeBase<CreateOrderItemRequestDto, OrderItem>();
+
+        CreateMap<Order, OrderDto>();
         
+        CreateMap<OrderItem, OrderItemDto>();
+        
+        CreateMap<ProductOrderItem, ProductOrderItemDto>()
+            .IncludeBase<OrderItem, OrderItemDto>();
+        
+        CreateMap<ServiceOrderItem, ServiceOrderItemDto>()
+            .IncludeBase<OrderItem, OrderItemDto>();
     }
 }
