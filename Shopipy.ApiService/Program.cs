@@ -245,6 +245,13 @@ using (var serviceScope = app.Services.CreateScope())
         Role = UserRole.Employee,
         BusinessId = 1
     }, "Test_password1234");
+    
+    await userManager.CreateAsync(new User("business_owner")
+    {
+        Name = "BusinessOwner",
+        Role = UserRole.BusinessOwner,
+        BusinessId = 1
+    }, "Business_owner1234");
 
     dbContext.SaveChanges();
 

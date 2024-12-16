@@ -1,8 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Clock, DollarSign, Sparkles } from "lucide-react"
+import { useUser } from "@/hooks/useUser";
 
 export default function ServiceList({ services, selectedService, onServiceSelect }) {
+  const { id, role } = useUser();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {services.map((service) => (
@@ -41,6 +43,9 @@ export default function ServiceList({ services, selectedService, onServiceSelect
             >
               {selectedService?.serviceId === service.serviceId ? 'Selected' : 'Select Service'}
             </Button>
+            {role === 'BusinessOwner' && (
+                <div>Hello mister owner</div>
+            )}
           </CardFooter>
         </Card>
       ))}
