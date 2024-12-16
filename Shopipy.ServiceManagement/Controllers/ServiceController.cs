@@ -46,10 +46,10 @@ public class ServiceController(IServiceManagementService serviceManagementServic
     [HttpPost]
     public async Task<IActionResult> CreateService(int businessId, ServiceRequestDto request)
     {
-        var categoryExists = await categoryService.GetCategoryByIdAsync(request.CategoryId);
+        var categoryExists = await categoryService.GetCategoryByIdInBusinessAsync(businessId,request.CategoryId);
         if (categoryExists == null)
         {
-            return NotFound("Category does not exist");
+            return NotFound("Category does not exist in business");
         }
 
         var service = mapper.Map<Service>(request);
@@ -58,7 +58,7 @@ public class ServiceController(IServiceManagementService serviceManagementServic
         var createdService = await serviceManagementService.CreateService(service);
         var responseDto = mapper.Map<ServiceResponseDto>(createdService);
 
-        return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, id = createdService.ServiceId }, responseDto);
+        return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, serviceId = createdService.ServiceId }, responseDto);
     }
 
     [HttpPut("{serviceId}")]
