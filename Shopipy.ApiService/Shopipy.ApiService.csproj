@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Shopipy.GiftcardManagement\Shopipy.GiftCardManagement.csproj" />
+        <ProjectReference Include="..\Shopipy.OrderManagement\Shopipy.OrderManagement.csproj" />
         <ProjectReference Include="..\Shopipy.ProductManagement\Shopipy.ProductManagement.csproj" />
         <ProjectReference Include="..\Shopipy.ServiceDefaults\Shopipy.ServiceDefaults.csproj" />
         <ProjectReference Include="..\Shopipy.Shared\Shopipy.Shared.csproj" />
