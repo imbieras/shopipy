@@ -12,11 +12,9 @@ public class ServiceRequestDto
     [StringLength(256)]
     public required string ServiceDescription { get; set; }
     
-    public required decimal ServiceBasePrice { get; set; }
+    public required decimal ServicePrice{ get; set; }
     
     public required int ServiceDuration { get; set; }
     
-    public decimal ServiceServiceCharge { get; set; }
-
     public required bool IsServiceActive { get; set; } = false;
 }
