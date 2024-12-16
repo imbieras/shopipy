@@ -68,7 +68,6 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
     {
         var orderItem = await orderService.GetOrderItemByIdAsync(businessId, orderId, orderItemId);
         if (orderItem == null) return NotFound();
-        orderItem.TaxRateId = request.TaxRateId;
         if (orderItem is ProductOrderItem productOrderItem && request.ProductQuantity is not null)
         {
             productOrderItem.ProductQuantity = request.ProductQuantity.Value;

@@ -13,7 +13,8 @@ public class OrderService(
     IGenericRepository<ProductOrderItem> productOrderItemRepository,
     IProductService productService,
     IProductVariationService productVariationService,
-    IServiceManagementService serviceManagementService)
+    IServiceManagementService serviceManagementService,
+    ITaxService taxService)
 {
     public async Task<Order> CreateOrderWithItemsAsync(int businessId, string userId, IEnumerable<OrderItem> orderItems)
     {
@@ -35,6 +36,13 @@ public class OrderService(
         return order;
     }
 
+    private async Task AddTaxRateToOrderItem(OrderItem orderItem, int categoryId)
+    {
+        var taxRate = (await taxService.GetAllTaxRatesByBusinessAsync(orderItem.BusinessId)).FirstOrDefault(t => t.CategoryId == categoryId && t.EffectiveFrom <= DateTime.UtcNow &&
+            DateTime.UtcNow <= t.EffectiveTo);
+        orderItem.TaxRateId = taxRate?.TaxRateId;
+    }
+
     public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
         var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
@@ -47,13 +55,17 @@ public class OrderService(
         {
             throw new ArgumentException("Order is not open");
         }
+        
         if (orderItem is ProductOrderItem productOrderItem)
         {
-            var match = await productOrderItemRepository.GetByConditionAsync(i => i.BusinessId == orderItem.BusinessId && i.OrderItemId == productOrderItem.OrderItemId && i.OrderId == productOrderItem.OrderId && i.ProductId == productOrderItem.ProductId);
+            var match = await productOrderItemRepository.GetByConditionAsync(i =>
+                i.BusinessId == orderItem.BusinessId && i.OrderItemId == productOrderItem.OrderItemId &&
+                i.OrderId == productOrderItem.OrderId && i.ProductId == productOrderItem.ProductId);
             if (match is not null)
             {
                 throw new ArgumentException("Product is already included");
             }
+
             var product =
                 await productService.GetProductByIdAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
             if (product is null)
@@ -89,6 +101,7 @@ public class OrderService(
                     $"Product variation with id {productOrderItem.ProductId} is not available");
             }
 
+            await AddTaxRateToOrderItem(productOrderItem, product.CategoryId);
             productOrderItem.UnitPrice += variation.PriceModifier;
             var item2 = await orderItemRepository.AddWithoutSavingChangesAsync(productOrderItem);
             if (saveChanges) await orderItemRepository.SaveChangesAsync();
@@ -110,6 +123,7 @@ public class OrderService(
         }
 
         serviceOrderItem.UnitPrice = service.ServiceBasePrice;
+        await AddTaxRateToOrderItem(serviceOrderItem, service.CategoryId);
 
         var item3 = await orderItemRepository.AddWithoutSavingChangesAsync(serviceOrderItem);
         if (saveChanges) await orderItemRepository.SaveChangesAsync();
@@ -133,7 +147,8 @@ public class OrderService(
 
     public Task<OrderItem?> GetOrderItemByIdAsync(int businessId, int orderId, int orderItemId)
     {
-        return orderItemRepository.GetByConditionAsync(i => i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
+        return orderItemRepository.GetByConditionAsync(i =>
+            i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
     }
 
     public async Task<OrderItem> UpdateOrderItemAsync(OrderItem orderItem)
