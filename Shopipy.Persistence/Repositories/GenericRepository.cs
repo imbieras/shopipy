@@ -35,7 +35,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _context.Set<T>().Where(predicate).CountAsync();           
     }
 
-    public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate)
+    public async Task<T?> GetByConditionAsync(Expression<Func<T, bool>> predicate)
     {
         return await _context.Set<T>().FirstOrDefaultAsync(predicate);
     }
@@ -50,6 +50,12 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _context.Set<T>().Add(entity);
         await _context.SaveChangesAsync();
         return entity;
+    }
+
+    public async Task<T> AddWithoutSavingChangesAsync(T entity)
+    {
+        var entry = await _context.Set<T>().AddAsync(entity);
+        return entry.Entity;
     }
 
     public async Task<T> UpdateAsync(T entity)
@@ -67,5 +73,20 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _context.Set<T>().Remove(entity);
         await _context.SaveChangesAsync();
         return true;
+    }
+    
+    public async Task<bool> DeleteByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        var entity = _context.Set<T>().FirstOrDefault(predicate);
+        if (entity == null) return false;
+
+        _context.Set<T>().Remove(entity);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public Task SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
     }
 }

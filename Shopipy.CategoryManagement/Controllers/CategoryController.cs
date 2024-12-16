@@ -43,7 +43,7 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
         var responseDto = mapper.Map<CategoryResponseDto>(createdCategory);
         return CreatedAtAction(
             nameof(GetCategoryById),
-            new { businessId = businessId, id = createdCategory.CategoryId },
+            new { businessId = businessId, categoryId = createdCategory.CategoryId },
             responseDto);
     }
 

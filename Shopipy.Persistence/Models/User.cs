@@ -11,7 +11,6 @@ public class User : IdentityUser
     public User(string userName) : base(userName)
     {
     }
-
     public required string Name { get; set; }
     public required UserRole Role { get; set; }
     public UserState UserState { get; set; } = UserState.Active;
