@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/select";
 import { useUser } from '@/hooks/useUser';
 import { useEffect } from 'react';
-import { serviceApi } from './services/ServiceApi';
-import { categoryApi } from '../categoryManagement/services/CategoryApi';
+import { serviceApi } from '../services/ServiceApi';
+import { categoryApi } from '../../categoryManagement/services/CategoryApi';
 
 const ServiceManagement = () => {
   const [serviceId, setServiceId] = useState('');
@@ -122,7 +122,7 @@ const ServiceManagement = () => {
     if (selectedService) {
       try {
         setLoading(true);
-        await serviceApi.deleteService(businessId, selectedService.id);
+        await serviceApi.deleteService(businessId, selectedService.serviceId);
         await fetchServices();
         setSelectedService(null);
         setEditedService(null);

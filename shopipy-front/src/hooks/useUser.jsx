@@ -22,7 +22,6 @@ export const useUser = create((set, get) => ({
     set({id: userId})
     try {
       const response = await axiosInstance.get(API_URL + `/users/${userId}`);
-      console.log("Response: ", response);
       set({
         email: response.data.email,
         name: response.data.name,
