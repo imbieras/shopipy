@@ -9,9 +9,9 @@ using Shopipy.Shared.Services;
 namespace Shopipy.DiscountManagement.Controllers;
 
 [ApiController]
-[Route("businesses/{businessId}/discounts")]
+[Route("businesses/{businessId:int}/discounts")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class DiscountController(IDiscountService discountService, IMapper mapper) : ControllerBase
+public class DiscountController(IDiscountService discountService, IMapper mapper, ILogger<DiscountController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetAllDiscounts(int businessId)
@@ -21,14 +21,20 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
         return Ok(discounts.Select(mapper.Map<DiscountResponseDto>));
     }
 
-    [HttpGet("{discountId}")]
+    [HttpGet("{discountId:int}")]
     public async Task<ActionResult<DiscountResponseDto>> GetDiscountById(int businessId, int discountId)
     {
         var discount = await discountService.GetDiscountByIdInBusinessAsync(businessId, discountId);
+        if (discount != null)
+        {
+            return Ok(mapper.Map<DiscountResponseDto>(discount));
+        }
 
-        return Ok(mapper.Map<DiscountResponseDto>(discount));
+        logger.LogWarning("Discount with ID {DiscountId} in business {BusinessId} not found.", discountId, businessId);
+        return NotFound();
+
     }
-    
+
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<DiscountResponseDto>> CreateDiscount(
@@ -44,7 +50,7 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
         return CreatedAtAction(nameof(GetDiscountById), new { businessId, discountId = discount.DiscountId }, mapper.Map<DiscountResponseDto>(discount));
     }
 
-    [HttpPut("{discountId}")]
+    [HttpPut("{discountId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<DiscountResponseDto>> UpdateDiscount(
         int businessId,
@@ -53,17 +59,30 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
     )
     {
         var discount = await discountService.GetDiscountByIdInBusinessAsync(businessId, discountId);
+        if (discount == null)
+        {
+            logger.LogWarning("Discount with ID {DiscountId} in business {BusinessId} not found.", discountId, businessId);
+            return NotFound();
+        }
 
         discount = await discountService.UpdateDiscountAsync(discount, effectiveTo);
 
         return Ok(mapper.Map<DiscountResponseDto>(discount));
     }
 
-    [HttpDelete("{discountId}")]
+    [HttpDelete("{discountId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult> DeleteDiscount(int businessId, int discountId)
     {
         var success = await discountService.DeleteDiscountAsync(discountId);
-        return success ? NoContent() : NotFound();
+
+        if (success)
+        {
+            return success ? NoContent() : NotFound();
+        }
+
+        logger.LogWarning("Discount with ID {DiscountId} in business {BusinessId} not found for deletion.", discountId, businessId);
+        return NotFound();
+
     }
 }
