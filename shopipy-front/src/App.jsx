@@ -10,10 +10,11 @@ import Services from './core/serviceManagement/page';
 import Appointments from './core/appointmentManagement/Appointments';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import Categories from './core/categoryManagement/Categories';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { fetchUser, clearUser } = useUser();
+  const { fetchUser, clearUser, role } = useUser();
   const queryClient = useQueryClient();
 
   const checkAuthentication = async () => {
@@ -124,6 +125,16 @@ function App() {
                 <Navigate to="/"/>
               )
             }
+          />
+          <Route
+          path="/categories"
+          element={
+            isAuthenticated && role === 'BusinessOwner' ? (
+              <Categories/>
+            ) : (
+              <Navigate to="/"/>
+            )
+          }
           />
         </Routes>
       </div>
