@@ -27,7 +27,8 @@ jobs:
           node-version: '22.x'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
+        working-directory: ./shopipy-front
 
       - name: Build
         run: npm run build
