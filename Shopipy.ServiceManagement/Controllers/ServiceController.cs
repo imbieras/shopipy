@@ -12,7 +12,7 @@ namespace Shopipy.ServiceManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId:int}/services")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ServiceController(IServiceManagementService serviceManagementService, ICategoryService categoryService, IMapper mapper, ILogger<ServiceController> logger) : ControllerBase
+public class ServiceController(IServiceManagementService serviceManagementService, IBusinessService businessService, ICategoryService categoryService, IMapper mapper, ILogger<ServiceController> logger) : ControllerBase
 {
 
     [HttpGet]
@@ -53,6 +53,13 @@ public class ServiceController(IServiceManagementService serviceManagementServic
     [HttpPost]
     public async Task<IActionResult> CreateService(int businessId, ServiceRequestDto request)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for service creation.", businessId);
+            return NotFound();
+        }
+
         var categoryExists = await categoryService.GetCategoryByIdInBusinessAsync(businessId, request.CategoryId);
         if (categoryExists == null)
         {

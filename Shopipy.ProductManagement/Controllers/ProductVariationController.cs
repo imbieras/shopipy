@@ -13,12 +13,26 @@ namespace Shopipy.ProductManagement.Controllers;
 [Route("businesses/{businessId:int}/products/{productId:int}/variations")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ProductVariationController(IProductVariationService variationService, IMapper mapper, ILogger<ProductVariationController> logger) : ControllerBase
+public class ProductVariationController(IProductVariationService variationService, IBusinessService businessService, IProductService productService, IMapper mapper, ILogger<ProductVariationController> logger) : ControllerBase
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<ProductVariationResponseDto>> CreateVariation(int businessId, int productId, ProductVariationRequestDto dto)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for product variation creation.", businessId);
+            return NotFound();
+        }
+        
+        var product = await productService.GetProductByIdAsync(productId, businessId);
+        if (product == null)
+        {
+            logger.LogWarning("Product with ID {ProductId} not found for product variation creation.", productId);
+            return NotFound();
+        }
+        
         var variation = mapper.Map<ProductVariation>(dto);
 
         var createdVariation = await variationService.CreateVariationAsync(variation, productId, businessId);

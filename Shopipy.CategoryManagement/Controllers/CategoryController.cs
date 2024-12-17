@@ -11,7 +11,7 @@ namespace Shopipy.CategoryManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId:int}/categories")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class CategoryController(ICategoryService categoryService, IMapper mapper, ILogger<CategoryController> logger) : ControllerBase
+public class CategoryController(ICategoryService categoryService, IBusinessService businessService, IMapper mapper, ILogger<CategoryController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAllCategories(int businessId)
@@ -39,6 +39,13 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> CreateCategory(int businessId, CategoryRequestDto request)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for category creation.", businessId);
+            return NotFound();
+        }
+
         var category = mapper.Map<Category>(request);
         category.BusinessId = businessId;
 

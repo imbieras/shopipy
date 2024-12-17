@@ -13,7 +13,7 @@ namespace Shopipy.ServiceManagement.Controllers;
 [EnableRateLimiting("fixed")]
 [Route("businesses/{businessId:int}/appointments")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class AppointmentController(IAppointmentService appointmentService, IMapper mapper, ILogger<AppointmentController> logger) : ControllerBase
+public class AppointmentController(IAppointmentService appointmentService, IBusinessService businessService, IMapper mapper, ILogger<AppointmentController> logger) : ControllerBase
 {
 
     [HttpGet("available-employees")]
@@ -125,6 +125,13 @@ public class AppointmentController(IAppointmentService appointmentService, IMapp
     [HttpPost]
     public async Task<IActionResult> CreateAppointment(int businessId, AppointmentRequestDto request)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for appointment creation.", businessId);
+            return NotFound();
+        }
+
         var appointment = mapper.Map<Appointment>(request);
         appointment.BusinessId = businessId;
 

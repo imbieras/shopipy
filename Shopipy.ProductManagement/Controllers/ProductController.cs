@@ -13,12 +13,19 @@ namespace Shopipy.ProductManagement.Controllers;
 [Route("businesses/{businessId:int}/products")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ProductController(IProductService productService, ICategoryService categoryService, IMapper mapper, ILogger<ProductController> logger) : ControllerBase
+public class ProductController(IProductService productService, ICategoryService categoryService, IBusinessService businessService, IMapper mapper, ILogger<ProductController> logger) : ControllerBase
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> CreateProduct(ProductRequestDto dto, int businessId)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for product creation.", businessId);
+            return NotFound();
+        }
+
         var categoryExists = await categoryService.GetCategoryByIdAsync(dto.CategoryId);
         if (categoryExists == null)
         {

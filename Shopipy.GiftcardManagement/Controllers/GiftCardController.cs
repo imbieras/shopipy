@@ -12,11 +12,18 @@ namespace Shopipy.GiftCardManagement.Controllers;
 [Route("businesses/{businessId:int}/giftcards")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class GiftCardController(IGiftCardService giftCardService, IMapper mapper, ILogger<GiftCardController> logger) : ControllerBase
+public class GiftCardController(IGiftCardService giftCardService, IBusinessService businessService, IMapper mapper, ILogger<GiftCardController> logger) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateGiftCard(GiftCardRequestDto dto, int businessId)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for gift card creation.", businessId);
+            return NotFound();
+        }
+        
         var giftCard = mapper.Map<GiftCard>(dto);
 
         var createdGiftCard = await giftCardService.CreateGiftCardAsync(giftCard, businessId);

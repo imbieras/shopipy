@@ -11,7 +11,7 @@ namespace Shopipy.DiscountManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId:int}/discounts")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class DiscountController(IDiscountService discountService, ICategoryService categoryService, IMapper mapper, ILogger<DiscountController> logger) : ControllerBase
+public class DiscountController(IDiscountService discountService, ICategoryService categoryService, IBusinessService businessService, IMapper mapper, ILogger<DiscountController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetAllDiscounts(int businessId)
@@ -42,6 +42,13 @@ public class DiscountController(IDiscountService discountService, ICategoryServi
         [FromBody] DiscountRequestDto discountRequestDto
     )
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for discount creation.", businessId);
+            return NotFound();
+        }
+
         var discount = mapper.Map<Discount>(discountRequestDto);
         discount.BusinessId = businessId;
 
@@ -88,7 +95,7 @@ public class DiscountController(IDiscountService discountService, ICategoryServi
             logger.LogWarning("Discount with ID {CategoryId} in business {BusinessId} not found for deletion.", discountId, businessId);
             return NotFound();
         }
-        
+
         var success = await discountService.DeleteDiscountAsync(discountId);
 
         if (success)
