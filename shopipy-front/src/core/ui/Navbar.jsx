@@ -1,17 +1,24 @@
-// Navbar.jsx
 import { Link, useLocation } from 'react-router-dom';
+import { useUser } from '@/hooks/useUser';
 
 const Navbar = ({ onLogout }) => {
   const location = useLocation();
+  const { role } = useUser();
  
   const navItems = [
     { name: 'Services', path: '/services' },
-    { name: 'Orders', path: '/orders' }
+    { name: 'Orders', path: '/orders' },
+    { name: 'Appointments', path: '/appointments'},
+    { name: 'Categories', path: '/categories', role: 'BusinessOwner' }
   ];
 
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  const filteredNavItems = navItems.filter(item =>
+    !item.role || item.role === role
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -21,7 +28,7 @@ const Navbar = ({ onLogout }) => {
             <span className="text-xl font-bold tracking-tight">Shopipy</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
