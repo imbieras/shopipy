@@ -4,13 +4,21 @@ namespace Shopipy.OrderManagement.DTOs;
 
 public class OrderDto
 {
-    public required int OrderId { get; set; }
-    public required int BusinessId { get; set; }
-    public required string UserId { get; set; }
-    public required OrderStatus OrderStatus { get; set; }
-    public required decimal TotalTip { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public DateTime? ClosedAt { get; set; }
-    public required IEnumerable<OrderItemDto> OrderItems { get; set; }
+    public required int OrderId { get; init; }
+
+    public required int BusinessId { get; init; }
+
+    public required string UserId { get; init; }
+
+    public required OrderStatus OrderStatus { get; init; }
+
+    public required decimal TotalTip { get; init; }
+
+    public DateTime CreatedAt { get; init; }
+
+    public DateTime UpdatedAt { get; init; }
+
+    public DateTime? ClosedAt { get; init; }
+
+    public required IEnumerable<OrderItemDto> OrderItems { get; init; }
 }

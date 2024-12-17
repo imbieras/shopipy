@@ -6,18 +6,22 @@ namespace Shopipy.OrderManagement.Mappings;
 
 public class CreateOrderItemRequestDtoJsonConverter : JsonConverter<CreateOrderItemRequestDto>
 {
-    public override CreateOrderItemRequestDto? Read(ref Utf8JsonReader reader, Type typeToConvert,
-        JsonSerializerOptions options)
+    public override CreateOrderItemRequestDto? Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
     {
         using var doc = JsonDocument.ParseValue(ref reader);
         var orderItem = doc.Deserialize<HelperCreateOrderItemRequestDto>();
         if (orderItem is null) throw new JsonException();
-        if (orderItem.ProductId is null == orderItem.Serviceid is null)
+        if (orderItem.ProductId is null == orderItem.ServiceId is null)
             throw new JsonException("Either product id or service id must be set");
         if (orderItem.ProductId is not null)
         {
             return doc.Deserialize<CreateProductOrderItemRequestDto>(options);
         }
+
         return doc.Deserialize<CreateServiceOrderItemRequestDto>(options);
     }
 
@@ -25,10 +29,11 @@ public class CreateOrderItemRequestDtoJsonConverter : JsonConverter<CreateOrderI
     {
         throw new NotImplementedException();
     }
-    
+
     private class HelperCreateOrderItemRequestDto : CreateOrderItemRequestDto
     {
         public int? ProductId { get; set; }
-        public int? Serviceid { get; set; }
+
+        public int? ServiceId { get; set; }
     }
 }

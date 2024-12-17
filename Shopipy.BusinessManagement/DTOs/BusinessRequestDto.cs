@@ -21,6 +21,6 @@ public class BusinessRequestDto
     [Phone]
     [StringLength(20)]
     public string? BusinessPhone { get; set; }
-    
+
     public required BusinessType BusinessType { get; set; }
 }

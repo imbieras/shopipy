@@ -16,7 +16,7 @@ public class CategoryService(IGenericRepository<Category> categoryRepository) : 
         return await categoryRepository.GetAllByConditionAsync(c => c.BusinessId == businessId);
     }
 
-    public async Task<Category> GetCategoryByIdAsync(int id)
+    public async Task<Category?> GetCategoryByIdAsync(int id)
     {
         return await categoryRepository.GetByIdAsync(id);
     }
@@ -25,7 +25,7 @@ public class CategoryService(IGenericRepository<Category> categoryRepository) : 
     {
         return await categoryRepository.GetByConditionAsync(c => c.BusinessId == businessId && c.CategoryId == id);
     }
-    
+
     public async Task<Category> CreateCategoryAsync(Category category)
     {
         return await categoryRepository.AddAsync(category);

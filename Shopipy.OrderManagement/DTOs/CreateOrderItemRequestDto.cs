@@ -4,6 +4,4 @@ using Shopipy.OrderManagement.Mappings;
 namespace Shopipy.OrderManagement.DTOs;
 
 [JsonConverter(typeof(CreateOrderItemRequestDtoJsonConverter))]
-public abstract class CreateOrderItemRequestDto
-{
-}
+public abstract class CreateOrderItemRequestDto {}

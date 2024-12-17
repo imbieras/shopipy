@@ -14,7 +14,8 @@ public class OrderService(
     IProductService productService,
     IProductVariationService productVariationService,
     IServiceManagementService serviceManagementService,
-    ITaxService taxService)
+    ITaxService taxService
+)
 {
     public async Task<Order> CreateOrderWithItemsAsync(int businessId, string userId, IEnumerable<OrderItem> orderItems)
     {
@@ -24,8 +25,7 @@ public class OrderService(
             throw new ArgumentException($"User with id {userId} not found");
         }
 
-        var order = await orderRepository.AddWithoutSavingChangesAsync(new Order
-            { BusinessId = businessId, UserId = userId, OrderStatus = OrderStatus.Open });
+        var order = await orderRepository.AddWithoutSavingChangesAsync(new Order { BusinessId = businessId, UserId = userId, OrderStatus = OrderStatus.Open });
         foreach (var orderItem in orderItems)
         {
             orderItem.OrderItemId = order.OrderId;
@@ -39,7 +39,7 @@ public class OrderService(
     private async Task AddTaxRateToOrderItem(OrderItem orderItem, int categoryId)
     {
         var taxRate = (await taxService.GetAllTaxRatesByBusinessAsync(orderItem.BusinessId)).FirstOrDefault(t => t.CategoryId == categoryId && t.EffectiveFrom <= DateTime.UtcNow &&
-            DateTime.UtcNow <= t.EffectiveTo);
+                                                                                                                 DateTime.UtcNow <= t.EffectiveTo);
         orderItem.TaxRateId = taxRate?.TaxRateId;
     }
 
@@ -55,7 +55,7 @@ public class OrderService(
         {
             throw new ArgumentException("Order is not open");
         }
-        
+
         if (orderItem is ProductOrderItem productOrderItem)
         {
             var match = await productOrderItemRepository.GetByConditionAsync(i =>
@@ -89,18 +89,18 @@ public class OrderService(
             }
 
             var variation = await productVariationService.GetVariationByIdAsync(
-                productOrderItem.ProductVariationId.Value,
-                productOrderItem.ProductId, productOrderItem.BusinessId);
+            productOrderItem.ProductVariationId.Value,
+            productOrderItem.ProductId, productOrderItem.BusinessId);
             if (variation is null)
             {
                 throw new ArgumentException(
-                    $"Variation with id {productOrderItem.ProductVariationId.Value} not found");
+                $"Variation with id {productOrderItem.ProductVariationId.Value} not found");
             }
 
             if (variation.ProductState != ProductState.Available)
             {
                 throw new ArgumentException(
-                    $"Product variation with id {productOrderItem.ProductId} is not available");
+                $"Product variation with id {productOrderItem.ProductId} is not available");
             }
 
             await AddTaxRateToOrderItem(productOrderItem, product.CategoryId);
@@ -116,7 +116,7 @@ public class OrderService(
         if (orderItem is not ServiceOrderItem serviceOrderItem) throw new ArgumentException("Invalid order item type");
         var service =
             await serviceManagementService.GetServiceByIdInBusiness(serviceOrderItem.BusinessId,
-                serviceOrderItem.ServiceId);
+            serviceOrderItem.ServiceId);
         if (service is null)
         {
             throw new ArgumentException($"Service with id {serviceOrderItem.ServiceId} is not found");
@@ -139,12 +139,7 @@ public class OrderService(
 
     public Task<Order?> GetOrderByIdAsync(int businessId, int orderId, bool withItems = true)
     {
-        if (withItems)
-        {
-            return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
-        }
-
-        return orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+        return withItems ? orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId) : orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
     }
 
     public Task<IEnumerable<Order>> GetOrdersAsync(int businessId)

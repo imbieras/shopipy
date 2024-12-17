@@ -56,7 +56,7 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
         }
 
         mapper.Map(request, existingBusiness);
-        existingBusiness.UpdatedAt = DateTime.UtcNow;// Update the timestamp
+        existingBusiness.UpdatedAt = DateTime.UtcNow;
 
         var updatedBusiness = await businessService.UpdateBusinessAsync(existingBusiness);
         var responseDto = mapper.Map<BusinessResponseDto>(updatedBusiness);

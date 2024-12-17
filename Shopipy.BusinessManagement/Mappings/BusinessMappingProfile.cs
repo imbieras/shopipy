@@ -28,8 +28,8 @@ public class BusinessMappingProfile : Profile
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.BusinessEmail))
             .ForMember(dest => dest.VatNumber, opt => opt.MapFrom(src => src.BusinessVatNumber))
             .ForMember(dest => dest.BusinessType, opt => opt.MapFrom(src => src.BusinessType))
-            .ForMember(dest => dest.BusinessId, opt => opt.Ignore()) 
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
+            .ForMember(dest => dest.BusinessId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
     }
 }

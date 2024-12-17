@@ -87,6 +87,6 @@ public class CategoryController(ICategoryService categoryService, IMapper mapper
         }
 
         logger.LogError("Failed to delete category with ID {CategoryId} in business {BusinessId}.", categoryId, businessId);
-        return BadRequest("Failed to delete category.");
+        return NotFound();
     }
 }

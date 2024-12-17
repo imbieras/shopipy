@@ -11,7 +11,7 @@ namespace Shopipy.DiscountManagement.Controllers;
 [ApiController]
 [Route("businesses/{businessId:int}/discounts")]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class DiscountController(IDiscountService discountService, IMapper mapper, ILogger<DiscountController> logger) : ControllerBase
+public class DiscountController(IDiscountService discountService, ICategoryService categoryService, IMapper mapper, ILogger<DiscountController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetAllDiscounts(int businessId)
@@ -45,6 +45,14 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
         var discount = mapper.Map<Discount>(discountRequestDto);
         discount.BusinessId = businessId;
 
+        var category = await categoryService.GetCategoryByIdAsync(discount.CategoryId);
+
+        if (category == null)
+        {
+            logger.LogWarning("Category with ID {CategoryId} not found for discount creation.", discount.CategoryId);
+            return NotFound();
+        }
+
         discount = await discountService.CreateDiscountAsync(discount);
 
         return CreatedAtAction(nameof(GetDiscountById), new { businessId, discountId = discount.DiscountId }, mapper.Map<DiscountResponseDto>(discount));
@@ -74,11 +82,18 @@ public class DiscountController(IDiscountService discountService, IMapper mapper
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult> DeleteDiscount(int businessId, int discountId)
     {
+        var existingDiscount = await discountService.GetDiscountByIdInBusinessAsync(businessId, discountId);
+        if (existingDiscount == null)
+        {
+            logger.LogWarning("Discount with ID {CategoryId} in business {BusinessId} not found for deletion.", discountId, businessId);
+            return NotFound();
+        }
+        
         var success = await discountService.DeleteDiscountAsync(discountId);
 
         if (success)
         {
-            return success ? NoContent() : NotFound();
+            return NoContent();
         }
 
         logger.LogWarning("Discount with ID {DiscountId} in business {BusinessId} not found for deletion.", discountId, businessId);

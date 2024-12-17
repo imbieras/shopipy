@@ -16,11 +16,7 @@ public class AuthService(SigningCredentials signingCredentials, string issuer, s
             Expires = DateTime.UtcNow.AddHours(1),
             Issuer = issuer,
             Audience = audience,
-            Claims = new Dictionary<string, object>
-            {
-                {JwtRegisteredClaimNames.Sub, user.Id},
-                {ClaimTypes.Role, user.Role.ToString()}
-            },
+            Claims = new Dictionary<string, object> { { JwtRegisteredClaimNames.Sub, user.Id }, { ClaimTypes.Role, user.Role.ToString() } }
         };
         return handler.CreateEncodedJwt(descriptor);
     }

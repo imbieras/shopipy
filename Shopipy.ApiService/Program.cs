@@ -150,8 +150,8 @@ builder.Services.AddShared();
 builder.Services.AddUserManagement();
 builder.Services.AddOrderManagement();
 
-builder.Services.AddSingleton<ISMSService>(provider => 
-    new TwilioSMSService(
+builder.Services.AddSingleton<ISmsService>(provider => 
+    new TwilioSmsService(
         builder.Configuration["TwilioAccountSid"]!,
         builder.Configuration["TwilioAuthToken"]!,
         builder.Configuration["TwilioPhoneNumber"]!
@@ -252,7 +252,7 @@ using (var serviceScope = app.Services.CreateScope())
     {
         Name = "BusinessOwner",
         Role = UserRole.BusinessOwner,
-        BusinessId = 2
+        BusinessId = 1
     }, "Business_owner1234");
 
     dbContext.SaveChanges();
