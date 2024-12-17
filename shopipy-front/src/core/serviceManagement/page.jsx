@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ServiceManagement from "./components/ServiceManagement";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CategoryFilter } from "./components/CategoryFilter";
+import { CategoryFilter } from "../categoryManagement/components/CategoryFilter";
 import { categoryApi } from "../categoryManagement/services/CategoryApi";
 
 export default function Services() {

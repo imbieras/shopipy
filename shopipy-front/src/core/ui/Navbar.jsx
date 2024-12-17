@@ -8,8 +8,9 @@ const Navbar = ({ onLogout }) => {
   const navItems = [
     { name: 'Services', path: '/services' },
     { name: 'Orders', path: '/orders' },
+    { name: 'Products', path: '/products'},
     { name: 'Appointments', path: '/appointments'},
-    { name: 'Categories', path: '/categories', role: 'BusinessOwner' }
+    { name: 'Categories', path: '/categories', role: 'BusinessOwner'},
   ];
 
   const isActive = (path) => {

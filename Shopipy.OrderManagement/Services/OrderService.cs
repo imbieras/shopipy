@@ -11,11 +11,12 @@ public class OrderService(
     OrderRepository orderRepository,
     IGenericRepository<OrderItem> orderItemRepository,
     IGenericRepository<ProductOrderItem> productOrderItemRepository,
+    IGenericRepository<ServiceOrderItem> serviceOrderItemRepository,
     IProductService productService,
     IProductVariationService productVariationService,
     IServiceManagementService serviceManagementService,
-    ITaxService taxService
-)
+    ITaxService taxService,
+    IGenericRepository<OrderDiscount> orderDiscountRepository)
 {
     public async Task<Order> CreateOrderWithItemsAsync(int businessId, string userId, IEnumerable<OrderItem> orderItems)
     {
@@ -25,35 +26,43 @@ public class OrderService(
             throw new ArgumentException($"User with id {userId} not found");
         }
 
-        var order = await orderRepository.AddWithoutSavingChangesAsync(new Order { BusinessId = businessId, UserId = userId, OrderStatus = OrderStatus.Open });
+        var order = await orderRepository.AddWithoutSavingChangesAsync(new Order
+            { BusinessId = businessId, UserId = userId, OrderStatus = OrderStatus.Open });
+        await orderRepository.SaveChangesAsync();
+
         foreach (var orderItem in orderItems)
         {
-            orderItem.OrderItemId = order.OrderId;
+            orderItem.OrderId = order.OrderId;
             await AddOrderItemAsync(orderItem, saveChanges: false);
         }
 
         await orderRepository.SaveChangesAsync();
-        return order;
+        return await GetOrderByIdAsync(businessId, order.OrderId) ?? 
+               throw new InvalidOperationException("Created order not found");
     }
 
     private async Task AddTaxRateToOrderItem(OrderItem orderItem, int categoryId)
     {
-        var taxRate = (await taxService.GetAllTaxRatesByBusinessAsync(orderItem.BusinessId)).FirstOrDefault(t => t.CategoryId == categoryId && t.EffectiveFrom <= DateTime.UtcNow &&
-                                                                                                                 DateTime.UtcNow <= t.EffectiveTo);
+        var taxRate = (await taxService.GetAllTaxRatesByBusinessAsync(orderItem.BusinessId)).FirstOrDefault(t =>
+            t.CategoryId == categoryId && t.EffectiveFrom <= DateTime.UtcNow &&
+            DateTime.UtcNow <= t.EffectiveTo);
         orderItem.TaxRateId = taxRate?.TaxRateId;
     }
 
     public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
-        var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
-        if (order is null)
+        if (saveChanges)
         {
-            throw new ArgumentException($"Order with id {orderItem.OrderId} not found");
-        }
+            var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
+            if (order is null)
+            {
+                throw new ArgumentException($"Order with id {orderItem.OrderId} not found");
+            }
 
-        if (order.OrderStatus != OrderStatus.Open)
-        {
-            throw new ArgumentException("Order is not open");
+            if (order.OrderStatus != OrderStatus.Open)
+            {
+                throw new ArgumentException("Order is not open");
+            }   
         }
 
         if (orderItem is ProductOrderItem productOrderItem)
@@ -142,6 +151,16 @@ public class OrderService(
         return withItems ? orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId) : orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
     }
 
+    public Task<IEnumerable<ProductOrderItem>> GetProductOrderItems(int businessId, int orderId)
+    {
+        return productOrderItemRepository.GetAllByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+    }
+    
+    public Task<IEnumerable<ServiceOrderItem>> GetServiceOrderItems(int businessId, int orderId)
+    {
+        return serviceOrderItemRepository.GetAllByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+    }
+
     public Task<IEnumerable<Order>> GetOrdersAsync(int businessId)
     {
         return orderRepository.GetOrdersWithItemsAsync(businessId);
@@ -152,7 +171,7 @@ public class OrderService(
         return orderItemRepository.GetByConditionAsync(i =>
             i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
     }
-
+    
     public async Task<OrderItem> UpdateOrderItemAsync(OrderItem orderItem)
     {
         await ValidateOrderAsync(orderItem.BusinessId, orderItem.OrderId);
@@ -181,6 +200,43 @@ public class OrderService(
         await UpdateOrderTime(businessId, orderId);
     }
 
+    public async Task ApplyDiscount(Order order, int discountId)
+    {
+        await ValidateOrderAsync(order.BusinessId, order.OrderId);
+        await orderDiscountRepository.AddWithoutSavingChangesAsync(new OrderDiscount
+        {
+            OrderId = order.OrderId,
+            BusinessId = order.BusinessId,
+            DiscountId = discountId
+        });
+        await UpdateOrderTime(order.BusinessId, order.OrderId, saveChanges: false);
+        await orderRepository.SaveChangesAsync();
+    }
+
+    public async Task ApplyDiscount(IEnumerable<OrderItem> orderItems, int discountId)
+    {
+        foreach (var orderItem in orderItems)
+        {
+            await ValidateOrderAsync(orderItem.BusinessId, orderItem.OrderId);
+            await orderDiscountRepository.AddWithoutSavingChangesAsync(new OrderDiscount
+            {
+                OrderId = orderItem.OrderId,
+                BusinessId = orderItem.BusinessId,
+                DiscountId = discountId,
+                OrderItemId = orderItem.OrderItemId
+            });
+            await UpdateOrderTime(orderItem.BusinessId, orderItem.OrderId, saveChanges: false);
+        }
+        await orderRepository.SaveChangesAsync();
+    }
+
+    public async Task DeleteDiscount(int businessId, int orderId, int discountId)
+    {
+        await ValidateOrderAsync(businessId, orderId);
+        await orderDiscountRepository.DeleteAsync(discountId);
+        await UpdateOrderTime(businessId, orderId);
+    }
+
     private async Task ValidateOrderAsync(int businessId, int orderId)
     {
         var order = await GetOrderByIdAsync(businessId, orderId);
@@ -195,11 +251,11 @@ public class OrderService(
         }
     }
 
-    private async Task UpdateOrderTime(int businessId, int orderId)
+    private async Task UpdateOrderTime(int businessId, int orderId, bool saveChanges = true)
     {
         var order = await GetOrderByIdAsync(businessId, orderId);
         if (order is null) return;
-        order.UpdatedAt = DateTime.Now;
-        await orderRepository.UpdateAsync(order);
+        order.UpdatedAt = DateTime.UtcNow;
+        if (saveChanges) await orderRepository.UpdateAsync(order);
     }
 }

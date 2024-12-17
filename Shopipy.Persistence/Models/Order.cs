@@ -11,4 +11,7 @@ public class Order
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ClosedAt { get; set; }
     public IEnumerable<OrderItem>? OrderItems { get; set; }
+    public IEnumerable<OrderDiscount>? OrderDiscounts { get; set; }
+    
+    public Order Clone() => (Order)MemberwiseClone();
 }

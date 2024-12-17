@@ -11,6 +11,9 @@ import Appointments from './core/appointmentManagement/Appointments';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import Categories from './core/categoryManagement/Categories';
+import Orders from './core/orderManagement/Orders';
+import Products from './core/productManagement/Products';
+import OrderDetails from './core/orderManagement/components/OrderDetails';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,6 +114,36 @@ function App() {
             element={
               isAuthenticated ? (
                 <Services/>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              isAuthenticated ? (
+                <Orders/>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/orders/:orderId"
+            element={
+              isAuthenticated ? (
+                <OrderDetails/>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              isAuthenticated ? (
+                <Products/>
               ) : (
                 <Navigate to="/" />
               )

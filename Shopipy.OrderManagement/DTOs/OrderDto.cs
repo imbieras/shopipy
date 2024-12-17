@@ -1,3 +1,4 @@
+using Shopipy.OrderManagement.DTOs.Discounts;
 using Shopipy.Persistence.Models;
 
 namespace Shopipy.OrderManagement.DTOs;
@@ -21,4 +22,6 @@ public class OrderDto
     public DateTime? ClosedAt { get; init; }
 
     public required IEnumerable<OrderItemDto> OrderItems { get; init; }
+
+    public required IEnumerable<DiscountDto> Discounts { get; init; }
 }
