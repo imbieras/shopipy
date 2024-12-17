@@ -1,3 +1,5 @@
+using Shopipy.OrderManagement.DTOs.Discounts;
+
 namespace Shopipy.OrderManagement.DTOs;
 
 public abstract class OrderItemDto
@@ -7,4 +9,5 @@ public abstract class OrderItemDto
     public required decimal UnitPrice { get; set; }
     public int? TaxRateId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public IEnumerable<DiscountDto> Discounts { get; set; }
 }
