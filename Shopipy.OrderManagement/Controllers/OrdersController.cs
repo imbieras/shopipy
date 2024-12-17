@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopipy.OrderManagement.DTOs;
+using Shopipy.OrderManagement.DTOs.Discounts;
 using Shopipy.OrderManagement.Services;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
@@ -97,6 +98,30 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
     public async Task<IActionResult> DeleteOrderItem(int businessId, int orderId, int orderItemId)
     {
         await orderService.DeleteOrderItemAsync(businessId, orderId, orderItemId);
+        return NoContent();
+    }
+
+    [HttpPost("{orderId}/apply-discount")]
+    public async Task<ActionResult<OrderDto>> CreateDiscount(int businessId, int orderId, [FromBody] ApplyDiscountRequestDto request)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId);
+        if (order == null) return NotFound();
+        if (request.ApplyTo == ApplyTo.Order)
+        {
+            await orderService.ApplyDiscount(order, request.Discountid);
+        }
+        else
+        {
+            if (request.OrderItemIds == null || order.OrderItems == null) return new BadRequestResult();
+            await orderService.ApplyDiscount(order.OrderItems.Where(i => request.OrderItemIds.Contains(i.OrderItemId)), request.Discountid);
+        }
+        return Ok(mapper.Map<OrderDto>(await orderService.GetOrderByIdAsync(businessId, orderId)));
+    }
+
+    [HttpDelete("{orderId}/discounts/{discountId}")]
+    public async Task<IActionResult> DeleteDiscount(int businessId, int orderId, int discountId)
+    {
+        await orderService.DeleteDiscount(businessId, orderId, discountId);
         return NoContent();
     }
 }

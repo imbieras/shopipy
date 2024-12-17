@@ -8,4 +8,5 @@ public abstract class OrderItem
     public required decimal UnitPrice { get; set; }
     public int? TaxRateId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public IEnumerable<OrderDiscount> OrderDiscounts { get; set; }
 }
