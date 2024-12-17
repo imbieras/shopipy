@@ -11,6 +11,7 @@ public class OrderService(
     OrderRepository orderRepository,
     IGenericRepository<OrderItem> orderItemRepository,
     IGenericRepository<ProductOrderItem> productOrderItemRepository,
+    IGenericRepository<ServiceOrderItem> serviceOrderItemRepository,
     IProductService productService,
     IProductVariationService productVariationService,
     IServiceManagementService serviceManagementService,
@@ -26,14 +27,17 @@ public class OrderService(
 
         var order = await orderRepository.AddWithoutSavingChangesAsync(new Order
             { BusinessId = businessId, UserId = userId, OrderStatus = OrderStatus.Open });
+        await orderRepository.SaveChangesAsync();
+
         foreach (var orderItem in orderItems)
         {
-            orderItem.OrderItemId = order.OrderId;
+            orderItem.OrderId = order.OrderId;
             await AddOrderItemAsync(orderItem, saveChanges: false);
         }
 
         await orderRepository.SaveChangesAsync();
-        return order;
+        return await GetOrderByIdAsync(businessId, order.OrderId) ?? 
+               throw new InvalidOperationException("Created order not found");
     }
 
     private async Task AddTaxRateToOrderItem(OrderItem orderItem, int categoryId)
@@ -45,15 +49,18 @@ public class OrderService(
 
     public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem, bool saveChanges = true)
     {
-        var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
-        if (order is null)
+        if (saveChanges)
         {
-            throw new ArgumentException($"Order with id {orderItem.OrderId} not found");
-        }
+            var order = await GetOrderByIdAsync(orderItem.BusinessId, orderItem.OrderId);
+            if (order is null)
+            {
+                throw new ArgumentException($"Order with id {orderItem.OrderId} not found");
+            }
 
-        if (order.OrderStatus != OrderStatus.Open)
-        {
-            throw new ArgumentException("Order is not open");
+            if (order.OrderStatus != OrderStatus.Open)
+            {
+                throw new ArgumentException("Order is not open");
+            }   
         }
         
         if (orderItem is ProductOrderItem productOrderItem)
@@ -147,6 +154,16 @@ public class OrderService(
         return orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
     }
 
+    public Task<IEnumerable<ProductOrderItem>> GetProductOrderItems(int businessId, int orderId)
+    {
+        return productOrderItemRepository.GetAllByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+    }
+    
+    public Task<IEnumerable<ServiceOrderItem>> GetServiceOrderItems(int businessId, int orderId)
+    {
+        return serviceOrderItemRepository.GetAllByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+    }
+
     public Task<IEnumerable<Order>> GetOrdersAsync(int businessId)
     {
         return orderRepository.GetOrdersWithItemsAsync(businessId);
@@ -157,7 +174,7 @@ public class OrderService(
         return orderItemRepository.GetByConditionAsync(i =>
             i.BusinessId == businessId && i.OrderId == orderId && i.OrderItemId == orderItemId);
     }
-
+    
     public async Task<OrderItem> UpdateOrderItemAsync(OrderItem orderItem)
     {
         await ValidateOrderAsync(orderItem.BusinessId, orderItem.OrderId);
@@ -204,7 +221,7 @@ public class OrderService(
     {
         var order = await GetOrderByIdAsync(businessId, orderId);
         if (order is null) return;
-        order.UpdatedAt = DateTime.Now;
+        order.UpdatedAt = DateTime.UtcNow;
         await orderRepository.UpdateAsync(order);
     }
 }

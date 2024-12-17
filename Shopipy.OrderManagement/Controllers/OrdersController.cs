@@ -33,7 +33,7 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         var orders = await orderService.GetOrdersAsync(businessId);
         return Ok(mapper.Map<IEnumerable<OrderDto>>(orders));
     }
-
+    
     [HttpGet("{orderId}")]
     public async Task<ActionResult<OrderDto>> GetOrderById(int businessId, int orderId)
     {
@@ -41,7 +41,23 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         if (order == null) return NotFound();
         return Ok(mapper.Map<OrderDto>(order));
     }
+    
+    [HttpGet("{orderId}/product-items")]
+    public async Task<ActionResult<IEnumerable<ProductOrderItemDto>>> GetProductOrderItems(int businessId, int orderId)
+    {
+        var productItems = await orderService.GetProductOrderItems(businessId, orderId);
+        if (!productItems.Any()) return NotFound();
+        return Ok(mapper.Map<IEnumerable<ProductOrderItemDto>>(productItems));
+    }
 
+    [HttpGet("{orderId}/service-items")]
+    public async Task<ActionResult<IEnumerable<ServiceOrderItemDto>>> GetServiceOrderItems(int businessId, int orderId)
+    {
+        var serviceItems = await orderService.GetServiceOrderItems(businessId, orderId);
+        if (!serviceItems.Any()) return NotFound();
+        return Ok(mapper.Map<IEnumerable<ServiceOrderItemDto>>(serviceItems));
+    }
+    
     [HttpPost("{orderId}/cancel")]
     public async Task<IActionResult> CancelOrder(int businessId, int orderId)
     {
