@@ -41,6 +41,10 @@ export const useUser = create((set, get) => ({
     }
   },
 
+  setBusinessId: (businessId) => {
+    set({ businessId });
+  },
+
   // Reset all state to initial values
   clearUser: () => {
     set(initialState);
