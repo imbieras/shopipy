@@ -14,6 +14,8 @@ import Categories from './core/categoryManagement/Categories';
 import Orders from './core/orderManagement/Orders';
 import Products from './core/productManagement/Products';
 import OrderDetails from './core/orderManagement/components/OrderDetails';
+import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -169,6 +171,16 @@ function App() {
             )
           }
           />
+          <Route
+          path="/switch-business"
+          element={
+            isAuthenticated ? (
+              <BusinessSwitcher />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
         </Routes>
       </div>
     </BrowserRouter>
