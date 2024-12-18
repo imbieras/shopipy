@@ -1,32 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { businessApi } from '../businessManagement/services/BusinessApi';
 import { useUser } from '@/hooks/useUser';
 
+const fetchBusinesses = async () => {
+    const data = await businessApi.getBusinesses();
+    return data;
+};
+
 const BusinessSwitcher = () => {
-    const [businesses, setBusinesses] = useState([]);
-    const [selectedBusiness, setSelectedBusiness] = useState(null);
-    const { setBusinessId } = useUser();
+    const { setBusinessId, businessId } = useUser();
 
-    useEffect(() => {
-        const fetchBusinesses = async () => {
-            try {
-                const data = await businessApi.getBusinesses();
-                setBusinesses(data);
-                console.log(`Fetched buisinesses: ${JSON.stringify(data, null, 2)}`);
-            } catch (error) {
-                console.error('Failed to fetch businesses:', error);
-            }
-        };
+    // Fetch businesses using useQuery
+    const { data: businesses = [], isLoading, error } = useQuery({
+        queryKey: ['businesses'],
+        queryFn: fetchBusinesses,
+    });
 
-        fetchBusinesses();
-    }, []);
-
-    const handleSelectBusiness = (businessId) => {
-        setSelectedBusiness(businessId);
-        setBusinessId(businessId);
-        console.log(`Selected Business ID: ${businessId}`);
-        // all vodoo magic happens here. 
+    const handleSelectBusiness = (selectedBusinessId) => {
+        setBusinessId(selectedBusinessId); 
+        console.log(`Selected Business ID: ${selectedBusinessId}`);
     };
+
+    if (isLoading) {
+        return <div className="text-center text-gray-700">Loading businesses...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="text-center text-red-500">
+                Failed to load businesses: {error.message}
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-8">
@@ -36,7 +42,7 @@ const BusinessSwitcher = () => {
                     <div
                         key={business.businessId}
                         className={`p-4 border rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
-                            selectedBusiness === business.businessId
+                            businessId === business.businessId
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-white text-gray-700'
                         }`}
@@ -51,5 +57,6 @@ const BusinessSwitcher = () => {
         </div>
     );
 };
+
 
 export default BusinessSwitcher;
