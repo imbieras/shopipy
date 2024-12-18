@@ -29,24 +29,25 @@ const BusinessSwitcher = () => {
     };
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold">Switch Business</h1>
-            {businesses.length > 0 ? (
-                <ul className="mt-4">
-                    {businesses.map((business) => (
-                        <li key={business.businessId} className="mb-2">
-                            <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                                onClick={() => handleSelectBusiness(business.businessId)}
-                            >
-                                {business.name}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>Loading businesses...</p>
-            )}
+        <div className="container mx-auto p-8">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Switch Business</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {businesses.map((business) => (
+                    <div
+                        key={business.businessId}
+                        className={`p-4 border rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
+                            selectedBusiness === business.businessId
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white text-gray-700'
+                        }`}
+                        onClick={() => handleSelectBusiness(business.businessId)}
+                    >
+                        <h2 className="text-lg font-semibold text-center">
+                            {business.name}
+                        </h2>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
