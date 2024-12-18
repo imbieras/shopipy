@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { businessApi } from '../businessManagement/services/BusinessApi';
+import { useUser } from '@/hooks/useUser';
 
 const BusinessSwitcher = () => {
     const [businesses, setBusinesses] = useState([]);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
+    const { setBusinessId } = useUser();
 
     useEffect(() => {
         const fetchBusinesses = async () => {
@@ -21,8 +23,9 @@ const BusinessSwitcher = () => {
 
     const handleSelectBusiness = (businessId) => {
         setSelectedBusiness(businessId);
+        setBusinessId(businessId);
         console.log(`Selected Business ID: ${businessId}`);
-        // Add logic to update the selected business in global state, context, or API if needed
+        // all vodoo magic happens here. 
     };
 
     return (
