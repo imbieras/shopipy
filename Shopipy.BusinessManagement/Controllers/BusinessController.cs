@@ -14,34 +14,33 @@ namespace Shopipy.BusinessManagement.Controllers;
 public class BusinessController(IBusinessService businessService, IMapper mapper, ILogger<BusinessController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetBusinesses()
+    public async Task<ActionResult<IEnumerable<BusinessResponseDto>>> GetAllBusinesses()
     {
         var businesses = await businessService.GetAllBusinessesAsync();
-        var responseDtos = mapper.Map<IEnumerable<BusinessResponseDto>>(businesses);
-        return Ok(responseDtos);
+
+        return Ok(businesses.Select(mapper.Map<BusinessResponseDto>));
     }
 
     [HttpGet("{businessId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-    public async Task<IActionResult> GetBusiness(int businessId)
+    public async Task<IActionResult> GetBusinessById(int businessId)
     {
         var business = await businessService.GetBusinessByIdAsync(businessId);
-        if (business == null)
+        if (business != null)
         {
-            logger.LogWarning("Business with ID {BusinessId} not found.", businessId);
-            return NotFound();
+            return Ok(mapper.Map<BusinessResponseDto>(business));
         }
 
-        var responseDto = mapper.Map<BusinessResponseDto>(business);
-        return Ok(responseDto);
+        logger.LogWarning("Business with ID {BusinessId} not found.", businessId);
+        return NotFound();
     }
+    
     [HttpPost]
-    public async Task<IActionResult> CreateBusiness(BusinessRequestDto request)
+    public async Task<IActionResult> CreateBusiness([FromBody] BusinessRequestDto request)
     {
         var business = mapper.Map<Business>(request);
         var createdBusiness = await businessService.CreateBusinessAsync(business);
-        var responseDto = mapper.Map<BusinessResponseDto>(createdBusiness);
-        return CreatedAtAction(nameof(GetBusiness), new { id = createdBusiness.BusinessId }, responseDto);
+        return CreatedAtAction(nameof(GetBusinessById), new { businessId = createdBusiness.BusinessId }, mapper.Map<BusinessResponseDto>(createdBusiness));
     }
 
     [HttpPut("{businessId:int}")]
@@ -56,18 +55,23 @@ public class BusinessController(IBusinessService businessService, IMapper mapper
         }
 
         mapper.Map(request, existingBusiness);
-        existingBusiness.UpdatedAt = DateTime.UtcNow;
 
         var updatedBusiness = await businessService.UpdateBusinessAsync(existingBusiness);
-        var responseDto = mapper.Map<BusinessResponseDto>(updatedBusiness);
 
-        return Ok(responseDto);
+        return Ok(mapper.Map<BusinessResponseDto>(updatedBusiness));
     }
 
     [HttpDelete("{businessId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
     public async Task<IActionResult> DeleteBusiness(int businessId)
     {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found.", businessId);
+            return NotFound();
+        }
+        
         var success = await businessService.DeleteBusinessAsync(businessId);
 
         if (success)

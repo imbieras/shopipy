@@ -76,7 +76,7 @@ public class OrderService(
             }
 
             var product =
-                await productService.GetProductByIdAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
+                await productService.GetProductByIdInBusinessAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
             if (product is null)
             {
                 throw new ArgumentException($"Product with id {productOrderItem.ProductId} not found");
@@ -97,7 +97,7 @@ public class OrderService(
                 return item;
             }
 
-            var variation = await productVariationService.GetVariationByIdAsync(
+            var variation = await productVariationService.GetVariationByIdInBusinessAsync(
             productOrderItem.ProductVariationId.Value,
             productOrderItem.ProductId, productOrderItem.BusinessId);
             if (variation is null)

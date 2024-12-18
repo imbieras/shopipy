@@ -15,33 +15,6 @@ namespace Shopipy.ProductManagement.Controllers;
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 public class ProductController(IProductService productService, ICategoryService categoryService, IBusinessService businessService, IMapper mapper, ILogger<ProductController> logger) : ControllerBase
 {
-    [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<IActionResult> CreateProduct(ProductRequestDto dto, int businessId)
-    {
-        var business = await businessService.GetBusinessByIdAsync(businessId);
-        if (business == null)
-        {
-            logger.LogWarning("Business with ID {BusinessId} not found for product creation.", businessId);
-            return NotFound();
-        }
-
-        var categoryExists = await categoryService.GetCategoryByIdAsync(dto.CategoryId);
-        if (categoryExists == null)
-        {
-            logger.LogWarning("Category ID {CategoryId} does not exist.", dto.CategoryId);
-            return NotFound("Category does not exist");
-        }
-
-        var product = mapper.Map<Product>(dto);
-
-        var createdProduct = await productService.CreateProductAsync(product, businessId);
-
-        var productResponseDto = mapper.Map<ProductResponseDto>(createdProduct);
-
-        return CreatedAtAction(nameof(GetProductById), new { businessId, productId = createdProduct.ProductId }, productResponseDto);
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAllProducts(int businessId, [FromQuery] int? top = null, [FromQuery] int? skip = null, [FromQuery] int? categoryId = null)
     {
@@ -64,15 +37,39 @@ public class ProductController(IProductService productService, ICategoryService 
     [HttpGet("{productId:int}")]
     public async Task<ActionResult<ProductResponseDto>> GetProductById(int businessId, int productId)
     {
-        var product = await productService.GetProductByIdAsync(productId, businessId);
-        if (product == null)
+        var product = await productService.GetProductByIdInBusinessAsync(productId, businessId);
+        if (product != null)
         {
-            logger.LogWarning("Product ID {ProductId} not found for Business ID {BusinessId}.", productId, businessId);
+            return Ok(mapper.Map<ProductResponseDto>(product));
+        }
+
+        logger.LogWarning("Product ID {ProductId} not found for Business ID {BusinessId}.", productId, businessId);
+        return NotFound();
+    }
+
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<IActionResult> CreateProduct(ProductRequestDto dto, int businessId)
+    {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for product creation.", businessId);
             return NotFound();
         }
 
-        var productResponseDto = mapper.Map<ProductResponseDto>(product);
-        return Ok(productResponseDto);
+        var categoryExists = await categoryService.GetCategoryByIdAsync(dto.CategoryId);
+        if (categoryExists == null)
+        {
+            logger.LogWarning("Category ID {CategoryId} does not exist.", dto.CategoryId);
+            return NotFound("Category does not exist");
+        }
+
+        var product = mapper.Map<Product>(dto);
+
+        var createdProduct = await productService.CreateProductAsync(product, businessId);
+
+        return CreatedAtAction(nameof(GetProductById), new { businessId, productId = createdProduct.ProductId }, mapper.Map<ProductResponseDto>(createdProduct));
     }
 
     [HttpPut("{productId:int}")]
@@ -86,7 +83,7 @@ public class ProductController(IProductService productService, ICategoryService 
             return NotFound("Category does not exist");
         }
 
-        var existingProduct = await productService.GetProductByIdAsync(productId, businessId);
+        var existingProduct = await productService.GetProductByIdInBusinessAsync(productId, businessId);
 
         if (existingProduct == null)
         {
@@ -97,15 +94,21 @@ public class ProductController(IProductService productService, ICategoryService 
         mapper.Map(dto, existingProduct);
 
         var updatedProduct = await productService.UpdateProductAsync(existingProduct);
-        var productResponseDto = mapper.Map<ProductResponseDto>(updatedProduct);
 
-        return Ok(productResponseDto);
+        return Ok(mapper.Map<ProductResponseDto>(updatedProduct));
     }
 
     [HttpDelete("{productId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteProduct(int productId, int businessId)
     {
+        var existingProduct = await productService.GetProductByIdInBusinessAsync(productId, businessId);
+        if (existingProduct == null)
+        {
+            logger.LogWarning("Product ID {ProductId} not found in Business ID {BusinessId}.", productId, businessId);
+            return NotFound();
+        }
+
         var success = await productService.DeleteProductAsync(productId, businessId);
         if (success)
         {

@@ -14,19 +14,6 @@ namespace Shopipy.OrderManagement.Controllers;
 [Route("businesses/{businessId:int}/orders")]
 public class OrdersController(OrderService orderService, IMapper mapper, ILogger<OrdersController> logger) : ControllerBase
 {
-    [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
-    {
-        var order = await orderService.CreateOrderWithItemsAsync(businessId, request.UserId, request.OrderItems.Select(
-        i => {
-            var item = mapper.Map<OrderItem>(i);
-            item.BusinessId = businessId;
-            return item;
-        }));
-        return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId = order.OrderId },
-        mapper.Map<OrderDto>(order));
-    }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(int businessId)
     {
@@ -63,6 +50,19 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
         var serviceItems = await orderService.GetServiceOrderItems(businessId, orderId);
         if (!serviceItems.Any()) return NotFound();
         return Ok(mapper.Map<IEnumerable<ServiceOrderItemDto>>(serviceItems));
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
+    {
+        var order = await orderService.CreateOrderWithItemsAsync(businessId, request.UserId, request.OrderItems.Select(
+        i => {
+            var item = mapper.Map<OrderItem>(i);
+            item.BusinessId = businessId;
+            return item;
+        }));
+        return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId = order.OrderId },
+        mapper.Map<OrderDto>(order));
     }
     
     [HttpPost("{orderId:int}/cancel")]

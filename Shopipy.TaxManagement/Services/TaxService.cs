@@ -16,17 +16,8 @@ namespace Shopipy.TaxManagement.Services
             return await taxRateRepository.GetByIdAsync(id);
         }
 
-        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId, int? top = null, int? skip = null)
+        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId)
         {
-            if (skip.HasValue || top.HasValue)
-            {
-                return await taxRateRepository.GetAllByConditionWithPaginationAsync(
-                tr => tr.BusinessId == businessId,
-                skip ?? 0,
-                top ?? int.MaxValue
-                );
-            }
-
             return await taxRateRepository.GetAllByConditionAsync(tr => tr.BusinessId == businessId);
         }
 
@@ -40,7 +31,7 @@ namespace Shopipy.TaxManagement.Services
             return await taxRateRepository.GetByConditionAsync(tr => tr.TaxRateId == taxRateId && tr.BusinessId == businessId);
         }
 
-        public async Task<TaxRate> AddTaxRateAsync(TaxRate taxRate)
+        public async Task<TaxRate> CreateTaxRateAsync(TaxRate taxRate)
         {
             taxRate.CreatedAt = DateTime.UtcNow;
             return await taxRateRepository.AddAsync(taxRate);

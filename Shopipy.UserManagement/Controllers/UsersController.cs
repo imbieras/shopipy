@@ -15,15 +15,6 @@ namespace Shopipy.UserManagement.Controllers;
 [Authorize]
 public class UsersController(UserManager<User> userManager, IMapper mapper, UserService userService, ILogger<UsersController> logger) : ControllerBase
 {
-    [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<UserResponseDto>> Create([FromBody] UserRequestDto request)
-    {
-        var user = mapper.Map<User>(request);
-        await userService.CreateUserAsync(user, request.Password);
-        return CreatedAtAction(nameof(GetUserById), new { userId = user.Id }, mapper.Map<UserResponseDto>(user));
-    }
-
     [HttpGet]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<ActionResult<PaginationResultDto<UserResponseDto>>> GetUsers([FromQuery] int? top, [FromQuery] int? skip)
@@ -45,6 +36,15 @@ public class UsersController(UserManager<User> userManager, IMapper mapper, User
 
         logger.LogWarning("User {UserId} not found.", userId);
         return NotFound();
+    }
+    
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<ActionResult<UserResponseDto>> Create([FromBody] UserRequestDto request)
+    {
+        var user = mapper.Map<User>(request);
+        await userService.CreateUserAsync(user, request.Password);
+        return CreatedAtAction(nameof(GetUserById), new { userId = user.Id }, mapper.Map<UserResponseDto>(user));
     }
 
     [HttpPut("{userId}")]

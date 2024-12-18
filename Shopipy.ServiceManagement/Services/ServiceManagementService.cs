@@ -29,6 +29,7 @@ public class ServiceManagementService(IGenericRepository<Service> serviceReposit
 
     public async Task<Service> UpdateService(Service service)
     {
+        service.UpdatedAt = DateTime.Now;
         return await serviceRepository.UpdateAsync(service);
     }
 

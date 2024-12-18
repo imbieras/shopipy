@@ -44,10 +44,14 @@ namespace Shopipy.GiftcardManagement.Services
             return await giftCardRepository.GetCountByConditionAsync(g => g.BusinessId == businessId);
         }
 
-        public async Task<GiftCard?> GetGiftCardByIdAsync(int giftCardId, int businessId)
+        public async Task<GiftCard?> GetGiftCardByIdAsync(int id)
         {
-            var giftCard = await giftCardRepository.GetByConditionAsync(g => g.GiftCardId == giftCardId && g.BusinessId == businessId);
-            return giftCard;
+            return await giftCardRepository.GetByIdAsync(id);
+        }
+
+        public async Task<GiftCard?> GetGiftCardByIdInBusinessAsync(int giftCardId, int businessId)
+        {
+            return await giftCardRepository.GetByConditionAsync(g => g.GiftCardId == giftCardId && g.BusinessId == businessId);
         }
 
         public async Task<GiftCard> UpdateGiftCardAsync(GiftCard giftCard)

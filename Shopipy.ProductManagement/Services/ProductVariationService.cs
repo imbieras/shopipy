@@ -47,7 +47,7 @@ public class ProductVariationService(IGenericRepository<ProductVariation> variat
         return await variationRepository.GetCountByConditionAsync(v => v.ProductId == productId);
     }
 
-    public async Task<ProductVariation?> GetVariationByIdAsync(int variationId, int productId, int businessId)
+    public async Task<ProductVariation?> GetVariationByIdInBusinessAsync(int variationId, int productId, int businessId)
     {
         var product = await productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
         if (product == null)
@@ -66,7 +66,7 @@ public class ProductVariationService(IGenericRepository<ProductVariation> variat
 
     public async Task<bool> DeleteVariationAsync(int variationId, int productId, int businessId)
     {
-        var existingVariation = await GetVariationByIdAsync(variationId, productId, businessId);
+        var existingVariation = await GetVariationByIdInBusinessAsync(variationId, productId, businessId);
         if (existingVariation == null)
         {
             return false;

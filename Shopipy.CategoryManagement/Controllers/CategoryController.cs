@@ -25,14 +25,13 @@ public class CategoryController(ICategoryService categoryService, IBusinessServi
     public async Task<IActionResult> GetCategoryById(int businessId, int categoryId)
     {
         var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, categoryId);
-        if (category == null)
+        if (category != null)
         {
-            logger.LogWarning("Category with ID {CategoryId} in business {BusinessId} not found.", categoryId, businessId);
-            return NotFound();
+            return Ok(mapper.Map<CategoryResponseDto>(category));
         }
 
-        var responseDto = mapper.Map<CategoryResponseDto>(category);
-        return Ok(responseDto);
+        logger.LogWarning("Category with ID {CategoryId} in business {BusinessId} not found.", categoryId, businessId);
+        return NotFound();
     }
 
     [HttpPost]
@@ -44,6 +43,14 @@ public class CategoryController(ICategoryService categoryService, IBusinessServi
         {
             logger.LogWarning("Business with ID {BusinessId} not found for category creation.", businessId);
             return NotFound();
+        }
+
+        var existingCategory = await categoryService.GetAllCategoriesInBusinessAsync(businessId);
+
+        if (existingCategory.Any(c => c.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            logger.LogWarning("Category with {Name} already exists in business with ID {BusinessId}.", request.Name, businessId);
+            return Conflict("A category with the same name already exists in this business.");
         }
 
         var category = mapper.Map<Category>(request);
@@ -70,10 +77,10 @@ public class CategoryController(ICategoryService categoryService, IBusinessServi
         }
 
         mapper.Map(request, existingCategory);
+
         var updatedCategory = await categoryService.UpdateCategoryAsync(existingCategory);
 
-        var responseDto = mapper.Map<CategoryResponseDto>(updatedCategory);
-        return Ok(responseDto);
+        return Ok(mapper.Map<CategoryResponseDto>(updatedCategory));
     }
 
     [HttpDelete("{categoryId:int}")]
@@ -88,6 +95,7 @@ public class CategoryController(ICategoryService categoryService, IBusinessServi
         }
 
         var success = await categoryService.DeleteCategoryAsync(categoryId);
+
         if (success)
         {
             return NoContent();

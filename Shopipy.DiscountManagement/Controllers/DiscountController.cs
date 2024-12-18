@@ -52,7 +52,7 @@ public class DiscountController(IDiscountService discountService, ICategoryServi
         var discount = mapper.Map<Discount>(discountRequestDto);
         discount.BusinessId = businessId;
 
-        var category = await categoryService.GetCategoryByIdAsync(discount.CategoryId);
+        var category = await categoryService.GetCategoryByIdInBusinessAsync(discount.CategoryId, businessId);
 
         if (category == null)
         {
@@ -92,7 +92,7 @@ public class DiscountController(IDiscountService discountService, ICategoryServi
         var existingDiscount = await discountService.GetDiscountByIdInBusinessAsync(businessId, discountId);
         if (existingDiscount == null)
         {
-            logger.LogWarning("Discount with ID {CategoryId} in business {BusinessId} not found for deletion.", discountId, businessId);
+            logger.LogWarning("Discount with ID {DiscountId} in business {BusinessId} not found for deletion.", discountId, businessId);
             return NotFound();
         }
 

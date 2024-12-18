@@ -37,7 +37,7 @@ public class ProductService(IGenericRepository<Product> productRepository) : IPr
         );
     }
 
-    public async Task<Product?> GetProductByIdAsync(int productId, int businessId)
+    public async Task<Product?> GetProductByIdInBusinessAsync(int productId, int businessId)
     {
         var product = await productRepository.GetByConditionAsync(p => p.ProductId == productId && p.BusinessId == businessId);
         return product;

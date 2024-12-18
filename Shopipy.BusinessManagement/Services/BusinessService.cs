@@ -24,6 +24,7 @@ public class BusinessService(IGenericRepository<Business> businessRepository) : 
 
     public async Task<Business> UpdateBusinessAsync(Business business)
     {
+        business.UpdatedAt = DateTime.UtcNow;
         return await businessRepository.UpdateAsync(business);
     }
 

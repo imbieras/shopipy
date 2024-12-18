@@ -39,18 +39,17 @@ public class ServiceController(IServiceManagementService serviceManagementServic
     public async Task<IActionResult> GetService(int businessId, int serviceId)
     {
         var service = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);
-        if (service == null)
+        if (service != null)
         {
-            logger.LogWarning("Service ID {ServiceId} not found in Business ID {BusinessId}.", serviceId, businessId);
-            return NotFound();
+            return Ok(mapper.Map<ServiceResponseDto>(service));
         }
 
-        var responseDto = mapper.Map<ServiceResponseDto>(service);
-
-        return Ok(responseDto);
+        logger.LogWarning("Service ID {ServiceId} not found in Business ID {BusinessId}.", serviceId, businessId);
+        return NotFound();
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> CreateService(int businessId, ServiceRequestDto request)
     {
         var business = await businessService.GetBusinessByIdAsync(businessId);
@@ -71,12 +70,12 @@ public class ServiceController(IServiceManagementService serviceManagementServic
         service.BusinessId = businessId;
 
         var createdService = await serviceManagementService.CreateService(service);
-        var responseDto = mapper.Map<ServiceResponseDto>(createdService);
 
-        return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, serviceId = createdService.ServiceId }, responseDto);
+        return CreatedAtAction(nameof(GetService), new { businessId = service.BusinessId, serviceId = createdService.ServiceId }, mapper.Map<ServiceResponseDto>(createdService));
     }
 
     [HttpPut("{serviceId:int}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> UpdateService(int businessId, int serviceId, ServiceRequestDto request)
     {
         var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);
@@ -90,12 +89,12 @@ public class ServiceController(IServiceManagementService serviceManagementServic
         existingService.UpdatedAt = DateTime.UtcNow;
 
         var updatedService = await serviceManagementService.UpdateService(existingService);
-        var responseDto = mapper.Map<ServiceResponseDto>(updatedService);
 
-        return Ok(responseDto);
+        return Ok(mapper.Map<ServiceResponseDto>(updatedService));
     }
 
     [HttpDelete("{serviceId:int}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteService(int businessId, int serviceId)
     {
         var existingService = await serviceManagementService.GetServiceByIdInBusiness(businessId, serviceId);

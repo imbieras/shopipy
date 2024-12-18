@@ -12,36 +12,43 @@ namespace Shopipy.TaxManagement.Controllers;
 [ApiController]
 [Route("/businesses/{businessId:int}/taxrates/")]
 [Tags("Tax")]
-[Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class TaxManagementController(ITaxService taxService, ICategoryService categoryService, IMapper mapper, ILogger logger) : ControllerBase
+public class TaxManagementController(ITaxService taxService, ICategoryService categoryService, IBusinessService businessService, IMapper mapper, ILogger<TaxManagementController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetTaxRates(int businessId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
+    public async Task<ActionResult<IEnumerable<TaxRateResponseDto>>> GetTaxRates(int businessId)
     {
-        var taxRates = await taxService.GetAllTaxRatesByBusinessAsync(businessId, top, skip);
-        var count = await taxService.GetTaxRateCountAsync(businessId);
+        var taxRates = await taxService.GetAllTaxRatesByBusinessAsync(businessId);
 
-        return Ok(new PaginationResultDto<TaxRateResponseDto> { Data = taxRates.Select(mapper.Map<TaxRateResponseDto>), Count = count });
+        return Ok(taxRates.Select(mapper.Map<TaxRateResponseDto>));
     }
 
     [HttpGet("{taxId:int}")]
-    public async Task<IActionResult> GetTaxRate(int businessId, int taxId)
+    public async Task<IActionResult> GetTaxRateById(int businessId, int taxId)
     {
         var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId);
-        if (taxRate == null)
+        if (taxRate != null)
         {
-            logger.LogWarning("Tax Rate {taxId} not found for business {BusinessId}.", taxId, businessId);
+            return Ok(mapper.Map<TaxRateResponseDto>(taxRate));
+        }
+
+        logger.LogWarning("Tax Rate {taxId} not found for business {BusinessId}.", taxId, businessId);
+        return NotFound();
+
+    }
+
+    
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<IActionResult> CreateTaxRate(int businessId, TaxRateRequestDto request)
+    {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for tax rate creation.", businessId);
             return NotFound();
         }
 
-        var responseDto = mapper.Map<TaxRateResponseDto>(taxRate);
-        return Ok(responseDto);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> CreateTaxRate(int businessId, TaxRateRequestDto request)
-    {
         var taxRate = mapper.Map<TaxRate>(request);
         taxRate.BusinessId = businessId;
 
@@ -49,17 +56,17 @@ public class TaxManagementController(ITaxService taxService, ICategoryService ca
 
         if (category == null)
         {
-            logger.LogWarning("Category with ID {CategoryId} not found for discount creation.", taxRate.CategoryId);
+            logger.LogWarning("Category with ID {CategoryId} not found for tax rate creation.", taxRate.CategoryId);
             return NotFound();
         }
 
-        var createdTaxRate = await taxService.AddTaxRateAsync(taxRate);
-        var responseDto = mapper.Map<TaxRateResponseDto>(createdTaxRate);
+        var createdTaxRate = await taxService.CreateTaxRateAsync(taxRate);
 
-        return CreatedAtAction(nameof(GetTaxRate), new { businessId, taxId = createdTaxRate.TaxRateId }, responseDto);
+        return CreatedAtAction(nameof(GetTaxRateById), new { businessId, taxId = createdTaxRate.TaxRateId }, mapper.Map<TaxRateResponseDto>(createdTaxRate));
     }
 
     [HttpPut("{taxId:int}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> UpdateTaxRate(
         int businessId,
         int taxId,
@@ -69,7 +76,7 @@ public class TaxManagementController(ITaxService taxService, ICategoryService ca
         var existingTaxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId);
         if (existingTaxRate == null)
         {
-            logger.LogWarning("Attempted to update non-existent tax rate {TaxId} for business {BusinessId}.", taxId, businessId);
+            logger.LogWarning("Tax rate with ID {TaxId} in business {BusinessId} not found.", taxId, businessId);
             return NotFound();
         }
 
@@ -78,17 +85,20 @@ public class TaxManagementController(ITaxService taxService, ICategoryService ca
         var responseDto = mapper.Map<TaxRateResponseDto>(updatedTaxRate);
         return Ok(responseDto);
     }
+    
     [HttpDelete("{taxId:int}")]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteTaxRate(int businessId, int taxId)
     {
         var taxRate = await taxService.GetTaxRateByIdAndBusinessAsync(taxId, businessId);
         if (taxRate == null)
         {
-            logger.LogWarning("Attempted to delete non-existent tax rate {TaxId} for business {BusinessId}.", taxId, businessId);
+            logger.LogWarning("Tax rate with ID {TaxId} in business {BusinessId} not found.", taxId, businessId);
             return NotFound();
         }
 
         var success = await taxService.DeleteTaxRateAsync(taxId);
+
         if (success)
         {
             return NoContent();
