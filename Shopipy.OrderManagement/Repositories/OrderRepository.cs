@@ -7,6 +7,7 @@ namespace Shopipy.OrderManagement.Repositories;
 
 public class OrderRepository(AppDbContext context) : GenericRepository<Order>(context)
 {
+    private readonly AppDbContext _context = context;
     public Task<Order?> GetOrderByIdWithItemsAsync(int businessId, int orderId)
     {
         // I need to remove Orders.OrderDiscounts that have OrderItemId

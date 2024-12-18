@@ -11,33 +11,27 @@ namespace Shopipy.TaxManagement.Services
             return await taxRateRepository.GetAllAsync();
         }
 
-        public async Task<TaxRate> GetTaxRateByIdAsync(int id)
+        public async Task<TaxRate?> GetTaxRateByIdAsync(int id)
         {
             return await taxRateRepository.GetByIdAsync(id);
         }
 
-        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId, int? top = null, int? skip = null)
+        public async Task<IEnumerable<TaxRate>> GetAllTaxRatesByBusinessAsync(int businessId)
         {
-            if (skip.HasValue || top.HasValue)
-            {
-                return await taxRateRepository.GetAllByConditionWithPaginationAsync(
-                    tr => tr.BusinessId == businessId,
-                    skip ?? 0,
-                    top ?? int.MaxValue
-                );
-            }
             return await taxRateRepository.GetAllByConditionAsync(tr => tr.BusinessId == businessId);
         }
+
         public async Task<int> GetTaxRateCountAsync(int businessId)
         {
             return await taxRateRepository.GetCountByConditionAsync(tr => tr.BusinessId == businessId);
         }
+
         public async Task<TaxRate?> GetTaxRateByIdAndBusinessAsync(int taxRateId, int businessId)
         {
             return await taxRateRepository.GetByConditionAsync(tr => tr.TaxRateId == taxRateId && tr.BusinessId == businessId);
         }
 
-        public async Task<TaxRate> AddTaxRateAsync(TaxRate taxRate)
+        public async Task<TaxRate> CreateTaxRateAsync(TaxRate taxRate)
         {
             taxRate.CreatedAt = DateTime.UtcNow;
             return await taxRateRepository.AddAsync(taxRate);
@@ -52,8 +46,14 @@ namespace Shopipy.TaxManagement.Services
         public async Task<bool> DeleteTaxRateAsync(int id)
         {
             var taxRate = await taxRateRepository.GetByIdAsync(id);
+            if (taxRate == null)
+            {
+                return false;
+            }
+
             taxRate.EffectiveTo = DateTime.UtcNow;
             await taxRateRepository.UpdateAsync(taxRate);
+
             return true;
         }
     }

@@ -9,76 +9,93 @@ using Shopipy.Shared.Services;
 
 namespace Shopipy.GiftCardManagement.Controllers;
 
-[Route("businesses/{businessId}/giftcards")]
+[Route("businesses/{businessId:int}/giftcards")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class GiftCardController(IGiftCardService _giftCardService, IMapper _mapper) : ControllerBase
+public class GiftCardController(IGiftCardService giftCardService, IBusinessService businessService, IMapper mapper, ILogger<GiftCardController> logger) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> CreateGiftCard(GiftCardRequestDTO dto, int businessId)
-    {
-        var giftCard = _mapper.Map<GiftCard>(dto);
-
-        var createdGiftCard = await _giftCardService.CreateGiftCardAsync(giftCard, businessId);
-
-        var giftCardResponseDTO = _mapper.Map<GiftCardResponseDTO>(createdGiftCard);
-
-        return CreatedAtAction(nameof(GetGiftCardById), new { businessId, giftCardId = createdGiftCard.GiftCardId }, giftCardResponseDTO);
-    }
-
     [HttpGet]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> GetAllGiftCards(int businessId, int? top = null, int? skip = null)
     {
-        var giftCards = await _giftCardService.GetAllGiftCardsOfBusinessAsync(businessId, top, skip);
-        var count = await _giftCardService.GetGiftCardCountAsync(businessId);
+        var giftCards = await giftCardService.GetAllGiftCardsOfBusinessAsync(businessId, top, skip);
+        var count = await giftCardService.GetGiftCardCountAsync(businessId);
 
-        return Ok(new PaginationResultDto<GiftCardResponseDTO>
-        {
-            Data = giftCards.Select(_mapper.Map<GiftCardResponseDTO>),
-            Count = count
-        });
+        return Ok(new PaginationResultDto<GiftCardResponseDto> { Data = giftCards.Select(mapper.Map<GiftCardResponseDto>), Count = count });
     }
 
-    [HttpGet("{giftCardId}")]
-    public async Task<ActionResult<GiftCardResponseDTO>> GetGiftCardById(int businessId, int giftCardId)
+    [HttpGet("{giftCardId:int}")]
+    public async Task<ActionResult<GiftCardResponseDto>> GetGiftCardById(int businessId, int giftCardId)
     {
-        var giftCard = await _giftCardService.GetGiftCardByIdAsync(giftCardId, businessId);
-        if (giftCard == null)
+        var giftCard = await giftCardService.GetGiftCardByIdInBusinessAsync(giftCardId, businessId);
+        if (giftCard != null)
         {
+            return Ok(mapper.Map<GiftCardResponseDto>(giftCard));
+        }
+
+        logger.LogWarning("Gift card with ID {GiftCardId} not found for business {BusinessId}.", giftCardId, businessId);
+        return NotFound();
+    }
+    
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
+    public async Task<IActionResult> CreateGiftCard(GiftCardRequestDto dto, int businessId)
+    {
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for gift card creation.", businessId);
             return NotFound();
         }
 
-        var giftCardResponseDTO = _mapper.Map<GiftCardResponseDTO>(giftCard);
-        return Ok(giftCardResponseDTO);
+        var giftCard = mapper.Map<GiftCard>(dto);
+
+        var createdGiftCard = await giftCardService.CreateGiftCardAsync(giftCard, businessId);
+
+        var giftCardResponseDto = mapper.Map<GiftCardResponseDto>(createdGiftCard);
+
+        return CreatedAtAction(nameof(GetGiftCardById), new { businessId, giftCardId = createdGiftCard.GiftCardId }, giftCardResponseDto);
     }
 
-    [HttpPut("{giftCardId}")]
+    [HttpPut("{giftCardId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<GiftCardResponseDTO>> UpdateGiftCard(int giftCardId, GiftCardRequestDTO dto, int businessId)
+    public async Task<ActionResult<GiftCardResponseDto>> UpdateGiftCard(int giftCardId, GiftCardRequestDto dto, int businessId)
     {
-        var existingGiftCard = await _giftCardService.GetGiftCardByIdAsync(giftCardId, businessId);
+        var existingGiftCard = await giftCardService.GetGiftCardByIdInBusinessAsync(giftCardId, businessId);
 
-        if (existingGiftCard == null) return NotFound();
+        if (existingGiftCard == null)
+        {
+            logger.LogWarning("Gift card with ID {GiftCardId} not found for update in business {BusinessId}.", giftCardId, businessId);
+            return NotFound();
+        }
 
-        _mapper.Map(dto, existingGiftCard);
+        mapper.Map(dto, existingGiftCard);
 
-        var updatedGiftCard = await _giftCardService.UpdateGiftCardAsync(existingGiftCard);
-        var giftCardResponseDTO = _mapper.Map<GiftCardResponseDTO>(updatedGiftCard);
+        var updatedGiftCard = await giftCardService.UpdateGiftCardAsync(existingGiftCard);
 
-        return Ok(giftCardResponseDTO);
+        return Ok(mapper.Map<GiftCardResponseDto>(updatedGiftCard));
     }
 
-    [HttpDelete("{giftCardId}")]
+    [HttpDelete("{giftCardId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteGiftCard(int businessId, int giftCardId)
     {
-        var success = await _giftCardService.DeleteGiftCardAsync(giftCardId, businessId);
-        if (!success)
+        var giftCard = await giftCardService.GetGiftCardByIdInBusinessAsync(giftCardId, businessId);
+        if (giftCard == null)
         {
+            logger.LogWarning("Gift card with ID {GiftCardId} not found for deletion in business {BusinessId}.", giftCardId, businessId);
             return NotFound();
         }
+        
+        var success = await giftCardService.DeleteGiftCardAsync(giftCardId, businessId);
+        
+        if (success)
+        {
+            return NoContent();
+        }
 
-        return NoContent();
+        logger.LogWarning("Failed to delete gift card with ID {GiftCardId} for business {BusinessId}.", giftCardId, businessId);
+        return NotFound();
+
     }
 }

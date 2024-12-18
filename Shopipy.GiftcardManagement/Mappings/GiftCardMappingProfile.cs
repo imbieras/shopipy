@@ -8,14 +8,14 @@ public class GiftCardMappingProfile : Profile
 {
     public GiftCardMappingProfile()
     {
-        CreateMap<GiftCard, GiftCardResponseDTO>();
+        CreateMap<GiftCard, GiftCardResponseDto>();
 
-        CreateMap<GiftCardRequestDTO, GiftCard>()
-            .ForMember(dest => dest.BusinessId, opt => opt.Ignore()) 
-            .ForMember(dest => dest.GiftCardId, opt => opt.Ignore()) 
-            .ForMember(dest => dest.AmountLeft, opt => opt.MapFrom(src => src.AmountOriginal)) 
-            .ForMember(dest => dest.GiftCardCode, opt => opt.Ignore()) 
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
-            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore()); 
+        CreateMap<GiftCardRequestDto, GiftCard>()
+            .ForMember(dest => dest.BusinessId, opt => opt.Ignore())
+            .ForMember(dest => dest.GiftCardId, opt => opt.Ignore())
+            .ForMember(dest => dest.AmountLeft, opt => opt.MapFrom(src => src.AmountOriginal))
+            .ForMember(dest => dest.GiftCardCode, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
     }
 }

@@ -10,72 +10,98 @@ using Shopipy.Shared.DTOs;
 namespace Shopipy.ProductManagement.Controllers;
 
 [Authorize]
-[Route("businesses/{businessId}/products/{productId}/variations")]
+[Route("businesses/{businessId:int}/products/{productId:int}/variations")]
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-public class ProductVariationController(IProductVariationService _variationService, IMapper _mapper) : ControllerBase
+public class ProductVariationController(IProductVariationService variationService, IBusinessService businessService, IProductService productService, IMapper mapper, ILogger<ProductVariationController> logger) : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<PaginationResultDto<ProductVariationResponseDto>>> GetAllVariationsOfProductInBusiness(int businessId, int productId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
+    {
+        var variations = await variationService.GetAllVariationsOfProductInBusinessAsync(productId, businessId, top, skip);
+
+        var count = await variationService.GetVariationCountOfProductAsync(productId, businessId);
+
+        return Ok(new PaginationResultDto<ProductVariationResponseDto> { Data = variations.Select(mapper.Map<ProductVariationResponseDto>), Count = count });
+    }
+
+    [HttpGet("{variationId:int}")]
+    public async Task<ActionResult<ProductVariationResponseDto>> GetVariationById(int businessId, int productId, int variationId)
+    {
+        var variation = await variationService.GetVariationByIdInBusinessAsync(variationId, productId, businessId);
+        if (variation != null)
+        {
+            return Ok(mapper.Map<ProductVariationResponseDto>(variation));
+        }
+
+        logger.LogWarning("Variation ID {VariationId} not found for Product ID {ProductId} in Business ID {BusinessId}.", variationId, productId, businessId);
+        return NotFound();
+    }
+
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductVariationResponseDTO>> CreateVariation(int businessId, int productId, ProductVariationRequestDTO dto)
+    public async Task<ActionResult<ProductVariationResponseDto>> CreateVariation(int businessId, int productId, ProductVariationRequestDto dto)
     {
-        var variation = _mapper.Map<ProductVariation>(dto);
+        var business = await businessService.GetBusinessByIdAsync(businessId);
+        if (business == null)
+        {
+            logger.LogWarning("Business with ID {BusinessId} not found for product variation creation.", businessId);
+            return NotFound();
+        }
 
-        var createdVariation = await _variationService.CreateVariationAsync(variation, productId, businessId);
-        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(createdVariation);
+        var product = await productService.GetProductByIdInBusinessAsync(productId, businessId);
+        if (product == null)
+        {
+            logger.LogWarning("Product with ID {ProductId} not found for product variation creation.", productId);
+            return NotFound();
+        }
+
+        var variation = mapper.Map<ProductVariation>(dto);
+
+        var createdVariation = await variationService.CreateVariationAsync(variation, productId, businessId);
 
         return CreatedAtAction(nameof(GetVariationById),
-            new { businessId, productId, variationId = createdVariation.VariationId },
-            variationResponseDTO);       
+        new { businessId, productId, variationId = createdVariation.VariationId },
+        mapper.Map<ProductVariationResponseDto>(createdVariation));
     }
 
-    [HttpGet]
-    public async Task<ActionResult<PaginationResultDto<ProductVariationResponseDTO>>> GetAllVariationsOfProductInBusiness(int businessId, int productId, [FromQuery] int? top = null, [FromQuery] int? skip = null)
-    {
-        var variations = await _variationService.GetAllVariationsOfProductInBusinessAsync(productId, businessId, top, skip);
-
-        var count = await _variationService.GetVariationCountOfProductAsync(productId, businessId);
-
-        return Ok(new PaginationResultDto<ProductVariationResponseDTO>
-        {
-            Data = variations.Select(_mapper.Map<ProductVariationResponseDTO>),
-            Count = count
-        });
-    }
-
-    [HttpGet("{variationId}")]
-    public async Task<ActionResult<ProductVariationResponseDTO>> GetVariationById(int businessId, int productId, int variationId)
-    {
-        var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
-        if (variation == null) return NotFound();
-
-        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(variation);
-        return Ok(variationResponseDTO);
-    }
-
-    [HttpPut("{variationId}")]
+    [HttpPut("{variationId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
-    public async Task<ActionResult<ProductVariationResponseDTO>> UpdateVariation(int businessId, int productId, int variationId, ProductVariationRequestDTO dto)
+    public async Task<ActionResult<ProductVariationResponseDto>> UpdateVariation(int businessId, int productId, int variationId, ProductVariationRequestDto dto)
     {
-        var variation = await _variationService.GetVariationByIdAsync(variationId, productId, businessId);
+        var variation = await variationService.GetVariationByIdInBusinessAsync(variationId, productId, businessId);
 
-        if (variation == null) return NotFound();
+        if (variation == null)
+        {
+            logger.LogWarning("Variation ID {VariationId} not found for Product ID {ProductId} in Business ID {BusinessId}.", variationId, productId, businessId);
+            return NotFound();
+        }
 
-        _mapper.Map(dto, variation);
+        mapper.Map(dto, variation);
 
-        var updatedVariation = await _variationService.UpdateVariationAsync(variation);
-        var variationResponseDTO = _mapper.Map<ProductVariationResponseDTO>(updatedVariation);
+        var updatedVariation = await variationService.UpdateVariationAsync(variation);
 
-        return Ok(variationResponseDTO);
+        return Ok(mapper.Map<ProductVariationResponseDto>(updatedVariation));
     }
 
-    [HttpDelete("{variationId}")]
+    [HttpDelete("{variationId:int}")]
     [Authorize(Policy = AuthorizationPolicies.RequireBusinessOwnerOrSuperAdmin)]
     public async Task<IActionResult> DeleteVariationAsync(int businessId, int productId, int variationId)
     {
-        var success = await _variationService.DeleteVariationAsync(variationId, productId, businessId);
-        if (!success) return NotFound();
+        var existingVariation = await variationService.GetVariationByIdInBusinessAsync(variationId, productId, businessId);
+        if (existingVariation == null)
+        {
+            logger.LogWarning("Variation ID {VariationId} not found in Business ID {BusinessId}.", variationId, businessId);
+            return NotFound();
+        }
 
-        return NoContent();
+        var success = await variationService.DeleteVariationAsync(variationId, productId, businessId);
+        if (success)
+        {
+            return NoContent();
+        }
+
+        logger.LogWarning("Variation ID {VariationId} not found for Product ID {ProductId} in Business ID {BusinessId}.", variationId, productId, businessId);
+        return NotFound();
     }
 }

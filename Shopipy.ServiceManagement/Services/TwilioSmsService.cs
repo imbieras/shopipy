@@ -1,34 +1,28 @@
-using Shopipy.Persistence.Models;
 using Shopipy.ServiceManagement.Interfaces;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
-using Twilio.TwiML.Messaging;
 
 namespace Shopipy.ServiceManagement.Services;
 
-public class TwilioSMSService : ISMSService
+public class TwilioSmsService : ISmsService
 {
-    private readonly string _accountSid;
-    private readonly string _authToken;
     private readonly string _fromNumber;
 
-    public TwilioSMSService(string accountSid, string authToken, string fromNumber)
+    public TwilioSmsService(string accountSid, string authToken, string fromNumber)
     {
-        _accountSid = accountSid;
-        _authToken = authToken;
         _fromNumber = fromNumber;
 
-        TwilioClient.Init(_accountSid, _authToken);
+        TwilioClient.Init(accountSid, authToken);
     }
 
-    public async Task SendSMSAsync(string phoneNumber, string message)
+    public async Task SendSmsAsync(string phoneNumber, string message)
     {
         try
         {
             await MessageResource.CreateAsync(
-                body: message,
-                from: new Twilio.Types.PhoneNumber(_fromNumber),
-                to: new Twilio.Types.PhoneNumber(phoneNumber)
+            body: message,
+            from: new Twilio.Types.PhoneNumber(_fromNumber),
+            to: new Twilio.Types.PhoneNumber(phoneNumber)
             );
         }
         catch (Twilio.Exceptions.ApiException apiEx)

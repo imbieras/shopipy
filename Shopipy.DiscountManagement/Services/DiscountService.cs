@@ -16,19 +16,19 @@ public class DiscountService(IGenericRepository<Discount> discountRepository) : 
         return await discountRepository.GetAllByConditionAsync(d => d.BusinessId == businessId);
     }
 
-    public async Task<Discount> GetDiscountByIdAsync(int id)
+    public async Task<Discount?> GetDiscountByIdAsync(int id)
     {
         return await discountRepository.GetByIdAsync(id);
     }
 
-    public async Task<Discount> GetDiscountByIdInBusinessAsync(int businessId, int id)
+    public async Task<Discount?> GetDiscountByIdInBusinessAsync(int businessId, int id)
     {
         return await discountRepository.GetByConditionAsync(d => d.BusinessId == businessId && d.DiscountId == id);
     }
 
-    public async Task<Discount> CreateDiscountAsync(Discount Discount)
+    public async Task<Discount> CreateDiscountAsync(Discount discount)
     {
-        return await discountRepository.AddAsync(Discount);
+        return await discountRepository.AddAsync(discount);
     }
 
     public async Task<Discount> UpdateDiscountAsync(Discount discount, DateTime? effectiveTo)
@@ -42,9 +42,15 @@ public class DiscountService(IGenericRepository<Discount> discountRepository) : 
     {
         var discount = await discountRepository.GetByIdAsync(id);
 
+        if (discount == null)
+        {
+            return false;
+        }
+
         discount.EffectiveTo = DateTime.UtcNow;
 
         await discountRepository.UpdateAsync(discount);
+
         return true;
     }
 }

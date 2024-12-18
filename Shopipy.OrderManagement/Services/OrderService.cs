@@ -76,7 +76,7 @@ public class OrderService(
             }
 
             var product =
-                await productService.GetProductByIdAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
+                await productService.GetProductByIdInBusinessAsync(productOrderItem.ProductId, productOrderItem.BusinessId);
             if (product is null)
             {
                 throw new ArgumentException($"Product with id {productOrderItem.ProductId} not found");
@@ -97,19 +97,19 @@ public class OrderService(
                 return item;
             }
 
-            var variation = await productVariationService.GetVariationByIdAsync(
-                productOrderItem.ProductVariationId.Value,
-                productOrderItem.ProductId, productOrderItem.BusinessId);
+            var variation = await productVariationService.GetVariationByIdInBusinessAsync(
+            productOrderItem.ProductVariationId.Value,
+            productOrderItem.ProductId, productOrderItem.BusinessId);
             if (variation is null)
             {
                 throw new ArgumentException(
-                    $"Variation with id {productOrderItem.ProductVariationId.Value} not found");
+                $"Variation with id {productOrderItem.ProductVariationId.Value} not found");
             }
 
             if (variation.ProductState != ProductState.Available)
             {
                 throw new ArgumentException(
-                    $"Product variation with id {productOrderItem.ProductId} is not available");
+                $"Product variation with id {productOrderItem.ProductId} is not available");
             }
 
             await AddTaxRateToOrderItem(productOrderItem, product.CategoryId);
@@ -125,7 +125,7 @@ public class OrderService(
         if (orderItem is not ServiceOrderItem serviceOrderItem) throw new ArgumentException("Invalid order item type");
         var service =
             await serviceManagementService.GetServiceByIdInBusiness(serviceOrderItem.BusinessId,
-                serviceOrderItem.ServiceId);
+            serviceOrderItem.ServiceId);
         if (service is null)
         {
             throw new ArgumentException($"Service with id {serviceOrderItem.ServiceId} is not found");
@@ -148,12 +148,7 @@ public class OrderService(
 
     public Task<Order?> GetOrderByIdAsync(int businessId, int orderId, bool withItems = true)
     {
-        if (withItems)
-        {
-            return orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId);
-        }
-
-        return orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
+        return withItems ? orderRepository.GetOrderByIdWithItemsAsync(businessId, orderId) : orderRepository.GetByConditionAsync(o => o.BusinessId == businessId && o.OrderId == orderId);
     }
 
     public Task<IEnumerable<ProductOrderItem>> GetProductOrderItems(int businessId, int orderId)

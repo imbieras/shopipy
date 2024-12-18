@@ -150,8 +150,8 @@ builder.Services.AddShared();
 builder.Services.AddUserManagement();
 builder.Services.AddOrderManagement();
 
-builder.Services.AddSingleton<ISMSService>(provider => 
-    new TwilioSMSService(
+builder.Services.AddSingleton<ISmsService>(provider => 
+    new TwilioSmsService(
         builder.Configuration["TwilioAccountSid"]!,
         builder.Configuration["TwilioAuthToken"]!,
         builder.Configuration["TwilioPhoneNumber"]!

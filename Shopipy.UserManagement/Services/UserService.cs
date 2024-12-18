@@ -19,15 +19,17 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
     public async Task<IEnumerable<User>> GetAllUsersAsync(int? top = null, int? skip = null)
     {
         var currentUser = await currentUserService.GetCurrentUserAsync();
-        var query = currentUser.Role == UserRole.SuperAdmin ? userManager.Users : userManager.Users.Where(user =>
-            user.BusinessId == currentUser.BusinessId
-        );
+        var query = currentUser.Role == UserRole.SuperAdmin
+            ? userManager.Users
+            : userManager.Users.Where(user =>
+                user.BusinessId == currentUser.BusinessId
+            );
         query = query.OrderBy(user => user.Id).Skip(skip ?? 0);
         if (top is not null)
         {
             query = query.Take(top.Value);
         }
-        
+
         return query;
     }
 
@@ -44,10 +46,12 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
         try
         {
             await ValidateAccessToUser(user);
-        } catch (UnauthorizedAccessException)
+        }
+        catch (UnauthorizedAccessException)
         {
             return null;
         }
+
         return user;
     }
 
@@ -60,7 +64,7 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
             throw new ArgumentException(result.ToString());
         }
     }
-    
+
     /// <returns>
     /// The <see cref="Task"/> that represents the asynchronous operation, containing the boolean that is true if user was deleted.
     /// </returns>
@@ -76,14 +80,16 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
         {
             return false;
         }
+
         var result = await userManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
             throw new ArgumentException(result.ToString());
         }
+
         return true;
     }
-    
+
     private async Task ValidateUserAsync(User user)
     {
         var currentUser = await currentUserService.GetCurrentUserAsync();
@@ -96,6 +102,7 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
                 throw new UnauthorizedAccessException("Business owner can only create employees");
             }
         }
+
         await ValidateAccessToUser(user);
         if (user.BusinessId != null)
         {
@@ -111,7 +118,7 @@ public class UserService(UserManager<User> userManager, CurrentUserService curre
                                                         (currentUser.Role != UserRole.BusinessOwner && currentUser.Id != user.Id)))
         {
             throw new UnauthorizedAccessException(
-                "No permission to use Business that current user is not the owner of");
+            "No permission to use Business that current user is not the owner of");
         }
     }
 }

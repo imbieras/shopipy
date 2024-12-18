@@ -12,7 +12,7 @@ public class UserMappingProfile : Profile
             .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone))
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.BusinessId, opt => opt.MapFrom(src => src.BusinessId))
-            .ForMember(dest => dest.Business, opt => opt.Ignore()) 
+            .ForMember(dest => dest.Business, opt => opt.Ignore())
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.NormalizedUserName, opt => opt.Ignore())
             .ForMember(dest => dest.NormalizedEmail, opt => opt.Ignore())
@@ -34,7 +34,7 @@ public class UserMappingProfile : Profile
             .ForMember(dest => dest.UserState, opt => opt.MapFrom(src => src.UserState))
             .ForMember(dest => dest.BusinessId, opt => opt.MapFrom(src => src.BusinessId))
             .ForMember(dest => dest.Business, opt => opt.Ignore());
-        
+
         CreateMap<User, UserBaseDto>()
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber))
             .ForMember(dest => dest.BusinessId, opt => opt.MapFrom(src => src.BusinessId));

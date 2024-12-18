@@ -11,39 +11,31 @@ namespace Shopipy.OrderManagement.Controllers;
 
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
-[Route("businesses/{businessId}/orders")]
-public class OrdersController(OrderService orderService, IMapper mapper) : ControllerBase
+[Route("businesses/{businessId:int}/orders")]
+public class OrdersController(OrderService orderService, IMapper mapper, ILogger<OrdersController> logger) : ControllerBase
 {
-    [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
-    {
-        var order = await orderService.CreateOrderWithItemsAsync(businessId, request.UserId, request.OrderItems.Select(
-            i =>
-            {
-                var item = mapper.Map<OrderItem>(i);
-                item.BusinessId = businessId;
-                return item;
-            }));
-        return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId = order.OrderId },
-            mapper.Map<OrderDto>(order));
-    }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(int businessId)
     {
         var orders = await orderService.GetOrdersAsync(businessId);
         return Ok(mapper.Map<IEnumerable<OrderDto>>(orders));
     }
-    
-    [HttpGet("{orderId}")]
+
+    [HttpGet("{orderId:int}")]
     public async Task<ActionResult<OrderDto>> GetOrderById(int businessId, int orderId)
     {
         var order = await orderService.GetOrderByIdAsync(businessId, orderId);
-        if (order == null) return NotFound();
-        return Ok(mapper.Map<OrderDto>(order));
+        if (order != null)
+        {
+            return Ok(mapper.Map<OrderDto>(order));
+        }
+
+        logger.LogWarning("Order {OrderId} not found for business {BusinessId}.", orderId, businessId);
+        return NotFound();
+
     }
     
-    [HttpGet("{orderId}/product-items")]
+    [HttpGet("{orderId:int}/product-items")]
     public async Task<ActionResult<IEnumerable<ProductOrderItemDto>>> GetProductOrderItems(int businessId, int orderId)
     {
         var productItems = await orderService.GetProductOrderItems(businessId, orderId);
@@ -51,7 +43,8 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         return Ok(mapper.Map<IEnumerable<ProductOrderItemDto>>(productItems));
     }
 
-    [HttpGet("{orderId}/service-items")]
+
+    [HttpGet("{orderId:int}/service-items")]
     public async Task<ActionResult<IEnumerable<ServiceOrderItemDto>>> GetServiceOrderItems(int businessId, int orderId)
     {
         var serviceItems = await orderService.GetServiceOrderItems(businessId, orderId);
@@ -59,18 +52,39 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         return Ok(mapper.Map<IEnumerable<ServiceOrderItemDto>>(serviceItems));
     }
     
-    [HttpPost("{orderId}/cancel")]
+    [HttpPost]
+    public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
+    {
+        var order = await orderService.CreateOrderWithItemsAsync(businessId, request.UserId, request.OrderItems.Select(
+        i => {
+            var item = mapper.Map<OrderItem>(i);
+            item.BusinessId = businessId;
+            return item;
+        }));
+        return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId = order.OrderId },
+        mapper.Map<OrderDto>(order));
+    }
+    
+    [HttpPost("{orderId:int}/cancel")]
     public async Task<IActionResult> CancelOrder(int businessId, int orderId)
     {
         var order = await orderService.GetOrderByIdAsync(businessId, orderId, withItems: false);
-        if (order == null) return NotFound();
+        if (order == null)
+        {
+            logger.LogWarning("Attempted to cancel non-existent order {OrderId} for business {BusinessId}.", orderId, businessId);
+            return NotFound();
+        }
+
         await orderService.CancelOrderAsync(order);
         return Ok();
     }
 
-    [HttpPost("{orderId}/items")]
-    public async Task<ActionResult<OrderItemDto>> CreateOrderItem(int businessId, int orderId,
-        [FromBody] CreateOrderItemRequestDto request)
+    [HttpPost("{orderId:int}/items")]
+    public async Task<ActionResult<OrderItemDto>> CreateOrderItem(
+        int businessId,
+        int orderId,
+        [FromBody] CreateOrderItemRequestDto request
+    )
     {
         var orderItem = mapper.Map<OrderItem>(request);
         orderItem.BusinessId = businessId;
@@ -78,30 +92,39 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         var result = await orderService.AddOrderItemAsync(orderItem);
         return CreatedAtAction(nameof(GetOrderById), new { businessId, orderId }, mapper.Map<OrderItemDto>(result));
     }
-    
-    [HttpPut("{orderId}/items/{orderItemId}")]
-    public async Task<ActionResult<OrderItemDto>> UpdateOrderItem(int businessId, int orderId, int orderItemId,
-        [FromBody] UpdateOrderItemDto request)
+
+    [HttpPut("{orderId:int}/items/{orderItemId:int}")]
+    public async Task<ActionResult<OrderItemDto>> UpdateOrderItem(
+        int businessId,
+        int orderId,
+        int orderItemId,
+        [FromBody] UpdateOrderItemDto request
+    )
     {
         var orderItem = await orderService.GetOrderItemByIdAsync(businessId, orderId, orderItemId);
-        if (orderItem == null) return NotFound();
-        if (orderItem is ProductOrderItem productOrderItem && request.ProductQuantity is not null)
+
+        switch (orderItem)
         {
-            productOrderItem.ProductQuantity = request.ProductQuantity.Value;
+            case null:
+                logger.LogWarning("Attempted to update non-existent order item {OrderItemId} in order {OrderId} for business {BusinessId}.", orderItemId, orderId, businessId);
+                return NotFound();
+            case ProductOrderItem productOrderItem when request.ProductQuantity is not null:
+                productOrderItem.ProductQuantity = request.ProductQuantity.Value;
+                break;
         }
 
         var res = await orderService.UpdateOrderItemAsync(orderItem);
         return Ok(mapper.Map<OrderItemDto>(res));
     }
-    
-    [HttpDelete("{orderId}/items/{orderItemId}")]
+
+    [HttpDelete("{orderId:int}/items/{orderItemId:int}")]
     public async Task<IActionResult> DeleteOrderItem(int businessId, int orderId, int orderItemId)
     {
         await orderService.DeleteOrderItemAsync(businessId, orderId, orderItemId);
         return NoContent();
     }
 
-    [HttpPost("{orderId}/apply-discount")]
+    [HttpPost("{orderId:int}/apply-discount")]
     public async Task<ActionResult<OrderDto>> CreateDiscount(int businessId, int orderId, [FromBody] ApplyDiscountRequestDto request)
     {
         var order = await orderService.GetOrderByIdAsync(businessId, orderId);
@@ -118,7 +141,7 @@ public class OrdersController(OrderService orderService, IMapper mapper) : Contr
         return Ok(mapper.Map<OrderDto>(await orderService.GetOrderByIdAsync(businessId, orderId)));
     }
 
-    [HttpDelete("{orderId}/discounts/{discountId}")]
+    [HttpDelete("{orderId:int}/discounts/{discountId:int}")]
     public async Task<IActionResult> DeleteDiscount(int businessId, int orderId, int discountId)
     {
         await orderService.DeleteDiscount(businessId, orderId, discountId);

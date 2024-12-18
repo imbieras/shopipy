@@ -17,10 +17,10 @@ public class OrderMappingProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.TaxRateId, opt => opt.Ignore())
             .ForMember(dest => dest.OrderDiscounts, opt => opt.Ignore());
-        
+
         CreateMap<CreateProductOrderItemRequestDto, ProductOrderItem>()
             .IncludeBase<CreateOrderItemRequestDto, OrderItem>();
-        
+
         CreateMap<CreateServiceOrderItemRequestDto, ServiceOrderItem>()
             .IncludeBase<CreateOrderItemRequestDto, OrderItem>();
 
@@ -29,10 +29,10 @@ public class OrderMappingProfile : Profile
         
         CreateMap<OrderItem, OrderItemDto>()
             .ForMember(o => o.Discounts, opt => opt.MapFrom(f => f.OrderDiscounts));
-        
+
         CreateMap<ProductOrderItem, ProductOrderItemDto>()
             .IncludeBase<OrderItem, OrderItemDto>();
-        
+
         CreateMap<ServiceOrderItem, ServiceOrderItemDto>()
             .IncludeBase<OrderItem, OrderItemDto>();
         

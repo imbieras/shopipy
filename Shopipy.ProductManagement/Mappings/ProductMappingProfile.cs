@@ -8,17 +8,17 @@ public class ProductMappingProfile : Profile
 {
     public ProductMappingProfile()
     {
-        CreateMap<Product, ProductResponseDTO>();
+        CreateMap<Product, ProductResponseDto>();
 
-        CreateMap<ProductRequestDTO, Product>()
+        CreateMap<ProductRequestDto, Product>()
             .ForMember(dest => dest.BusinessId, opt => opt.Ignore())
             .ForMember(dest => dest.ProductId, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
-        CreateMap<ProductVariation, ProductVariationResponseDTO>();
+        CreateMap<ProductVariation, ProductVariationResponseDto>();
 
-        CreateMap<ProductVariationRequestDTO, ProductVariation>()
+        CreateMap<ProductVariationRequestDto, ProductVariation>()
             .ForMember(dest => dest.VariationId, opt => opt.Ignore())
             .ForMember(dest => dest.ProductId, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
