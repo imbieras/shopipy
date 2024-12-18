@@ -12,6 +12,7 @@ const Navbar = ({ onLogout }) => {
     { name: 'Appointments', path: '/appointments'},
     { name: 'Categories', path: '/categories', role: 'BusinessOwner'},
     { name: 'Switch Business', path: '/switch-business', role: 'SuperAdmin' }
+    { name: 'Users', path: '/users', role: ['BusinessOwner','SuperAdmin']},
   ];
 
   const isActive = (path) => {
@@ -19,7 +20,8 @@ const Navbar = ({ onLogout }) => {
   };
 
   const filteredNavItems = navItems.filter(item =>
-    !item.role || item.role === role
+    !item.role || 
+    (Array.isArray(item.role) ? item.role.includes(role) : item.role === role)
   );
 
   return (

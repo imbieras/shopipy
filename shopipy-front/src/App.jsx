@@ -15,7 +15,7 @@ import Orders from './core/orderManagement/Orders';
 import Products from './core/productManagement/Products';
 import OrderDetails from './core/orderManagement/components/OrderDetails';
 import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
-
+import Users from './core/userManagement/Users';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -176,6 +176,11 @@ function App() {
           element={
             isAuthenticated ? (
               <BusinessSwitcher />
+          <Route
+          path="/users"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <Users />
             ) : (
               <Navigate to="/" />
             )
