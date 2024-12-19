@@ -18,6 +18,7 @@ import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
 import Users from './core/userManagement/Users';
 import Discounts from './core/discountsManagement/Discounts';
 import ProductsAdmin from './core/productAdminManagement/ProductsAdmin';
+import Taxes from './core/taxManagement/Taxes';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -208,6 +209,16 @@ function App() {
           element={
             isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
               <ProductsAdmin />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+          />
+          <Route
+          path="/taxes"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <Taxes />
             ) : (
               <Navigate to="/" />
             )
