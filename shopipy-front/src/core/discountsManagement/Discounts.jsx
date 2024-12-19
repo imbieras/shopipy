@@ -1,39 +1,46 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { discountsApi } from './services/DiscountsApi';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useUser } from '@/hooks/useUser';
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { discountsApi } from "./services/DiscountsApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useBusiness } from "@/hooks/useUser";
 
 // Utility to format the date for `datetime-local` input
 const formatDateForInput = (date) => {
-  if (!date) return '';
+  if (!date) return "";
   return new Date(date).toISOString().slice(0, 16);
 };
 
 const AddDiscountForm = ({ onClose }) => {
-  const { businessId } = useUser(); // Assuming you are using a hook to get the businessId
+  const { businessId } = useBusiness(); // Assuming you are using a hook to get the businessId
   const queryClient = useQueryClient();
   const [formState, setFormState] = useState({
-    categoryId: '', // Add this field
-    name: '',
-    description: '',
-    discountValue: '',
-    discountType: '',
-    effectiveFrom: '',
-    effectiveTo: '',
+    categoryId: "", // Add this field
+    name: "",
+    description: "",
+    discountValue: "",
+    discountType: "",
+    effectiveFrom: "",
+    effectiveTo: "",
   });
 
   // Create mutation for adding a new discount
   const createDiscountMutation = useMutation({
-    mutationFn: (discountData) => discountsApi.createDiscount(businessId, discountData), // Include businessId here
+    mutationFn: (discountData) =>
+      discountsApi.createDiscount(businessId, discountData), // Include businessId here
     onSuccess: () => {
-      queryClient.invalidateQueries(['discounts', businessId]);
+      queryClient.invalidateQueries(["discounts", businessId]);
       onClose(); // Close the form after a successful submission
     },
     onError: (error) => {
@@ -47,21 +54,23 @@ const AddDiscountForm = ({ onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     // Convert effectiveFrom and effectiveTo to UTC if they are not null
     const effectiveFromUtc = new Date(formState.effectiveFrom).toISOString(); // Convert to UTC
-    const effectiveToUtc = formState.effectiveTo ? new Date(formState.effectiveTo).toISOString() : null;
-  
+    const effectiveToUtc = formState.effectiveTo
+      ? new Date(formState.effectiveTo).toISOString()
+      : null;
+
     const discountData = {
       ...formState,
       businessId,
       effectiveFrom: effectiveFromUtc,
       effectiveTo: effectiveToUtc, // Ensure effectiveTo is null if empty
     };
-  
+
     createDiscountMutation.mutate(discountData); // Pass the data with businessId
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mb-4">
       <div>
@@ -114,7 +123,9 @@ const AddDiscountForm = ({ onClose }) => {
         <Select
           name="discountType"
           value={formState.discountType}
-          onValueChange={(value) => setFormState({ ...formState, discountType: value })}
+          onValueChange={(value) =>
+            setFormState({ ...formState, discountType: value })
+          }
           required
         >
           <SelectTrigger>
@@ -159,17 +170,20 @@ const AddDiscountForm = ({ onClose }) => {
   );
 };
 
-
 const UpdateDiscountForm = ({ discount, onClose }) => {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const queryClient = useQueryClient();
   const [formState, setFormState] = useState(discount);
 
   const updateDiscountMutation = useMutation({
     mutationFn: (updatedEffectiveTo) =>
-      discountsApi.updateDiscount(businessId, discount.discountId, updatedEffectiveTo), // Send only effectiveTo
+      discountsApi.updateDiscount(
+        businessId,
+        discount.discountId,
+        updatedEffectiveTo
+      ), // Send only effectiveTo
     onSuccess: () => {
-      queryClient.invalidateQueries(['discounts', businessId]);
+      queryClient.invalidateQueries(["discounts", businessId]);
       onClose();
     },
     onError: (error) => {
@@ -183,10 +197,12 @@ const UpdateDiscountForm = ({ discount, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     // Convert effectiveTo to UTC if it's provided
-    const effectiveToUtc = formState.effectiveTo ? new Date(formState.effectiveTo).toISOString() : null;
-  
+    const effectiveToUtc = formState.effectiveTo
+      ? new Date(formState.effectiveTo).toISOString()
+      : null;
+
     // Directly pass only the effectiveTo field (not wrapped in an object)
     updateDiscountMutation.mutate(effectiveToUtc); // Send only effectiveTo as a plain value
   };
@@ -243,7 +259,9 @@ const UpdateDiscountForm = ({ discount, onClose }) => {
         <Select
           name="discountType"
           value={formState.discountType}
-          onValueChange={(value) => setFormState({ ...formState, discountType: value })}
+          onValueChange={(value) =>
+            setFormState({ ...formState, discountType: value })
+          }
           disabled
         >
           <SelectTrigger>
@@ -289,16 +307,15 @@ const UpdateDiscountForm = ({ discount, onClose }) => {
   );
 };
 
-
-
 const DiscountList = ({ discounts, onEdit }) => {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const queryClient = useQueryClient();
 
   const deleteDiscountMutation = useMutation({
-    mutationFn: (discountId) => discountsApi.deleteDiscount(businessId, discountId),
+    mutationFn: (discountId) =>
+      discountsApi.deleteDiscount(businessId, discountId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['discounts', businessId]);
+      queryClient.invalidateQueries(["discounts", businessId]);
     },
     onError: (error) => {
       alert(`Failed to deactivate discount: ${error.message}`);
@@ -306,7 +323,7 @@ const DiscountList = ({ discounts, onEdit }) => {
   });
 
   const handleDelete = (discountId) => {
-    if (window.confirm('Are you sure you want to deactivate this discount?')) {
+    if (window.confirm("Are you sure you want to deactivate this discount?")) {
       deleteDiscountMutation.mutate(discountId);
     }
   };
@@ -315,13 +332,13 @@ const DiscountList = ({ discounts, onEdit }) => {
   const filteredDiscounts = discounts.filter((discount) => {
     // If effectiveTo is null, consider the discount as valid
     if (!discount.effectiveTo) return true;
-  
+
     // Parse the effectiveTo date string
     const effectiveToDate = new Date(discount.effectiveTo);
-  
+
     // Get the current date and time
     const currentDate = new Date();
-  
+
     // Compare effectiveTo with the current date (including time)
     return effectiveToDate > currentDate;
   });
@@ -348,7 +365,10 @@ const DiscountList = ({ discounts, onEdit }) => {
             <td className="px-4 py-2">{discount.discountType}</td>
             <td className="px-4 py-2 text-right">
               <div className="flex justify-end gap-2">
-                <Button onClick={() => onEdit(discount)} className="min-w-[80px]">
+                <Button
+                  onClick={() => onEdit(discount)}
+                  className="min-w-[80px]"
+                >
                   Edit
                 </Button>
                 <Button
@@ -367,14 +387,17 @@ const DiscountList = ({ discounts, onEdit }) => {
   );
 };
 
-
 const DiscountsPage = () => {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const [isAdding, setIsAdding] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
 
-  const { data: discounts = [], isLoading, error } = useQuery({
-    queryKey: ['discounts', businessId],
+  const {
+    data: discounts = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["discounts", businessId],
     queryFn: () => discountsApi.getDiscounts(businessId),
   });
 
@@ -387,7 +410,10 @@ const DiscountsPage = () => {
       {isAdding ? (
         <AddDiscountForm onClose={() => setIsAdding(false)} />
       ) : editingDiscount ? (
-        <UpdateDiscountForm discount={editingDiscount} onClose={() => setEditingDiscount(null)} />
+        <UpdateDiscountForm
+          discount={editingDiscount}
+          onClose={() => setEditingDiscount(null)}
+        />
       ) : (
         <Button onClick={() => setIsAdding(true)}>Add Discount</Button>
       )}

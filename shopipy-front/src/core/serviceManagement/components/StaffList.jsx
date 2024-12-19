@@ -1,43 +1,59 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { useUser } from "@/hooks/useUser"
-import { useQuery } from "@tanstack/react-query"
-import { appointmentApi } from "@/core/appointmentManagement/services/AppointmentApi"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { useBusiness } from "@/hooks/useUser";
+import { useQuery } from "@tanstack/react-query";
+import { appointmentApi } from "@/core/appointmentManagement/services/AppointmentApi";
 
 export default function StaffList({
-    selectedService,
-    selectedDate,
-    selectedTime,
-    selectedStaff,
-    onSelectStaff
-  }) {
-    const { businessId } = useUser();
-    const getDateTime = () => {
-      if (!selectedDate) return null;
-      const dateTime = new Date(selectedDate);
-      dateTime.setHours(0, 0, 0, 0);
-      return dateTime;
-    };
- 
-    const { data: availableStaff = [], isLoading, error } = useQuery({
-      queryKey: ['availableStaff', businessId, selectedService?.serviceId, selectedDate],
-      queryFn: async () => {
-        const dateTime = getDateTime();
-        if (!dateTime) return [];
-       
-        return await appointmentApi.getAvailableEmployees(
-          businessId,
-          selectedService.serviceId,
-          dateTime.toISOString()
-        );
-      },
-      enabled: !!(businessId && selectedService?.serviceId && selectedDate)
-    });
+  selectedService,
+  selectedDate,
+  selectedTime,
+  selectedStaff,
+  onSelectStaff,
+}) {
+  const { businessId } = useBusiness();
+  const getDateTime = () => {
+    if (!selectedDate) return null;
+    const dateTime = new Date(selectedDate);
+    dateTime.setHours(0, 0, 0, 0);
+    return dateTime;
+  };
+
+  const {
+    data: availableStaff = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: [
+      "availableStaff",
+      businessId,
+      selectedService?.serviceId,
+      selectedDate,
+    ],
+    queryFn: async () => {
+      const dateTime = getDateTime();
+      if (!dateTime) return [];
+
+      return await appointmentApi.getAvailableEmployees(
+        businessId,
+        selectedService.serviceId,
+        dateTime.toISOString()
+      );
+    },
+    enabled: !!(businessId && selectedService?.serviceId && selectedDate),
+  });
 
   if (!selectedService) return null;
 
-  if (!selectedDate) { // Removed selectedTime check
+  if (!selectedDate) {
+    // Removed selectedTime check
     return (
       <Card>
         <CardHeader>
@@ -53,7 +69,9 @@ export default function StaffList({
       <Card>
         <CardHeader>
           <CardTitle>Loading Staff</CardTitle>
-          <CardDescription>Please wait while we check staff availability...</CardDescription>
+          <CardDescription>
+            Please wait while we check staff availability...
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -64,7 +82,9 @@ export default function StaffList({
       <Card>
         <CardHeader>
           <CardTitle>Error Loading Staff</CardTitle>
-          <CardDescription>Failed to load available staff. Please try again.</CardDescription>
+          <CardDescription>
+            Failed to load available staff. Please try again.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -75,7 +95,10 @@ export default function StaffList({
       <Card>
         <CardHeader>
           <CardTitle>No Staff Available</CardTitle>
-          <CardDescription>No staff members are available on this date. Please try another date.</CardDescription>
+          <CardDescription>
+            No staff members are available on this date. Please try another
+            date.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -90,7 +113,9 @@ export default function StaffList({
         {availableStaff.map((staff) => (
           <Card
             key={staff.employee_id}
-            className={selectedStaff === staff.employee_id ? "border-primary" : ""}
+            className={
+              selectedStaff === staff.employee_id ? "border-primary" : ""
+            }
           >
             <CardHeader>
               <CardTitle>{staff.employee_name}</CardTitle>
@@ -101,7 +126,9 @@ export default function StaffList({
                   value={staff.employee_id.toString()}
                   id={`staff-${staff.employee_id}`}
                 />
-                <Label htmlFor={`staff-${staff.employee_id}`}>Select this staff member</Label>
+                <Label htmlFor={`staff-${staff.employee_id}`}>
+                  Select this staff member
+                </Label>
               </div>
             </CardContent>
           </Card>
