@@ -241,6 +241,7 @@ const ProductsPage = () => {
   <TableHeader>
     <TableRow>
       <TableHead>ID</TableHead>
+      <TableHead>Category</TableHead>
       <TableHead>Name</TableHead>
       <TableHead>Price</TableHead>
       <TableHead>State</TableHead> {/* Added this line for the product state */}
@@ -251,6 +252,7 @@ const ProductsPage = () => {
     {products.map((product) => (
       <TableRow key={product.productId}>
         <TableCell>{product.productId}</TableCell>
+        <TableCell>{product.categoryId}</TableCell>
         <TableCell>{product.name}</TableCell>
         <TableCell>{product.basePrice}</TableCell>
         <TableCell>{product.productState}</TableCell> {/* Displaying the product state here */}

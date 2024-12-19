@@ -330,6 +330,7 @@ const DiscountList = ({ discounts, onEdit }) => {
     <table className="min-w-full table-fixed divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
+          <th className="px-4 py-2 text-left">Category</th>
           <th className="px-4 py-2 text-left">Name</th>
           <th className="px-4 py-2 text-left">Description</th>
           <th className="px-4 py-2 text-left">Value</th>
@@ -340,6 +341,7 @@ const DiscountList = ({ discounts, onEdit }) => {
       <tbody>
         {filteredDiscounts.map((discount) => (
           <tr key={discount.discountId}>
+            <td className="px-4 py-2">{discount.categoryId}</td>
             <td className="px-4 py-2">{discount.name}</td>
             <td className="px-4 py-2">{discount.description}</td>
             <td className="px-4 py-2">{discount.discountValue}</td>
