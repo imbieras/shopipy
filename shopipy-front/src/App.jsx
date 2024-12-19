@@ -17,6 +17,7 @@ import OrderDetails from './core/orderManagement/components/OrderDetails';
 import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
 import Users from './core/userManagement/Users';
 import Discounts from './core/discountsManagement/Discounts';
+import ProductsAdmin from './core/productAdminManagement/ProductsAdmin';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -197,6 +198,16 @@ function App() {
           element={
             isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
               <Discounts />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+          />
+          <Route
+          path="/productsAdmin"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <ProductsAdmin />
             ) : (
               <Navigate to="/" />
             )

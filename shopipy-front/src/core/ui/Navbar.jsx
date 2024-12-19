@@ -14,6 +14,7 @@ const Navbar = ({ onLogout }) => {
     { name: 'Switch Business', path: '/switch-business', role: 'SuperAdmin' },
     { name: 'Users', path: '/users', role: ['BusinessOwner','SuperAdmin']},
     { name: 'Discounts', path: '/discounts', role: ['BusinessOwner','SuperAdmin']},
+    { name: 'ProductsAdmin', path: '/productsAdmin', role: ['BusinessOwner','SuperAdmin']},
   ];
 
   const isActive = (path) => {
