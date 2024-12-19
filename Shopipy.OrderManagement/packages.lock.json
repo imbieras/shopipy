@@ -11,6 +11,16 @@
           "Microsoft.Extensions.Options": "6.0.0"
         }
       },
+      "Stripe.net": {
+        "type": "Direct",
+        "requested": "[47.2.0, )",
+        "resolved": "47.2.0",
+        "contentHash": "e1FR3JTUbSWYDxE78APyml5V2SV3wS6z/eIQN2OAdtrRSoahOCAK4OcWiHn4582HPf2mJmS1AvyDZO+OqAHOfw==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.3",
+          "System.Configuration.ConfigurationManager": "8.0.0"
+        }
+      },
       "Aspire.Npgsql.EntityFrameworkCore.PostgreSQL": {
         "type": "Transitive",
         "resolved": "8.2.2",
@@ -275,6 +285,11 @@
         "resolved": "8.0.0",
         "contentHash": "bXJEZrW9ny8vjMF1JV253WeLhpEVzFo1lyaZu1vQ4ZxWUlVvknZ/+ftFgVheLubb4eZPSwwxBeqS1JkCOjxd8g=="
       },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
       "Npgsql": {
         "type": "Transitive",
         "resolved": "8.0.5",
@@ -348,10 +363,29 @@
           "OpenTelemetry": "1.9.0"
         }
       },
+      "System.Configuration.ConfigurationManager": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "JlYi9XVvIREURRUlGMr1F6vOFLk7YSY4p1vHo4kX3tQ0AGrjqlRWHDi66ImHhy6qwXBG3BJ6Y1QlYQ+Qz6Xgww==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "8.0.0",
+          "System.Security.Cryptography.ProtectedData": "8.0.0"
+        }
+      },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
         "resolved": "8.0.0",
         "contentHash": "c9xLpVz6PL9lp/djOWtk5KPDZq3cSYpmXoJQY524EOtuFl5z9ZtsotpsyrDW40U1DRnQSYvcPKEUV0X//u6gkQ=="
+      },
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "fdYxcRjQqTTacKId/2IECojlDSFvp7LP5N78+0z/xH7v/Tuw5ZAxu23Y6PTCRinqyu2ePx+Gn1098NC6jM6d+A=="
+      },
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "+TUFINV2q2ifyXauQXRwy4CiBhqvDEDZeVJU7qfxya4aRYOKzVBpN+4acx25VcPB9ywUN6C0n8drWl110PhZEg=="
       },
       "shopipy.persistence": {
         "type": "Project",

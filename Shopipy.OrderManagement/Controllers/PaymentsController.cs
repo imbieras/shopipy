@@ -24,12 +24,12 @@ public class PaymentsController(IMapper mapper, PaymentService paymentService) :
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPayments(int businessId, int orderId)
     {
-        return Ok(mapper.Map<IEnumerable<OrderDto>>(await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId)));
+        return Ok(mapper.Map<IEnumerable<PaymentDto>>(await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId)));
     }
     
     [HttpGet("{paymentId:int}")]
     public async Task<ActionResult<PaymentDto>> GetPayment(int businessId, int orderId, int paymentId)
     {
-        return Ok(mapper.Map<OrderDto>(await paymentService.GetPaymentById(businessId, orderId, paymentId)));
+        return Ok(mapper.Map<PaymentDto>(await paymentService.GetPaymentById(businessId, orderId, paymentId)));
     }
 }
