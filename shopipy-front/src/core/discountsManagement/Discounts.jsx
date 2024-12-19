@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { discountsApi } from './services/DiscountsApi';
-import { useBusiness } from "@/hooks/useUser";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {useState} from 'react';
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {discountsApi} from './services/DiscountsApi';
+import {useBusiness} from "@/hooks/useUser";
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 
 // Utility function to format date for input
 const formatDateForInput = (date) => {
@@ -18,13 +18,13 @@ const formatDateForInput = (date) => {
 };
 
 const DiscountPage = () => {
-  const { businessId } = useBusiness();
+  const {businessId} = useBusiness();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
 
   // Fetch Discounts
-  const { data: discounts = [], isLoading, error } = useQuery({
+  const {data: discounts = [], isLoading, error} = useQuery({
     queryKey: ['discounts', businessId],
     queryFn: () => discountsApi.getDiscounts(businessId),
   });
@@ -102,20 +102,20 @@ const DiscountPage = () => {
           {isAdding && (
             <>
               <Label htmlFor="categoryId">Category ID</Label>
-              <Input id="categoryId" name="categoryId" type="number" required />
+              <Input id="categoryId" name="categoryId" type="number" required/>
 
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
+              <Input id="name" name="name" required/>
 
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" required />
+              <Textarea id="description" name="description" required/>
 
               <Label htmlFor="discountValue">Discount Value</Label>
-              <Input id="discountValue" name="discountValue" type="number" step="0.01" required />
+              <Input id="discountValue" name="discountValue" type="number" step="0.01" required/>
 
               <Label htmlFor="discountType">Discount Type</Label>
               <Select name="discountType" required>
-                <SelectTrigger><SelectValue placeholder="Select a discount type" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select a discount type"/></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Fixed">Fixed</SelectItem>
                   <SelectItem value="Percentage">Percentage</SelectItem>
@@ -123,11 +123,10 @@ const DiscountPage = () => {
               </Select>
 
               <Label htmlFor="effectiveFrom">Effective From</Label>
-              <Input id="effectiveFrom" name="effectiveFrom" type="datetime-local" required />
+              <Input id="effectiveFrom" name="effectiveFrom" type="datetime-local" required/>
             </>
           )}
 
-          {/* Form for updating (only effectiveTo) */}
           <Label htmlFor="effectiveTo">Effective To</Label>
           <Input
             id="effectiveTo"
@@ -137,7 +136,10 @@ const DiscountPage = () => {
           />
 
           <Button type="submit">{isAdding ? 'Add Discount' : 'Update Discount'}</Button>
-          <Button type="button" variant="outline" onClick={() => { setIsAdding(false); setEditingDiscount(null); }}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => {
+            setIsAdding(false);
+            setEditingDiscount(null);
+          }}>Cancel</Button>
         </form>
       ) : (
         <Button onClick={() => setIsAdding(true)}>Add Discount</Button>

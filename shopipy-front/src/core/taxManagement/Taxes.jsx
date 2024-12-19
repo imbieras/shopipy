@@ -1,336 +1,169 @@
-// TaxManagementPage.js
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useUser } from '@/hooks/useUser';
-import { taxesApi } from './services/TaxesApi'; // Assuming this file handles API calls for taxes
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { taxesApi } from './services/TaxesApi';
+import { useBusiness } from "@/hooks/useUser";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-// Utility to format the date for `datetime-local` input
+// Utility function to format date for input
 const formatDateForInput = (date) => {
-  if (!date) return '';
-  return new Date(date).toISOString().slice(0, 16);
+  if (!date) return '';  // Return an empty string if no date is provided
+  return new Date(date).toISOString();  // Convert the date to the correct ISO format with timezone
 };
 
-const AddTaxForm = ({ onClose }) => {
-  const { businessId } = useUser();
+const TaxRatesPage = () => {
+  const { businessId } = useBusiness();
   const queryClient = useQueryClient();
-  const [formState, setFormState] = useState({
-    categoryId: '',
-    name: '',
-    rate: '',
-    effectiveFrom: '',
-    effectiveTo: '',
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingTaxRate, setEditingTaxRate] = useState(null);
+
+  // Fetch tax rates
+  const { data: taxRates = [], isLoading, error } = useQuery({
+    queryKey: ['taxRates', businessId],
+    queryFn: () => taxesApi.getTaxRates(businessId),
   });
 
-  // Create mutation for adding a new tax rate
+  // Mutations
   const createTaxRateMutation = useMutation({
-    mutationFn: (taxData) => taxesApi.createTaxRate(businessId, taxData),
+    mutationFn: (taxRateData) => taxesApi.createTaxRate(businessId, taxRateData),
     onSuccess: () => {
       queryClient.invalidateQueries(['taxRates', businessId]);
-      onClose();
+      setIsAdding(false);
     },
     onError: (error) => {
-      alert(`Failed to add tax rate: ${error.message}`);
+      alert(`Failed to create tax rate: ${error.message}`);
     },
   });
 
-  const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const effectiveFromUtc = new Date(formState.effectiveFrom).toISOString();
-    const effectiveToUtc = formState.effectiveTo ? new Date(formState.effectiveTo).toISOString() : null;
-
-    const taxData = {
-      ...formState,
-      businessId,
-      effectiveFrom: effectiveFromUtc,
-      effectiveTo: effectiveToUtc,
-    };
-
-    createTaxRateMutation.mutate(taxData);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 mb-4">
-      <div>
-        <Label htmlFor="categoryId">Category ID</Label>
-        <Input
-          id="categoryId"
-          name="categoryId"
-          type="number"
-          value={formState.categoryId}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formState.name}
-          onChange={handleChange}
-          maxLength={255}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="rate">Tax Rate</Label>
-        <Input
-          id="rate"
-          name="rate"
-          type="number"
-          step="0.01"
-          value={formState.rate}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="effectiveFrom">Effective From</Label>
-        <Input
-          id="effectiveFrom"
-          name="effectiveFrom"
-          type="datetime-local"
-          value={formatDateForInput(formState.effectiveFrom)}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="effectiveTo">Effective To</Label>
-        <Input
-          id="effectiveTo"
-          name="effectiveTo"
-          type="datetime-local"
-          value={formatDateForInput(formState.effectiveTo)}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="flex gap-2">
-        <Button type="submit" isLoading={createTaxRateMutation.isLoading}>
-          Add Tax Rate
-        </Button>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-const UpdateTaxForm = ({ tax, onClose }) => {
-  const { businessId } = useUser();
-  const queryClient = useQueryClient();
-  const [formState, setFormState] = useState(tax);
-
   const updateTaxRateMutation = useMutation({
-    mutationFn: (updatedEffectiveTo) =>
-      taxesApi.updateTaxRate(businessId, tax.taxRateId, updatedEffectiveTo),
+    mutationFn: ({ taxRateId, effectiveTo }) =>
+      taxesApi.updateTaxRate(businessId, taxRateId, effectiveTo),
     onSuccess: () => {
       queryClient.invalidateQueries(['taxRates', businessId]);
-      onClose();
+      setEditingTaxRate(null);
     },
     onError: (error) => {
       alert(`Failed to update tax rate: ${error.message}`);
     },
   });
 
-  const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
-  };
+  const deleteTaxRateMutation = useMutation({
+    mutationFn: (taxRateId) => taxesApi.deleteTaxRate(businessId, taxRateId),
+    onSuccess: () => queryClient.invalidateQueries(['taxRates', businessId]),
+  });
 
-  const handleSubmit = (e) => {
+  // Handle Form Submission
+  const handleTaxRateSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
 
-    const effectiveToUtc = formState.effectiveTo ? new Date(formState.effectiveTo).toISOString() : null;
-
-    updateTaxRateMutation.mutate(effectiveToUtc);
+    if (isAdding) {
+      const newTaxRate = {
+        categoryId: formData.get('categoryId'),
+        name: formData.get('name'),
+        rate: parseFloat(formData.get('rate')) / 100,
+        effectiveFrom: formatDateForInput(formData.get('effectiveFrom')),
+        effectiveTo: formatDateForInput(formData.get('effectiveTo')) || null,
+      };
+      await createTaxRateMutation.mutateAsync(newTaxRate);
+    } else if (editingTaxRate) {
+      const updatedData = {
+        taxRateId: editingTaxRate.taxRateId,
+        effectiveTo: formatDateForInput(formData.get('effectiveTo')) || null,
+      };
+      await updateTaxRateMutation.mutateAsync(updatedData);
+    }
   };
+
+  const handleDeleteTaxRate = (taxRateId) => {
+    if (window.confirm('Are you sure you want to delete this tax rate?')) {
+      deleteTaxRateMutation.mutate(taxRateId);
+    }
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading tax rates</div>;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mb-4">
-      <div>
-        <Label htmlFor="categoryId">Category ID</Label>
-        <Input
-          id="categoryId"
-          name="categoryId"
-          type="number"
-          value={formState.categoryId}
-          onChange={handleChange}
-          disabled
-        />
-      </div>
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formState.name}
-          onChange={handleChange}
-          maxLength={255}
-          disabled
-        />
-      </div>
-      <div>
-        <Label htmlFor="rate">Tax Rate</Label>
-        <Input
-          id="rate"
-          name="rate"
-          type="number"
-          value={formState.rate}
-          onChange={handleChange}
-          disabled
-        />
-      </div>
-      <div>
-        <Label htmlFor="effectiveFrom">Effective From</Label>
-        <Input
-          id="effectiveFrom"
-          name="effectiveFrom"
-          type="datetime-local"
-          value={formatDateForInput(formState.effectiveFrom)}
-          onChange={handleChange}
-          disabled
-        />
-      </div>
-      <div>
-        <Label htmlFor="effectiveTo">Effective To</Label>
-        <Input
-          id="effectiveTo"
-          name="effectiveTo"
-          type="datetime-local"
-          value={formatDateForInput(formState.effectiveTo)}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="flex gap-2">
-        <Button type="submit" isLoading={updateTaxRateMutation.isLoading}>
-          Update Tax Rate
-        </Button>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Tax Rates</h1>
+
+      {isAdding || editingTaxRate ? (
+        <form onSubmit={handleTaxRateSubmit} className="space-y-4 mb-4">
+          {isAdding && (
+            <>
+              <div>
+                <Label htmlFor="categoryId">Category ID</Label>
+                <Input id="categoryId" name="categoryId" type="number" required/>
+              </div>
+
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" required/>
+              </div>
+
+              <div>
+                <Label htmlFor="rate">Rate (Multiplier)</Label>
+                <Input id="rate" name="rate" type="number" step="0.01" required/>
+              </div>
+
+              <div>
+                <Label htmlFor="effectiveFrom">Effective From</Label>
+                <Input id="effectiveFrom" name="effectiveFrom" type="datetime-local" required/>
+              </div>
+            </>
+          )}
+
+          <Label htmlFor="effectiveTo">Effective To</Label>
+          <Input
+            id="effectiveTo"
+            name="effectiveTo"
+            type="datetime-local"
+            defaultValue={formatDateForInput(editingTaxRate?.effectiveTo) || ''}
+          />
+
+          <Button type="submit">{isAdding ? 'Add Tax Rate' : 'Update Tax Rate'}</Button>
+          <Button type="button" variant="outline" onClick={() => { setIsAdding(false); setEditingTaxRate(null); }} className="ml-2">Cancel</Button>
+        </form>
+      ) : (
+        <Button onClick={() => setIsAdding(true)}>Add Tax Rate</Button>
+      )}
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Category ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Rate</TableHead>
+            <TableHead>Effective From</TableHead>
+            <TableHead>Effective To</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {taxRates.map((taxRate) => (
+            <TableRow key={taxRate.taxRateId}>
+              <TableCell>{taxRate.taxRateId}</TableCell>
+              <TableCell>{taxRate.categoryId}</TableCell>
+              <TableCell>{taxRate.name}</TableCell>
+              <TableCell>{(taxRate.rate * 100).toFixed(2)}%</TableCell>
+              <TableCell>{new Date(taxRate.effectiveFrom).toLocaleDateString()}</TableCell>
+              <TableCell>{taxRate.effectiveTo ? new Date(taxRate.effectiveTo).toLocaleDateString() : 'N/A'}</TableCell>
+              <TableCell>
+                <Button onClick={() => setEditingTaxRate(taxRate)} className="mr-2">Edit</Button>
+                <Button onClick={() => handleDeleteTaxRate(taxRate.taxRateId)} variant="destructive">Delete</Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
-const TaxList = ({ taxes, onEdit }) => {
-    const { businessId } = useUser();
-    const queryClient = useQueryClient();
-  
-    const deleteTaxRateMutation = useMutation({
-      mutationFn: (taxId) => taxesApi.deleteTaxRate(businessId, taxId),
-      onSuccess: () => {
-        queryClient.invalidateQueries(['taxRates', businessId]);
-      },
-      onError: (error) => {
-        alert(`Failed to deactivate tax rate: ${error.message}`);
-      },
-    });
-  
-    const handleDelete = (taxId) => {
-      if (window.confirm('Are you sure you want to deactivate this tax rate?')) {
-        deleteTaxRateMutation.mutate(taxId);
-      }
-    };
-  
-    // Filter the taxes based on effectiveTo condition
-    const filteredTaxes = taxes.filter((tax) => {
-      // If effectiveTo is null, consider the tax as valid
-      if (!tax.effectiveTo) return true;
-  
-      // Parse the effectiveTo date string
-      const effectiveToDate = new Date(tax.effectiveTo);
-  
-      // Get the current date and time
-      const currentDate = new Date();
-  
-      // Compare effectiveTo with the current date (including time)
-      return effectiveToDate > currentDate;
-    });
-  
-    return (
-      <table className="min-w-full table-fixed divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left">Category</th>
-            <th className="px-4 py-2 text-left">Name</th>
-            <th className="px-4 py-2 text-left">Rate</th>
-            <th className="px-4 py-2 text-left">Effective From</th>
-            <th className="px-4 py-2 text-left">Effective To</th>
-            <th className="px-4 py-2 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTaxes.map((tax) => (
-            <tr key={tax.taxRateId}>
-              <td className="px-4 py-2">{tax.categoryId}</td>
-              <td className="px-4 py-2">{tax.name}</td>
-              <td className="px-4 py-2">{tax.rate}</td>
-              <td className="px-4 py-2">{new Date(tax.effectiveFrom).toLocaleString()}</td>
-              <td className="px-4 py-2">{tax.effectiveTo ? new Date(tax.effectiveTo).toLocaleString() : 'N/A'}</td>
-              <td className="px-4 py-2 text-right">
-                <div className="flex justify-end gap-2">
-                  <Button onClick={() => onEdit(tax)} className="min-w-[80px]">
-                    Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDelete(tax.taxRateId)}
-                    className="min-w-[80px]"
-                  >
-                    Deactivate
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-  
-
-  const TaxManagementPage = () => {
-    const { businessId } = useUser();
-    const [isAdding, setIsAdding] = useState(false);
-    const [editingTax, setEditingTax] = useState(null);
-  
-    const { data: taxes = [], isLoading, error } = useQuery({
-      queryKey: ['taxRates', businessId],
-      queryFn: () => taxesApi.getTaxRates(businessId),
-    });
-  
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error loading tax rates: {error.message}</div>;
-  
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Tax Rates</h1>
-        {isAdding ? (
-          <AddTaxForm onClose={() => setIsAdding(false)} />
-        ) : editingTax ? (
-          <UpdateTaxForm tax={editingTax} onClose={() => setEditingTax(null)} />
-        ) : (
-          <Button onClick={() => setIsAdding(true)}>Add Tax Rate</Button>
-        )}
-        <TaxList taxes={taxes} onEdit={setEditingTax} />
-      </div>
-    );
-  };
-  
-
-export default TaxManagementPage;
+export default TaxRatesPage;
