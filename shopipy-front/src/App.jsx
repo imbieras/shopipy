@@ -1,15 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { AuthLayout } from './core/layouts/AuthLayout';
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {AuthLayout} from './core/layouts/AuthLayout';
 import LoginPage from "./core/auth/LoginPage";
-import { authService } from './core/auth/services/AuthService';
-import { useUser } from './hooks/useUser';
-import { jwtDecode } from 'jwt-decode';
+import {authService} from './core/auth/services/AuthService';
+import {useUser} from './hooks/useUser';
+import {jwtDecode} from 'jwt-decode';
 import Navbar from './core/ui/Navbar';
 import Services from './core/serviceManagement/page';
 import Appointments from './core/appointmentManagement/Appointments';
-import { useQueryClient } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import {useQueryClient} from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 import Categories from './core/categoryManagement/Categories';
 import Orders from './core/orderManagement/Orders';
 import Products from './core/productManagement/Products';
@@ -20,7 +20,7 @@ import Discounts from './core/discountsManagement/Discounts';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { fetchUser, clearUser, role } = useUser();
+  const {fetchUser, clearUser, role} = useUser();
   const queryClient = useQueryClient();
 
   const checkAuthentication = async () => {
@@ -68,7 +68,7 @@ function App() {
       }
     },
     enabled: !!authService.getToken(),
-    staleTime: Infinity, 
+    staleTime: Infinity,
   });
 
   const handleLogin = async (username, password) => {
@@ -98,14 +98,14 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
-        {isAuthenticated && <Navbar onLogout={handleLogout} />}
+        {isAuthenticated && <Navbar onLogout={handleLogout}/>}
         <Routes>
           <Route
             path="/"
             element={
               !isAuthenticated ? (
                 <AuthLayout>
-                  <LoginPage onLogin={handleLogin} />
+                  <LoginPage onLogin={handleLogin}/>
                 </AuthLayout>
               ) : (
                 <Navigate to="/services"/>
@@ -115,48 +115,38 @@ function App() {
           <Route
             path="/services"
             element={
-              isAuthenticated ? (
-                <Services/>
-              ) : (
-                <Navigate to="/" />
-              )
+              isAuthenticated ? <Services/> : <Navigate to="/"/>
             }
           />
           <Route
             path="/orders"
             element={
-              isAuthenticated ? (
-                <Orders/>
-              ) : (
-                <Navigate to="/" />
-              )
+              isAuthenticated ? <Orders/> : <Navigate to="/"/>
             }
           />
           <Route
             path="/orders/:orderId"
             element={
-              isAuthenticated ? (
-                <OrderDetails/>
-              ) : (
-                <Navigate to="/" />
-              )
+              isAuthenticated ? <OrderDetails/> : <Navigate to="/"/>
             }
           />
           <Route
             path="/products"
             element={
-              isAuthenticated ? (
-                <Products/>
-              ) : (
-                <Navigate to="/" />
-              )
+              isAuthenticated ? <Products/> : <Navigate to="/"/>
             }
           />
           <Route
             path="/appointments"
             element={
-              isAuthenticated ? (
-                <Appointments/>
+              isAuthenticated ? <Appointments/> : <Navigate to="/"/>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              isAuthenticated && role === 'BusinessOwner' ? (
+                <Categories/>
               ) : (
                 <Navigate to="/"/>
               )
