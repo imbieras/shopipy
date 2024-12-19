@@ -41,6 +41,7 @@ const fetchGiftCards = async () => {
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
+      console.log("Sending Gift Card Data:", giftCardData); 
       try {
         await giftCardApi.createGiftCard(businessId, giftCardData);
         fetchGiftCards();
@@ -76,12 +77,13 @@ const fetchGiftCards = async () => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const updatedGiftCard = {
-        amountLeft: parseFloat(formData.get("amountLeft")),
+        amountOriginal: parseFloat(formData.get("amountOriginal")),
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
+      console.log("Updating Gift Card Data:", updatedGiftCard);
       try {
-        await giftCardApi.updateGiftCard(giftCard.giftCardId, updatedGiftCard);
+        await giftCardApi.updateGiftCard(businessId, giftCard.giftCardId, updatedGiftCard);
         fetchGiftCards();
         onClose();
       } catch (error) {
@@ -93,26 +95,30 @@ const fetchGiftCards = async () => {
       <form onSubmit={handleSubmit} className="space-y-4 mb-4">
         <input type="hidden" name="giftCardId" value={giftCard.giftCardId} />
         <div>
-          <label htmlFor="amountLeft">Remaining Amount</label>
-          <input
-            id="amountLeft"
-            name="amountLeft"
+          <Label htmlFor="amountOriginal">Original Amount</Label>
+          <Input
+            id="amountOriginal"
+            name="amountOriginal"
             type="number"
             step="0.01"
-            defaultValue={giftCard.amountLeft}
+            defaultValue={giftCard.amountOriginal}
             required
           />
         </div>
         <div>
-          <label htmlFor="validFrom">Valid From</label>
-          <input id="validFrom" name="validFrom" type="date" defaultValue={giftCard.validFrom} required />
+          <Label htmlFor="validFrom">Valid From</Label>
+          <Input id="validFrom" name="validFrom" type="date" defaultValue={giftCard.validFrom} required />
+
         </div>
         <div>
-          <label htmlFor="validUntil">Valid Until</label>
-          <input id="validUntil" name="validUntil" type="date" defaultValue={giftCard.validUntil} required />
+          <Label htmlFor="validUntil">Valid Until</Label>
+          <Input id="validUntil" name="validUntil" type="date" defaultValue={giftCard.validUntil} required />
+
         </div>
-        <button type="submit">Update Gift Card</button>
-        <button type="button" onClick={onClose}>Cancel</button>
+        <Button type="submit">Update Gift Card</Button>
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
       </form>
     );
   };
