@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { giftCardApi } from "@/core/gift-cards/services/GiftCardApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,11 @@ const fetchGiftCards = async () => {
     console.error("Error fetching gift cards:", error);
   }
 };
-
+  useEffect(() => {
+    if (businessId) {
+      fetchGiftCards();
+    }
+  }, [businessId]);
   const handleDelete = async (giftCardId) => {
     try {
       await giftCardApi.deleteGiftCard(businessId, giftCardId);
@@ -66,8 +70,12 @@ const fetchGiftCards = async () => {
           <Label htmlFor="validUntil">Valid Until</Label>
           <Input id="validUntil" name="validUntil" type="date" required />
         </div>
-        <button type="submit">Add Gift Card</button>
-        <button type="button" onClick={onClose}>Cancel</button>
+        <div className="flex space-x-4">
+          <Button type="submit">Add Gift Card</Button>
+          <Button type="button" variant="destructive" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
       </form>
     );
   };
