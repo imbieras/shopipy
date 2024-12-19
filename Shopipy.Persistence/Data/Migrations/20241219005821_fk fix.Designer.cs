@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shopipy.Persistence.Data;
 
 #nullable disable
 
-namespace Shopipy.ApiService.Data.Migrations
+namespace Shopipy.Persistence.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241219005821_fk fix")]
+    partial class fkfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -483,10 +486,6 @@ namespace Shopipy.ApiService.Data.Migrations
 
                     b.HasKey("PaymentId", "BusinessId", "OrderId");
 
-                    b.HasIndex("BusinessId");
-
-                    b.HasIndex("OrderId");
-
                     b.ToTable("OrderPayments");
                 });
 
@@ -828,25 +827,6 @@ namespace Shopipy.ApiService.Data.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Shopipy.Persistence.Models.OrderPayment", b =>
-                {
-                    b.HasOne("Shopipy.Persistence.Models.Business", "Business")
-                        .WithMany()
-                        .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Shopipy.Persistence.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Business");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Shopipy.Persistence.Models.User", b =>

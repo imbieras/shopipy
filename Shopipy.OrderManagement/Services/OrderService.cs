@@ -16,6 +16,7 @@ public class OrderService(
     IProductVariationService productVariationService,
     IServiceManagementService serviceManagementService,
     ITaxService taxService,
+    IDiscountService discountService,
     IGenericRepository<OrderDiscount> orderDiscountRepository)
 {
     public async Task<Order> CreateOrderWithItemsAsync(int businessId, string userId, IEnumerable<OrderItem> orderItems)
@@ -237,7 +238,60 @@ public class OrderService(
         await UpdateOrderTime(businessId, orderId);
     }
 
-    private async Task ValidateOrderAsync(int businessId, int orderId)
+    public async Task<decimal> GetTotalPriceAsync(int businessId, int orderId)
+    {
+        var order = await GetOrderByIdAsync(businessId, orderId);
+        if (order == null) throw new ArgumentException("Order not found");
+        decimal totalPrice = 0;
+        foreach (var orderItem in order.OrderItems)
+        {
+            var orderItemPrice = orderItem.UnitPrice;
+            if (orderItem is ProductOrderItem productOrderItem)
+            {
+                orderItemPrice *= productOrderItem.ProductQuantity;
+            }
+
+            foreach (var orderItemOrderDiscount in orderItem.OrderDiscounts)
+            {
+                orderItemPrice = await CalculateDiscountAsync(orderItemPrice, orderItemOrderDiscount);
+            }
+
+            if (orderItem.TaxRateId is not null)
+            {
+                var tax = await taxService.GetTaxRateByIdAndBusinessAsync(orderItem.TaxRateId.Value, orderItem.BusinessId);
+                if (tax != null) orderItemPrice *= (1 - tax.Rate);
+            }
+            
+            totalPrice += orderItemPrice;
+        }
+        
+        foreach (var orderDiscount in order.OrderDiscounts)
+        {
+            totalPrice = await CalculateDiscountAsync(totalPrice, orderDiscount);
+        }
+        
+        return totalPrice;
+    }
+
+    private async Task<decimal> CalculateDiscountAsync(decimal currentPrice, OrderDiscount orderDiscount)
+    {
+        var discount = await discountService.GetDiscountByIdAsync(orderDiscount.DiscountId);
+        if (discount == null) return currentPrice;
+        switch (discount.DiscountType)
+        {
+            case DiscountType.Fixed:
+                currentPrice -= discount.DiscountValue;
+                break;
+            case DiscountType.Percentage:
+                currentPrice *= (1 - discount.DiscountValue);
+                break;
+            default:
+                throw new InvalidOperationException($"Unknown discount type: {discount.DiscountType}");
+        }
+        return currentPrice;
+    }
+
+    public async Task ValidateOrderAsync(int businessId, int orderId)
     {
         var order = await GetOrderByIdAsync(businessId, orderId);
         if (order is null)

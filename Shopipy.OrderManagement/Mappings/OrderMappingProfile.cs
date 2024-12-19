@@ -1,6 +1,7 @@
 using AutoMapper;
 using Shopipy.OrderManagement.DTOs;
 using Shopipy.OrderManagement.DTOs.Discounts;
+using Shopipy.OrderManagement.DTOs.Payments;
 using Shopipy.Persistence.Models;
 
 namespace Shopipy.OrderManagement.Mappings;
@@ -38,5 +39,9 @@ public class OrderMappingProfile : Profile
         
         CreateMap<OrderDiscount, DiscountDto>()
             .ForMember(d => d.AppliedOrderDiscountId, opt => opt.MapFrom(o => o.OrderDiscountId));
+
+        CreateMap<CreatePaymentRequestDto, OrderPayment>();
+
+        CreateMap<OrderPayment, PaymentDto>();
     }
 }
