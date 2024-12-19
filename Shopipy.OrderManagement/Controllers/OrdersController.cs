@@ -39,7 +39,6 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
     public async Task<ActionResult<IEnumerable<ProductOrderItemDto>>> GetProductOrderItems(int businessId, int orderId)
     {
         var productItems = await orderService.GetProductOrderItems(businessId, orderId);
-        if (!productItems.Any()) return NotFound();
         return Ok(mapper.Map<IEnumerable<ProductOrderItemDto>>(productItems));
     }
 

@@ -1,23 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { ProductVariationModal } from "./ProductVariationModal";
 import { useQuery } from "@tanstack/react-query";
-import { productsApi } from '@/core/productManagement/services/productsApi';
-import { useUser } from "@/hooks/useUser";
+import { productsApi } from "@/core/productManagement/services/productsApi";
+import { useBusiness } from "@/hooks/useUser";
 import { useState } from "react";
 
 export function ProductList({ searchTerm, selectedCategory, onAddToOrder }) {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const { data: productsResponse, isLoading } = useQuery({
-    queryKey: ['products', businessId, selectedCategory],
+    queryKey: ["products", businessId, selectedCategory],
     queryFn: async () => {
-      const response = await productsApi.getAllProducts(businessId, { 
-        categoryId: selectedCategory 
+      const response = await productsApi.getAllProducts(businessId, {
+        categoryId: selectedCategory,
       });
       return response;
     },
-    enabled: !!businessId
+    enabled: !!businessId,
   });
 
   const products = productsResponse?.data || [];
@@ -35,7 +35,11 @@ export function ProductList({ searchTerm, selectedCategory, onAddToOrder }) {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-full">Loading products...</div>;
+    return (
+      <div className="flex justify-center items-center h-full">
+        Loading products...
+      </div>
+    );
   }
 
   return (

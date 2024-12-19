@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { categoryApi } from './services/CategoryApi';
-import { useUser } from '@/hooks/useUser';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { categoryApi } from "./services/CategoryApi";
+import { useBusiness } from "@/hooks/useUser";
 import {
   Table,
   TableBody,
@@ -34,46 +34,49 @@ export default function Categories() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [name, setName] = useState('');
-  const { businessId } = useUser();
+  const [name, setName] = useState("");
+  const { businessId } = useBusiness();
 
   // Queries
   const { data: categories, isLoading } = useQuery({
-    queryKey: ['categories', businessId],
-    queryFn: () => categoryApi.getCategories(businessId)
+    queryKey: ["categories", businessId],
+    queryFn: () => categoryApi.getCategories(businessId),
   });
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (newCategory) => categoryApi.createCategory(businessId, newCategory),
+    mutationFn: (newCategory) =>
+      categoryApi.createCategory(businessId, newCategory),
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories', businessId]);
+      queryClient.invalidateQueries(["categories", businessId]);
       setIsCreateOpen(false);
-      setName('');
+      setName("");
       //alert('Category created successfully');
     },
-    onError: () => console.error('Failed to create category')
+    onError: () => console.error("Failed to create category"),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ categoryId, data }) => categoryApi.updateCategory(businessId, categoryId, data),
+    mutationFn: ({ categoryId, data }) =>
+      categoryApi.updateCategory(businessId, categoryId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories', businessId]);
+      queryClient.invalidateQueries(["categories", businessId]);
       setIsEditOpen(false);
       setSelectedCategory(null);
-      setName('');
+      setName("");
       //alert('Category updated successfully');
     },
-    onError: () => alert('Failed to update category')
+    onError: () => alert("Failed to update category"),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (categoryId) => categoryApi.deleteCategory(businessId, categoryId),
+    mutationFn: (categoryId) =>
+      categoryApi.deleteCategory(businessId, categoryId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories', businessId]);
-    //   alert('Category deleted successfully');
+      queryClient.invalidateQueries(["categories", businessId]);
+      //   alert('Category deleted successfully');
     },
-    onError: () => console.error('Failed to delete category')
+    onError: () => console.error("Failed to delete category"),
   });
 
   const handleSubmit = (e) => {
@@ -81,7 +84,7 @@ export default function Categories() {
     if (selectedCategory) {
       updateMutation.mutate({
         categoryId: selectedCategory.categoryId,
-        data: { name }
+        data: { name },
       });
     } else {
       createMutation.mutate({ name });
@@ -95,13 +98,15 @@ export default function Categories() {
   };
 
   const handleDelete = (categoryId) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm("Are you sure you want to delete this category?")) {
       deleteMutation.mutate(categoryId);
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-96">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-96">Loading...</div>
+    );
   }
 
   return (

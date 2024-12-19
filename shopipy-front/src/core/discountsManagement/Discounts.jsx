@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { discountsApi } from './services/DiscountsApi';
-import { useUser } from '@/hooks/useUser';
+import { useBusiness } from "@/hooks/useUser";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Utility function to format date for input
@@ -18,7 +18,7 @@ const formatDateForInput = (date) => {
 };
 
 const DiscountPage = () => {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
