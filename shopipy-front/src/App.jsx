@@ -16,6 +16,7 @@ import Products from './core/productManagement/Products';
 import OrderDetails from './core/orderManagement/components/OrderDetails';
 import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
 import Users from './core/userManagement/Users';
+import GiftCardsPage from './core/gift-cards/Page';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -191,6 +192,16 @@ function App() {
             )
           }
         />
+        <Route
+            path="/gift-cards"
+            element={
+              isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+                <GiftCardsPage />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>

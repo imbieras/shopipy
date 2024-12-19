@@ -13,6 +13,7 @@ const Navbar = ({ onLogout }) => {
     { name: 'Categories', path: '/categories', role: 'BusinessOwner'},
     { name: 'Switch Business', path: '/switch-business', role: 'SuperAdmin' },
     { name: 'Users', path: '/users', role: ['BusinessOwner','SuperAdmin']},
+    { name: 'Gift Cards', path: '/gift-cards', role: ['BusinessOwner','SuperAdmin'] }, // Added Gift Cards
   ];
 
   const isActive = (path) => {
