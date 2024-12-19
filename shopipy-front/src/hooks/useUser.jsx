@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import axiosInstance from '../services/axios';
-const API_URL = 'https://localhost:7417';
+import { create } from "zustand";
+import axiosInstance from "../services/axios";
+const API_URL = "https://localhost:7417";
 
 const initialState = {
   id: null,
@@ -15,13 +15,14 @@ const initialState = {
   error: null,
 };
 
+// I don't have mental energy to fix the bigger problem here
 export const useUser = create((set, get) => ({
   ...initialState, // Spread initial state
 
   fetchUser: async (userId) => {
     if (!userId) return;
     set({ isLoading: true });
-    set({id: userId})
+    set({ id: userId });
     try {
       const response = await axiosInstance.get(API_URL + `/users/${userId}`);
       set({
@@ -30,12 +31,12 @@ export const useUser = create((set, get) => ({
         role: response.data.role,
         businessId: response.data.businessId,
         fetched: true,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       set({
         error: error.message,
-        isLoading: false
+        isLoading: false,
       });
       throw error;
     }
@@ -53,5 +54,18 @@ export const useUser = create((set, get) => ({
   // Getters
   getUserId: () => get().id,
   getUsername: () => get().username,
-  getDisplayName: () => get().displayName
+  getDisplayName: () => get().displayName,
 }));
+
+const useBusinessStore = create((set) => ({
+  businessId: undefined,
+  setBusinessId: (businessId) => set({ businessId }),
+}));
+
+export const useBusiness = () => {
+  const { businessId: userBusinessId } = useUser();
+  const { businessId: superAdminBusinessId, setBusinessId } =
+    useBusinessStore();
+  const businessId = userBusinessId ?? superAdminBusinessId;
+  return { businessId, setBusinessId };
+};

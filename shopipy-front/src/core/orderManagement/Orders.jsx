@@ -1,31 +1,30 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ordersApi } from './services/ordersApi';
-import { useUser } from '@/hooks/useUser';
-import { OrderListItem } from './components/OrderListItem';
+import { ordersApi } from "./services/ordersApi";
+import { useBusiness } from "@/hooks/useUser";
+import { OrderListItem } from "./components/OrderListItem";
 
 export default function Orders() {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ['orders', businessId],
-    queryFn: () => ordersApi.getOrders(businessId)
+    queryKey: ["orders", businessId],
+    queryFn: () => ordersApi.getOrders(businessId),
   });
 
   const cancelOrderMutation = useMutation({
     mutationFn: (orderId) => ordersApi.cancelOrder(businessId, orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['orders', businessId]);
+      queryClient.invalidateQueries(["orders", businessId]);
       setSelectedOrder(null);
-    }
+    },
   });
 
   const handleOrderClick = (orderId) => {
@@ -33,22 +32,29 @@ export default function Orders() {
   };
 
   const handleCancelOrder = async (orderId) => {
-    if (window.confirm('Are you sure you want to cancel this order?')) {
+    if (window.confirm("Are you sure you want to cancel this order?")) {
       await cancelOrderMutation.mutateAsync(orderId);
     }
   };
 
-  const filteredOrders = orders.filter(order => 
-    order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.orderId?.toString().includes(searchTerm)
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.orderId?.toString().includes(searchTerm)
   );
 
   // Separate active and cancelled orders
-  const activeOrders = filteredOrders.filter(order => order.status !== 'cancelled');
-  const cancelledOrders = filteredOrders.filter(order => order.status === 'cancelled');
+  const activeOrders = filteredOrders.filter(
+    (order) => order.status !== "cancelled"
+  );
+  const cancelledOrders = filteredOrders.filter(
+    (order) => order.status === "cancelled"
+  );
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-96">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-96">Loading...</div>
+    );
   }
 
   return (
@@ -76,11 +82,13 @@ export default function Orders() {
               onCancel={handleCancelOrder}
             />
           ))}
-          
+
           {cancelledOrders.length > 0 && (
             <>
               <Separator className="my-6" />
-              <h2 className="text-lg font-semibold text-gray-600">Cancelled Orders</h2>
+              <h2 className="text-lg font-semibold text-gray-600">
+                Cancelled Orders
+              </h2>
               {cancelledOrders.map((order) => (
                 <OrderListItem
                   key={order.orderId}

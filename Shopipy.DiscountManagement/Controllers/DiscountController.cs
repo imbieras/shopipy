@@ -52,7 +52,7 @@ public class DiscountController(IDiscountService discountService, ICategoryServi
         var discount = mapper.Map<Discount>(discountRequestDto);
         discount.BusinessId = businessId;
 
-        var category = await categoryService.GetCategoryByIdInBusinessAsync(discount.CategoryId, businessId);
+        var category = await categoryService.GetCategoryByIdInBusinessAsync(businessId, discount.CategoryId);
 
         if (category == null)
         {

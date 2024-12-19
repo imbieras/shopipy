@@ -10,10 +10,13 @@ const Navbar = ({ onLogout }) => {
     { name: 'Orders', path: '/orders' },
     { name: 'Products', path: '/products'},
     { name: 'Appointments', path: '/appointments'},
-    { name: 'Categories', path: '/categories', role: 'BusinessOwner'},
+    { name: 'Gift Cards', path: '/gift-cards', role: ['BusinessOwner','SuperAdmin'] }, // Added Gift Cards
+    { name: 'Categories', path: '/categories', role: ['BusinessOwner','SuperAdmin']},
     { name: 'Switch Business', path: '/switch-business', role: 'SuperAdmin' },
     { name: 'Users', path: '/users', role: ['BusinessOwner','SuperAdmin']},
-    { name: 'Gift Cards', path: '/gift-cards', role: ['BusinessOwner','SuperAdmin'] }, // Added Gift Cards
+    { name: 'Discounts', path: '/discounts', role: ['BusinessOwner','SuperAdmin']},
+    { name: 'ProductsAdmin', path: '/productsAdmin', role: ['BusinessOwner','SuperAdmin']},
+    { name: 'Taxes', path: '/taxes', role: ['BusinessOwner','SuperAdmin']},
   ];
 
   const isActive = (path) => {
