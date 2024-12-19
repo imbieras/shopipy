@@ -1,31 +1,29 @@
-import axiosInstance from "@/services/axios";
+import axiosInstance from '@/services/axios';
 
-// Get all discounts for a business
-export const getDiscounts = async (businessId) => {
-  const response = await axiosInstance.get(`/businesses/${businessId}/discounts`);
-  return response.data; // Return the list of discounts
-};
-
-// Get a discount by its ID
-export const getDiscountById = async (businessId, discountId) => {
-  const response = await axiosInstance.get(`/businesses/${businessId}/discounts/${discountId}`);
-  return response.data; // Return the discount details
-};
-
-// Create a new discount
-export const createDiscount = async (businessId, discountData) => {
-  const response = await axiosInstance.post(`/businesses/${businessId}/discounts`, discountData);
-  return response.data; // Return the created discount
-};
-
-// Update an existing discount
-export const updateDiscount = async (businessId, discountId, discountData) => {
-  const response = await axiosInstance.put(`/businesses/${businessId}/discounts/${discountId}`, discountData);
-  return response.data; // Return the updated discount
-};
-
-// Delete a discount by its ID
-export const deleteDiscount = async (businessId, discountId) => {
-  const response = await axiosInstance.delete(`/businesses/${businessId}/discounts/${discountId}`);
-  return response.data; // Return success or failure response
+export const discountsApi = {
+  getDiscounts: async (businessId) => {
+    const response = await axiosInstance.get(`/businesses/${businessId}/discounts`);
+    return response.data;
+  },
+  getDiscountById: async (businessId, discountId) => {
+    const response = await axiosInstance.get(`/businesses/${businessId}/discounts/${discountId}`);
+    return response.data;
+  },
+  createDiscount: async (businessId, discountData) => {
+    const response = await axiosInstance.post(`/businesses/${businessId}/discounts`, discountData);
+    return response.data;
+  },
+  updateDiscount: async (businessId, discountId, effectiveTo) => {
+    // Directly send only effectiveTo (no need for object wrapping)
+    const response = await axiosInstance.put(`/businesses/${businessId}/discounts/${discountId}`, effectiveTo);
+    return response.data;
+  },
+  deleteDiscount: async (businessId, discountId) => {
+    try {
+      const response = await axiosInstance.delete(`/businesses/${businessId}/discounts/${discountId}`);
+      return response.data;  // Ensure it returns a response to confirm success
+    } catch (error) {
+      throw new Error('Error deleting discount: ' + error.message);  // Make sure to throw errors for catching
+    }
+  },
 };
