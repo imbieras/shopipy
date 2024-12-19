@@ -1,25 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState } from "react";
 import { giftCardApi } from "@/core/gift-cards/services/GiftCardApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUser } from "@/hooks/useUser";
 
 export default function GiftCardsPage() {
+  const { businessId } = useUser();
   const [giftCards, setGiftCards] = useState([]);
   const [editingGiftCard, setEditingGiftCard] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  const fetchGiftCards = async () => {
-    try {
-      const data = await giftCardApi.getGiftCards();
-      setGiftCards(data);
-    } catch (error) {
-      console.error("Error fetching gift cards:", error);
-    }
-  };
+const fetchGiftCards = async () => {
+  try {
+    const response = await giftCardApi.getGiftCards(businessId);
+    console.log("Fetched Gift Cards:", response); // Debug log
+    setGiftCards(Array.isArray(response.data) ? response.data : []); // Extract `data` array
+  } catch (error) {
+    console.error("Error fetching gift cards:", error);
+  }
+};
 
   const handleDelete = async (giftCardId) => {
     try {
-      await giftCardApi.deleteGiftCard(giftCardId);
+      await giftCardApi.deleteGiftCard(businessId, giftCardId);
       fetchGiftCards();
     } catch (error) {
       console.error("Error deleting gift card:", error);
@@ -36,27 +42,28 @@ export default function GiftCardsPage() {
         validUntil: formData.get("validUntil"),
       };
       try {
-        await giftCardApi.addGiftCard(giftCardData);
+        await giftCardApi.createGiftCard(businessId, giftCardData);
         fetchGiftCards();
         onClose();
       } catch (error) {
         console.error("Error adding gift card:", error);
+        alert(`Error adding gift card: ${error.response?.data?.message || error.message}`);
       }
     };
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4 mb-4">
         <div>
-          <label htmlFor="amountOriginal">Original Amount</label>
-          <input id="amountOriginal" name="amountOriginal" type="number" step="0.01" required />
+          <Label htmlFor="amountOriginal">Original Amount</Label>
+          <Input id="amountOriginal" name="amountOriginal" type="number" step="0.01" required />
         </div>
         <div>
-          <label htmlFor="validFrom">Valid From</label>
-          <input id="validFrom" name="validFrom" type="date" required />
+          <Label htmlFor="validFrom">Valid From</Label>
+          <Input id="validFrom" name="validFrom" type="date" required />
         </div>
         <div>
-          <label htmlFor="validUntil">Valid Until</label>
-          <input id="validUntil" name="validUntil" type="date" required />
+          <Label htmlFor="validUntil">Valid Until</Label>
+          <Input id="validUntil" name="validUntil" type="date" required />
         </div>
         <button type="submit">Add Gift Card</button>
         <button type="button" onClick={onClose}>Cancel</button>
@@ -111,8 +118,12 @@ export default function GiftCardsPage() {
   };
 
   const GiftCardList = ({ giftCards }) => {
+    if (!Array.isArray(giftCards) || giftCards.length === 0) {
+      return <div>No gift cards available.</div>;
+    }
+
     return (
-      <table>
+      <table className="min-w-full table-fixed divide-y divide-gray-200">
         <thead>
           <tr>
             <th>Code</th>
@@ -132,8 +143,10 @@ export default function GiftCardsPage() {
               <td>{new Date(giftCard.validFrom).toLocaleDateString()}</td>
               <td>{new Date(giftCard.validUntil).toLocaleDateString()}</td>
               <td>
-                <button onClick={() => setEditingGiftCard(giftCard)}>Edit</button>
-                <button onClick={() => handleDelete(giftCard.giftCardId)}>Delete</button>
+                <Button onClick={() => setEditingGiftCard(giftCard)}>Edit</Button>
+                <Button variant="destructive" onClick={() => handleDelete(giftCard.giftCardId)}>
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
@@ -143,14 +156,14 @@ export default function GiftCardsPage() {
   };
 
   return (
-    <div>
-      <h1>Gift Cards</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Gift Cards</h1>
       {isAdding ? (
         <AddGiftCardForm onClose={() => setIsAdding(false)} />
       ) : editingGiftCard ? (
         <UpdateGiftCardForm giftCard={editingGiftCard} onClose={() => setEditingGiftCard(null)} />
       ) : (
-        <button onClick={() => setIsAdding(true)}>Add Gift Card</button>
+        <Button onClick={() => setIsAdding(true)}>Add Gift Card</Button>
       )}
       <GiftCardList giftCards={giftCards} />
     </div>
