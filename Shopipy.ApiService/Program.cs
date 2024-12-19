@@ -20,10 +20,6 @@ using Shopipy.ProductManagement.Mappings;
 using Shopipy.Persistence.Data;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
-using Shopipy.Shared;
-using Shopipy.ServiceManagement;
-using Shopipy.ServiceManagement.Mappings;
-using Shopipy.UserManagement;
 using Shopipy.UserManagement.Mappings;
 using Shopipy.ProductManagement;
 using Shopipy.TaxManagement;
@@ -36,6 +32,10 @@ using Shopipy.GiftcardManagement;
 using Shopipy.GiftcardManagement.Mappings;
 using Shopipy.OrderManagement;
 using Shopipy.OrderManagement.Mappings;
+using Shopipy.ServiceManagement;
+using Shopipy.ServiceManagement.Mappings;
+using Shopipy.Shared;
+using Shopipy.UserManagement;
 
 
 var builder = WebApplication.CreateBuilder(args);
