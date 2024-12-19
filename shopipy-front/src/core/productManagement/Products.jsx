@@ -9,10 +9,10 @@ import { PaymentSelection } from "./components/PaymentSelection";
 import { TipSelection } from "./components/TipSelection";
 import { useQuery } from "@tanstack/react-query";
 import { categoryApi } from "../categoryManagement/services/CategoryApi";
-import { useUser } from "@/hooks/useUser";
+import { useBusiness } from "@/hooks/useUser";
 
 export default function Products() {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const [order, setOrder] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -41,12 +41,12 @@ export default function Products() {
             : item
         );
       }
-  
+
       const basePrice = product.basePrice;
-      const variationPrice = variation 
-        ? basePrice + variation.priceModifier 
+      const variationPrice = variation
+        ? basePrice + variation.priceModifier
         : basePrice;
-  
+
       return [
         ...prevOrder,
         {
@@ -54,11 +54,13 @@ export default function Products() {
           name: product.name,
           basePrice: basePrice,
           quantity: 1,
-          selectedVariation: variation ? {
-            variationId: variation.variationId,
-            name: variation.name,
-            basePrice: variationPrice
-          } : null
+          selectedVariation: variation
+            ? {
+                variationId: variation.variationId,
+                name: variation.name,
+                basePrice: variationPrice,
+              }
+            : null,
         },
       ];
     });
@@ -105,7 +107,8 @@ export default function Products() {
 
   const calculateTotal = () => {
     const subtotal = order.reduce(
-      (sum, item) => sum + (item.selectedVariation?.price || item.price) * item.quantity,
+      (sum, item) =>
+        sum + (item.selectedVariation?.price || item.price) * item.quantity,
       0
     );
     // const taxTotal = order.reduce(
@@ -116,7 +119,7 @@ export default function Products() {
     const taxTotal = 0;
     let discountAmount = 0;
     if (discount) {
-      if (discount.type === 'percentage') {
+      if (discount.type === "percentage") {
         discountAmount = subtotal * (discount.value / 100);
       } else {
         discountAmount = discount.value;
@@ -133,15 +136,15 @@ export default function Products() {
     // }
     // const newRemainingBalance = Math.max(0, remainingBalance - amount);
     // setRemainingBalance(newRemainingBalance);
-    
+
     //this shit causes NAN NAN NAN NAN DOLLARS
-    
+
     // if (newRemainingBalance === 0) {
     //   alert("Payment completed!");
     // } else {
     //   alert(`Remaining balance: $${newRemainingBalance.toFixed(2)}`);
     // }
-    
+
     alert("Payment processed");
   };
 
@@ -163,7 +166,7 @@ export default function Products() {
               />
             </div>
             <div>
-              <CategoryFilter 
+              <CategoryFilter
                 categories={categories}
                 selectedCategory={selectedCategory}
                 onSelectCategory={setSelectedCategory}
@@ -187,15 +190,20 @@ export default function Products() {
             onRemoveDiscount={removeDiscount}
             onRemoveTip={removeTip}
           />
-          <DiscountForm 
-            onApplyDiscount={applyDiscount} 
+          <DiscountForm
+            onApplyDiscount={applyDiscount}
             onRemoveDiscount={removeDiscount}
             currentDiscount={discount}
           />
-          <TipSelection subtotal={calculateTotal() - tip} onSelectTip={handleTip} />
+          <TipSelection
+            subtotal={calculateTotal() - tip}
+            onSelectTip={handleTip}
+          />
           <PaymentSelection
             totalAmount={calculateTotal()}
-            remainingAmount={remainingBalance === 0 ? calculateTotal() : remainingBalance}
+            remainingAmount={
+              remainingBalance === 0 ? calculateTotal() : remainingBalance
+            }
             onProcessPayment={handlePayment}
           />
         </div>
