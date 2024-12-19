@@ -16,6 +16,7 @@ import Products from './core/productManagement/Products';
 import OrderDetails from './core/orderManagement/components/OrderDetails';
 import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
 import Users from './core/userManagement/Users';
+import Discounts from './core/discountsManagement/Discounts';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -152,20 +153,44 @@ function App() {
             }
           />
           <Route
-            path="/switch-business"
-            element={
-              isAuthenticated ? <BusinessSwitcher/> : <Navigate to="/"/>
-            }
+          path="/categories"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <Categories/>
+            ) : (
+              <Navigate to="/"/>
+            )
+          }
           />
           <Route
-            path="/users"
-            element={
-              isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-                <Users/>
-              ) : (
-                <Navigate to="/"/>
-              )
-            }
+          path="/switch-business"
+          element={
+            isAuthenticated ? (
+              <BusinessSwitcher />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+          />
+          <Route
+          path="/users"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <Users />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+          />
+          <Route
+          path="/discounts"
+          element={
+            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              <Discounts />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
           />
         </Routes>
       </div>
