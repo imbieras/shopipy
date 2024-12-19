@@ -1,11 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace Shopipy.Persistence.Models;
 
-[PrimaryKey(nameof(PaymentId), nameof(BusinessId), nameof(OrderId))]
 public class OrderPayment
 {
+    [Key]
     public int PaymentId { get; set; }
     public int BusinessId { get; set; }
     public int OrderId { get; set; }

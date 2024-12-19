@@ -455,21 +455,24 @@ namespace Shopipy.ApiService.Data.Migrations
             modelBuilder.Entity("Shopipy.Persistence.Models.OrderPayment", b =>
                 {
                     b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    b.Property<int>("BusinessId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
 
                     b.Property<decimal>("AmountPaid")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("GiftCardId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
                     b.Property<int>("PaymentMethod")
@@ -481,7 +484,7 @@ namespace Shopipy.ApiService.Data.Migrations
                     b.Property<string>("StripePaymentId")
                         .HasColumnType("text");
 
-                    b.HasKey("PaymentId", "BusinessId", "OrderId");
+                    b.HasKey("PaymentId");
 
                     b.HasIndex("BusinessId");
 

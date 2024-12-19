@@ -30,6 +30,88 @@ import { Package, Wrench, Plus } from "lucide-react";
 import ProductOrderItem from "./ProductOrderItem";
 import ServiceOrderItem from "./ServiceOrderItem";
 
+const useOrder = () => {
+  const { orderId } = useParams();
+  const { businessId } = useBusiness();
+  const { data: order, isLoading: orderLoading } = useQuery({
+    queryKey: ["order", businessId, orderId],
+    queryFn: () => ordersApi.getOrderById(businessId, orderId, true),
+  });
+  return { order, orderLoading };
+};
+
+const PaymentDialog = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { order, orderLoading } = useOrder();
+  const [paymentType, setPaymentType] = useState("Cash");
+  const [paymentAmount, setPaymentAmount] = useState("");
+
+  const handlePayment = (e) => {
+    e.preventDefault();
+    // Add payment handling logic here
+    console.log("Payment Type:", paymentType);
+    console.log("Payment Amount:", paymentAmount);
+  };
+
+  if (!order) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="flex items-center gap-2 bg-blue-600"
+          disabled={order.orderStatus !== "Open"}
+        >
+          Pay
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Payment</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handlePayment} className="space-y-4">
+          <div className="space-y-2">
+            <label>Payment Type</label>
+            <Select
+              value={paymentType}
+              onValueChange={(value) => {
+                setPaymentType(value);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Cash">Cash</SelectItem>
+                <SelectItem value="Card">Card</SelectItem>
+                <SelectItem value="GiftCard">GiftCard</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="paymentAmount">Payment Amount</label>
+            <Input
+              id="paymentAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              required
+              placeholder="Enter payment amount"
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={!paymentAmount}>
+            Pay
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function OrderDetails() {
   const { orderId } = useParams();
   const { role } = useUser();
@@ -43,10 +125,7 @@ export default function OrderDetails() {
   const [newQuantity, setNewQuantity] = useState("1");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const { data: order, isLoading: orderLoading } = useQuery({
-    queryKey: ["order", businessId, orderId],
-    queryFn: () => ordersApi.getOrderById(businessId, orderId, true),
-  });
+  const { order, orderLoading } = useOrder();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", businessId],
@@ -225,6 +304,7 @@ export default function OrderDetails() {
           <CardTitle>Order #{orderId}</CardTitle>
           <p className="text-lg font-medium">Total: {calculateTotalPrice()}</p>
           <div className="flex gap-2 items-center">
+            <PaymentDialog />
             <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
               <DialogTrigger asChild>
                 <Button
