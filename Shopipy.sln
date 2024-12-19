@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ServiceDefaults", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.ApiService", "Shopipy.ApiService\Shopipy.ApiService.csproj", "{A840AF9E-2122-4945-A13F-14EEA6C49296}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Tests", "Shopipy.Tests\Shopipy.Tests.csproj", "{A9F36946-974A-4371-B907-A08B90EBB42D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.Web", "Shopipy.Web\Shopipy.Web.csproj", "{1A0E45D8-272B-469D-B173-71AE5D57BC77}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shopipy.UserManagement", "Shopipy.UserManagement\Shopipy.UserManagement.csproj", "{AE18BA20-80F0-4941-8064-E1DF92D15894}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{399E5849-C540-4F9E-A191-CFA8A0F435A4}"
@@ -54,6 +58,14 @@ Global
 		{A840AF9E-2122-4945-A13F-14EEA6C49296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A840AF9E-2122-4945-A13F-14EEA6C49296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A840AF9E-2122-4945-A13F-14EEA6C49296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9F36946-974A-4371-B907-A08B90EBB42D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9F36946-974A-4371-B907-A08B90EBB42D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9F36946-974A-4371-B907-A08B90EBB42D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9F36946-974A-4371-B907-A08B90EBB42D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0E45D8-272B-469D-B173-71AE5D57BC77}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE18BA20-80F0-4941-8064-E1DF92D15894}.Release|Any CPU.ActiveCfg = Release|Any CPU

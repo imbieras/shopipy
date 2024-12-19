@@ -6,28 +6,27 @@ on:
     branches:
       - 'main'
     paths:
-      - 'shopipy-front/**'
+      - 'Shopipy.Web/**'
+      - '*.sln'
   pull_request:
     paths:
-      - 'shopipy-front/**'
+      - 'Shopipy.Web/**'
+      - '*.sln'
 
 jobs:
   frontend:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: '22.x'
+          dotnet-version: 8.0.x
 
-      - name: Install Dependencies
-        working-directory: shopipy-front
-        run: npm install
+      - name: Restore Web
+        run: dotnet restore ./Shopipy.Web/
 
-      - name: Build
-        working-directory: shopipy-front
-        run: npm run build
+      - name: Build Web
+        run: dotnet build -c Release --no-restore ./Shopipy.Web/

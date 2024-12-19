@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Shopipy.ApiService\Shopipy.ApiService.csproj" />
+        <ProjectReference Include="..\Shopipy.Web\Shopipy.Web.csproj" />
     </ItemGroup>
 
     <ItemGroup>

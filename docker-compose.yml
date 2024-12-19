@@ -1,4 +1,16 @@
 ﻿services:
+  shopipy.web:
+    image: shopipy.web
+    ports:
+      - "8000:80"
+    build:
+      context: .
+      dockerfile: Shopipy.Web/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: LocalDevelopment
+    depends_on:
+      - shopipy.apiservice
+
   shopipy.apiservice:
     image: shopipy.apiservice
     ports:

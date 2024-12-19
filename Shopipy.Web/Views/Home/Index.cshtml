@@ -1,0 +1,9 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    var userName = ViewData["UserName"] as string;
+}
+
+<div class="text-center">
+    <h1>Hello, @(!string.IsNullOrEmpty(userName) ? userName : "world")!</h1>
+    <p>Welcome to your new app.</p>
+</div>

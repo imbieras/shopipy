@@ -1,0 +1,23 @@
+@model Shopipy.Web.ViewModels.BaseViewModel
+
+<ul class="navbar-nav ml-auto">
+    <li class="nav-item">
+        @if (Model?.CurrentUser != null)
+        {
+            <a class="nav-link text-dark">Logged in as: <b>@Model.CurrentUser.Name</b></a>
+        }
+        else
+        {
+            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Login">Login</a>
+        }
+    </li>
+</ul>
+
+@if (Model?.CurrentUser != null)
+{
+    <div class="btn-group">
+        <form method="post" asp-controller="User" asp-action="Logout">
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
+    </div>
+}
