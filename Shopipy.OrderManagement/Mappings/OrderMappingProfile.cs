@@ -40,7 +40,15 @@ public class OrderMappingProfile : Profile
         CreateMap<OrderDiscount, DiscountDto>()
             .ForMember(d => d.AppliedOrderDiscountId, opt => opt.MapFrom(o => o.OrderDiscountId));
 
-        CreateMap<CreatePaymentRequestDto, OrderPayment>();
+        CreateMap<CreatePaymentRequestDto, OrderPayment>()
+            .ForMember(d => d.PaymentId, opt => opt.Ignore())
+            .ForMember(d => d.BusinessId, opt => opt.Ignore())
+            .ForMember(d => d.OrderId, opt => opt.Ignore())
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.Status, opt => opt.Ignore())
+            .ForMember(d => d.StripePaymentId, opt => opt.Ignore())
+            .ForMember(d => d.Business, opt => opt.Ignore())
+            .ForMember(d => d.Order, opt => opt.Ignore());
 
         CreateMap<OrderPayment, PaymentDto>();
     }
