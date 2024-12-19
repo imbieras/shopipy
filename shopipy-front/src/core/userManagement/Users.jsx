@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userApi } from './services/UsersApi';
+import { userApi } from './services/UsersApi.jsx';
 import { useUser } from '@/hooks/useUser';
 
 const AddUserForm = ({ onClose }) => {
@@ -64,9 +64,7 @@ const AddUserForm = ({ onClose }) => {
               <SelectValue placeholder="Select a role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Admin">Admin</SelectItem>
-              <SelectItem value="Manager">Manager</SelectItem>
-              <SelectItem value="User">User</SelectItem>
+              <SelectItem value="BusinessOwner">Business owner</SelectItem>
               <SelectItem value="Employee">Employee</SelectItem> {/* Added the 'Employee' role */}
             </SelectContent>
           </Select>
@@ -147,9 +145,8 @@ const UpdateUserForm = ({ user, onClose }) => {
               <SelectValue placeholder="Select a role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Admin">Admin</SelectItem>
-              <SelectItem value="Manager">Manager</SelectItem>
-              <SelectItem value="User">User</SelectItem>
+              <SelectItem value="BusinessOwner">Business owner</SelectItem>
+              <SelectItem value="Employee">Employee</SelectItem>
             </SelectContent>
           </Select>
         </div>
