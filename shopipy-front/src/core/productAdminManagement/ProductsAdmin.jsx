@@ -164,8 +164,8 @@ const ProductsPage = () => {
   if (error) return <div>Error loading products</div>;
 
   return (
-    <div>
-      <h1>Products</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Products</h1>
       {isAdding ? (
         <form onSubmit={handleProductSubmit} className="space-y-4">
           <div>
