@@ -172,10 +172,15 @@ function App() {
           }
           />
           <Route
-          path="/switch-business"
-          element={
-            isAuthenticated ? (
-              <BusinessSwitcher />
+            path="/switch-business"
+            element={
+              isAuthenticated ? (
+                <BusinessSwitcher />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
           <Route
           path="/users"
           element={
