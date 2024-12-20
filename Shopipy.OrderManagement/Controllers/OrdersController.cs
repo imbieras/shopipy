@@ -169,19 +169,19 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
             PaymentIds = payments.Select(payment => payment.PaymentId).ToList(),
             PaymentMethods = payments.Select(payment => payment.PaymentMethod.ToString()).ToList(),
             OrderId = order.OrderId,
-            TipAmount = order.TotalTip,
-            TaxAmount = order.OrderItems?.Sum(i => i.TaxRateId.HasValue ? i.UnitPrice * 0.1m : 0) ?? 0, // Placeholder tax logic
+            TipAmount = order.TotalTip, //do we have that
+            TaxAmount = order.OrderItems?.Sum(i => i.TaxRateId.HasValue ? i.UnitPrice * 0.1m : 0) ?? 0, //not sure
             TotalAmount = await orderService.GetTotalPriceAsync(businessId, orderId),
             CreatedAt = order.CreatedAt,
             ClosedAt = order.ClosedAt,
             Items = order.OrderItems?.Select(item => new OrderItemReceiptDto
             {
                 ItemId = item.OrderItemId,
-                ItemType = item is ProductOrderItem ? "Product" : "Service", // Adjust based on item type
-                Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1, // Handle quantity for products
+                ItemType = item is ProductOrderItem ? "Product" : "Service", 
+                Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1, 
                 UnitPrice = item.UnitPrice,
-                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, // Placeholder tax calculation
-                TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) // Calculate total price based on quantity
+                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, //not sure
+                TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) 
             })?.ToList() ?? new List<OrderItemReceiptDto>()
         };
 
