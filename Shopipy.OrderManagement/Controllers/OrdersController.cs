@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shopipy.OrderManagement.DTOs;
 using Shopipy.OrderManagement.DTOs.Discounts;
 using Shopipy.OrderManagement.Services;
+using Shopipy.Persistence.Data.Migrations;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
 
@@ -50,7 +51,31 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
         if (!serviceItems.Any()) return NotFound();
         return Ok(mapper.Map<IEnumerable<ServiceOrderItemDto>>(serviceItems));
     }
-    
+
+    [HttpGet("{orderId:int}/leftAmount")]
+    public async Task<ActionResult<decimal>> GetLeftToPayForOrder(int businessId, int orderId)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId, withItems: false);
+        if (order == null)
+        {
+            logger.LogWarning("Attempted to get non-existent order {OrderId} for business {BusinessId}.", orderId, businessId);
+            return NotFound();
+        }
+
+        var totalAmount = await orderService.GetTotalPriceAsync(businessId, orderId);
+
+        var payments = await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId);
+
+        decimal leftTopay = totalAmount;
+
+        foreach (var payment in payments)
+        {
+            leftTopay = leftTopay - payment.AmountPaid;
+        }
+        Console.WriteLine("test");
+        return Ok(leftTopay);
+    }
+
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
     {
@@ -180,7 +205,7 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
                 ItemType = item is ProductOrderItem ? "Product" : "Service", 
                 Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1, 
                 UnitPrice = item.UnitPrice,
-                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, //not sure
+                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, // 
                 TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) 
             })?.ToList() ?? new List<OrderItemReceiptDto>()
         };
