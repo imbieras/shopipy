@@ -16,7 +16,7 @@ public class PaymentsController(IMapper mapper, PaymentService paymentService, I
         var payment = mapper.Map<OrderPayment>(request);
         payment.BusinessId = businessId;
         payment.OrderId = orderId;
-        var created = await paymentService.CreatePaymentAsync(payment);
+        var created = await paymentService.CreatePaymentAsync(payment, request.GiftCardCode);
         return CreatedAtAction(nameof(GetPayment), new { orderId, businessId, paymentId = created.PaymentId }, mapper.Map<PaymentDto>(created));
     }
 

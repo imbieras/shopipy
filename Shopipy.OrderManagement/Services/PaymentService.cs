@@ -11,7 +11,7 @@ public class PaymentService(
     OrderService orderService,
     OrderRepository orderRepository)
 {
-    public async Task<OrderPayment> CreatePaymentAsync(OrderPayment orderPayment)
+    public async Task<OrderPayment> CreatePaymentAsync(OrderPayment orderPayment, string? giftCardCode)
     {
         if (orderPayment is { PaymentMethod: PaymentMethod.GiftCard, GiftCardId: null })
         {
