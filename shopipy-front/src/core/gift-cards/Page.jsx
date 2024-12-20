@@ -1,32 +1,38 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { giftCardApi } from "@/core/gift-cards/services/GiftCardApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@/hooks/useUser";
+import { useBusiness } from "@/hooks/useUser";
 
 export default function GiftCardsPage() {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const [giftCards, setGiftCards] = useState([]);
   const [editingGiftCard, setEditingGiftCard] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-const fetchGiftCards = async () => {
-  try {
-    const response = await giftCardApi.getGiftCards(businessId);
-    console.log("Fetched Gift Cards:", response); // Debug log
-    setGiftCards(Array.isArray(response.data) ? response.data : []); // Extract `data` array
-  } catch (error) {
-    console.error("Error fetching gift cards:", error);
-  }
-};
-  useEffect(() => {
-    if (businessId) {
-      fetchGiftCards();
+  // Fetch Gift Cards
+  const fetchGiftCards = async () => {
+    if (!businessId) return; // Avoid fetching without a valid businessId
+    setIsLoading(true);
+    try {
+      const response = await giftCardApi.getGiftCards(businessId);
+      setGiftCards(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Error fetching gift cards:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [businessId]);
+  };
+
+  // Automatically fetch gift cards if businessId exists
+  if (businessId && giftCards.length === 0 && !isLoading) {
+    fetchGiftCards();
+  }
+
   const handleDelete = async (giftCardId) => {
     try {
       await giftCardApi.deleteGiftCard(businessId, giftCardId);
@@ -45,7 +51,6 @@ const fetchGiftCards = async () => {
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
-      console.log("Sending Gift Card Data:", giftCardData); 
       try {
         await giftCardApi.createGiftCard(businessId, giftCardData);
         fetchGiftCards();
@@ -89,7 +94,6 @@ const fetchGiftCards = async () => {
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
-      console.log("Updating Gift Card Data:", updatedGiftCard);
       try {
         await giftCardApi.updateGiftCard(businessId, giftCard.giftCardId, updatedGiftCard);
         fetchGiftCards();
@@ -115,13 +119,23 @@ const fetchGiftCards = async () => {
         </div>
         <div>
           <Label htmlFor="validFrom">Valid From</Label>
-          <Input id="validFrom" name="validFrom" type="date" defaultValue={giftCard.validFrom} required />
-
+          <Input
+            id="validFrom"
+            name="validFrom"
+            type="date"
+            defaultValue={giftCard.validFrom}
+            required
+          />
         </div>
         <div>
           <Label htmlFor="validUntil">Valid Until</Label>
-          <Input id="validUntil" name="validUntil" type="date" defaultValue={giftCard.validUntil} required />
-
+          <Input
+            id="validUntil"
+            name="validUntil"
+            type="date"
+            defaultValue={giftCard.validUntil}
+            required
+          />
         </div>
         <Button type="submit">Update Gift Card</Button>
         <Button type="button" variant="outline" onClick={onClose}>
