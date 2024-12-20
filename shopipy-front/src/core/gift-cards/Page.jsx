@@ -1,32 +1,36 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { giftCardApi } from "@/core/gift-cards/services/GiftCardApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@/hooks/useUser";
+import { useBusiness } from "@/hooks/useUser";
 
 export default function GiftCardsPage() {
-  const { businessId } = useUser();
+  const { businessId } = useBusiness();
   const [giftCards, setGiftCards] = useState([]);
   const [editingGiftCard, setEditingGiftCard] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-const fetchGiftCards = async () => {
-  try {
-    const response = await giftCardApi.getGiftCards(businessId);
-    console.log("Fetched Gift Cards:", response); // Debug log
-    setGiftCards(Array.isArray(response.data) ? response.data : []); // Extract `data` array
-  } catch (error) {
-    console.error("Error fetching gift cards:", error);
-  }
-};
-  useEffect(() => {
-    if (businessId) {
-      fetchGiftCards();
+  const fetchGiftCards = async () => {
+    if (!businessId) return;
+    setIsLoading(true);
+    try {
+      const response = await giftCardApi.getGiftCards(businessId);
+      setGiftCards(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Error fetching gift cards:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [businessId]);
+  };
+
+  if (businessId && giftCards.length === 0 && !isLoading) {
+    fetchGiftCards();
+  }
+
   const handleDelete = async (giftCardId) => {
     try {
       await giftCardApi.deleteGiftCard(businessId, giftCardId);
@@ -45,32 +49,33 @@ const fetchGiftCards = async () => {
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
-      console.log("Sending Gift Card Data:", giftCardData); 
       try {
         await giftCardApi.createGiftCard(businessId, giftCardData);
         fetchGiftCards();
         onClose();
       } catch (error) {
         console.error("Error adding gift card:", error);
-        alert(`Error adding gift card: ${error.response?.data?.message || error.message}`);
       }
     };
 
     return (
-      <form onSubmit={handleSubmit} className="space-y-4 mb-4">
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6 bg-white p-6 rounded-md shadow-md">
+        <h2 className="text-lg font-semibold">Add Gift Card</h2>
         <div>
           <Label htmlFor="amountOriginal">Original Amount</Label>
           <Input id="amountOriginal" name="amountOriginal" type="number" step="0.01" required />
         </div>
-        <div>
-          <Label htmlFor="validFrom">Valid From</Label>
-          <Input id="validFrom" name="validFrom" type="date" required />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="validFrom">Valid From</Label>
+            <Input id="validFrom" name="validFrom" type="date" required />
+          </div>
+          <div>
+            <Label htmlFor="validUntil">Valid Until</Label>
+            <Input id="validUntil" name="validUntil" type="date" required />
+          </div>
         </div>
-        <div>
-          <Label htmlFor="validUntil">Valid Until</Label>
-          <Input id="validUntil" name="validUntil" type="date" required />
-        </div>
-        <div className="flex space-x-4">
+        <div className="flex justify-end space-x-4">
           <Button type="submit">Add Gift Card</Button>
           <Button type="button" variant="destructive" onClick={onClose}>
             Cancel
@@ -89,7 +94,6 @@ const fetchGiftCards = async () => {
         validFrom: formData.get("validFrom"),
         validUntil: formData.get("validUntil"),
       };
-      console.log("Updating Gift Card Data:", updatedGiftCard);
       try {
         await giftCardApi.updateGiftCard(businessId, giftCard.giftCardId, updatedGiftCard);
         fetchGiftCards();
@@ -100,8 +104,8 @@ const fetchGiftCards = async () => {
     };
 
     return (
-      <form onSubmit={handleSubmit} className="space-y-4 mb-4">
-        <input type="hidden" name="giftCardId" value={giftCard.giftCardId} />
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6 bg-white p-6 rounded-md shadow-md">
+        <h2 className="text-lg font-semibold">Update Gift Card</h2>
         <div>
           <Label htmlFor="amountOriginal">Original Amount</Label>
           <Input
@@ -113,54 +117,58 @@ const fetchGiftCards = async () => {
             required
           />
         </div>
-        <div>
-          <Label htmlFor="validFrom">Valid From</Label>
-          <Input id="validFrom" name="validFrom" type="date" defaultValue={giftCard.validFrom} required />
-
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="validFrom">Valid From</Label>
+            <Input id="validFrom" name="validFrom" type="date" defaultValue={giftCard.validFrom} required />
+          </div>
+          <div>
+            <Label htmlFor="validUntil">Valid Until</Label>
+            <Input id="validUntil" name="validUntil" type="date" defaultValue={giftCard.validUntil} required />
+          </div>
         </div>
-        <div>
-          <Label htmlFor="validUntil">Valid Until</Label>
-          <Input id="validUntil" name="validUntil" type="date" defaultValue={giftCard.validUntil} required />
-
+        <div className="flex justify-end space-x-4">
+          <Button type="submit">Update Gift Card</Button>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
         </div>
-        <Button type="submit">Update Gift Card</Button>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
       </form>
     );
   };
 
   const GiftCardList = ({ giftCards }) => {
     if (!Array.isArray(giftCards) || giftCards.length === 0) {
-      return <div>No gift cards available.</div>;
+      return <div className="text-center mt-4">No gift cards available.</div>;
     }
 
     return (
-      <table className="min-w-full table-fixed divide-y divide-gray-200">
-        <thead>
+      <table className="min-w-full border border-gray-200 rounded-md shadow-sm mt-4">
+        <thead className="bg-gray-100">
           <tr>
-            <th>Code</th>
-            <th>Original Amount</th>
-            <th>Remaining Amount</th>
-            <th>Valid From</th>
-            <th>Valid Until</th>
-            <th>Actions</th>
+            <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Code</th>
+            <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Original Amount</th>
+            <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Remaining Amount</th>
+            <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Valid From</th>
+            <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Valid Until</th>
+            <th className="px-4 py-2 text-right text-sm font-semibold text-gray-600">Actions</th>
           </tr>
         </thead>
         <tbody>
           {giftCards.map((giftCard) => (
-            <tr key={giftCard.giftCardId}>
-              <td>{giftCard.giftCardCode}</td>
-              <td>${giftCard.amountOriginal.toFixed(2)}</td>
-              <td>${giftCard.amountLeft.toFixed(2)}</td>
-              <td>{new Date(giftCard.validFrom).toLocaleDateString()}</td>
-              <td>{new Date(giftCard.validUntil).toLocaleDateString()}</td>
-              <td>
-                <Button onClick={() => setEditingGiftCard(giftCard)}>Edit</Button>
-                <Button variant="destructive" onClick={() => handleDelete(giftCard.giftCardId)}>
-                  Delete
-                </Button>
+            <tr key={giftCard.giftCardId} className="border-t hover:bg-gray-50">
+              <td className="px-4 py-2">{giftCard.giftCardCode}</td>
+              <td className="px-4 py-2">${giftCard.amountOriginal.toFixed(2)}</td>
+              <td className="px-4 py-2">${giftCard.amountLeft.toFixed(2)}</td>
+              <td className="px-4 py-2">{new Date(giftCard.validFrom).toLocaleDateString()}</td>
+              <td className="px-4 py-2">{new Date(giftCard.validUntil).toLocaleDateString()}</td>
+              <td className="px-4 py-2 text-right">
+                <div className="inline-flex space-x-2">
+                  <Button onClick={() => setEditingGiftCard(giftCard)}>Edit</Button>
+                  <Button variant="destructive" onClick={() => handleDelete(giftCard.giftCardId)}>
+                    Delete
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}
@@ -170,14 +178,16 @@ const fetchGiftCards = async () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Gift Cards</h1>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <h1 className="text-3xl font-bold text-left">Gift Cards</h1>
       {isAdding ? (
         <AddGiftCardForm onClose={() => setIsAdding(false)} />
       ) : editingGiftCard ? (
         <UpdateGiftCardForm giftCard={editingGiftCard} onClose={() => setEditingGiftCard(null)} />
       ) : (
-        <Button onClick={() => setIsAdding(true)}>Add Gift Card</Button>
+        <div className="text-left">
+          <Button onClick={() => setIsAdding(true)}>Add Gift Card</Button>
+        </div>
       )}
       <GiftCardList giftCards={giftCards} />
     </div>
