@@ -149,6 +149,7 @@ export default function Categories() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="w-[100px] text-right">Actions</TableHead>
             </TableRow>
@@ -156,6 +157,7 @@ export default function Categories() {
           <TableBody>
             {categories?.map((category) => (
               <TableRow key={category.categoryId}>
+                <TableCell className="font-medium">{category.categoryId}</TableCell>
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
