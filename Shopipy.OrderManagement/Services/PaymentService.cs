@@ -65,9 +65,8 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
     {
         var options = new RefundCreateOptions
         {
-            Amount = (long)(orderPayment.AmountPaid * 100),
-            Reason = reason,
             PaymentIntent = orderPayment.StripePaymentIntentId,
+            Reason = reason,
         };
 
         var service = new RefundService();
@@ -90,7 +89,6 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
             throw new ArgumentException($"Order with id {order.OrderId} is not closed");
         }
         
-
         if (payment.PaymentMethod == PaymentMethod.Card)
         {
             await RefundStripePaymentAsync(payment, reason);
