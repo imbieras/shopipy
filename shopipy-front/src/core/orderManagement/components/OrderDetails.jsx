@@ -8,6 +8,7 @@ import { categoryApi } from "@/core/categoryManagement/services/CategoryApi";
 import { useBusiness, useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AddDiscountDialog from "./AddDiscountDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -207,7 +208,8 @@ export default function OrderDetails() {
   const [selectedItemId, setSelectedItemId] = useState("");
   const [newQuantity, setNewQuantity] = useState("1");
   const [selectedCategory, setSelectedCategory] = useState(null);
-
+  const [isDiscountOpen, setIsDiscountOpen] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState("");
   const { order, orderLoading } = useOrder();
 
   const { data: categories = [] } = useQuery({
@@ -297,6 +299,7 @@ export default function OrderDetails() {
     },
   });
 
+  
   const handleUpdateItem = (e) => {
     e.preventDefault();
     updateItemMutation.mutate({
@@ -379,6 +382,54 @@ export default function OrderDetails() {
       <div className="flex justify-center items-center h-96">Loading...</div>
     );
   }
+
+
+  const handleAddDiscount = async (e) => {
+    e.preventDefault();
+    try {
+      await ordersApi.applyDiscount(businessId, orderId, {
+        discountAmount: parseFloat(discountAmount),
+      });
+      queryClient.invalidateQueries(["order", businessId, orderId]);
+      setIsDiscountOpen(false);
+      setDiscountAmount("");
+    } catch (error) {
+      console.error("Failed to apply discount:", error);
+    }
+  };
+  
+  // Render Section
+  <Dialog open={isDiscountOpen} onOpenChange={setIsDiscountOpen}>
+    <DialogTrigger asChild>
+      <Button className="flex items-center gap-2" disabled={order.orderStatus === "cancelled"}>
+        Add Discount
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Apply Discount</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={handleAddDiscount} className="space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="discountAmount">Discount Amount</label>
+          <Input
+            id="discountAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={discountAmount}
+            onChange={(e) => setDiscountAmount(e.target.value)}
+            required
+            placeholder="Enter discount amount"
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={!discountAmount}>
+          Apply Discount
+        </Button>
+      </form>
+    </DialogContent>
+  </Dialog>
+
 
   return (
     <Card className="max-w-4xl mx-auto my-8">
@@ -492,6 +543,20 @@ export default function OrderDetails() {
                 </form>
               </DialogContent>
             </Dialog>
+            <Dialog open={isDiscountOpen} onOpenChange={setIsDiscountOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2" disabled={order.orderStatus === "cancelled"}>
+                Add Discount
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+                {<AddDiscountDialog
+              orderId={orderId}
+              orderStatus={order.orderStatus}
+              businessId={businessId}
+            />} 
+            </DialogContent>
+          </Dialog>
             <Badge
               className={`${getStatusColor(order.orderStatus)} text-white`}
             >
