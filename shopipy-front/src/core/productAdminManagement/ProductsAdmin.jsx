@@ -176,7 +176,7 @@ const ProductsPage = () => {
           </div>
           <div>
             <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" type="number" required/>
+            <Input id="price" name="price" type="number" required step="0.01" />
           </div>
           <div>
             <Label htmlFor="description">Description</Label>
@@ -210,7 +210,7 @@ const ProductsPage = () => {
           </div>
           <div>
             <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" type="number" defaultValue={editingProduct.basePrice} required/>
+            <Input id="price" name="price" type="number" defaultValue={editingProduct.basePrice} required step="0.01" />
           </div>
           <div>
             <Label htmlFor="description">Description</Label>
