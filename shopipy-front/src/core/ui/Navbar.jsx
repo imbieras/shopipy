@@ -17,6 +17,7 @@ const Navbar = ({ onLogout }) => {
     { name: 'Discounts', path: '/discounts', role: ['BusinessOwner','SuperAdmin']},
     { name: 'ProductsAdmin', path: '/productsAdmin', role: ['BusinessOwner','SuperAdmin']},
     { name: 'Taxes', path: '/taxes', role: ['BusinessOwner','SuperAdmin']},
+    { name: 'Businesses', path: '/businesses', role: ['SuperAdmin']},
   ];
 
   const isActive = (path) => {

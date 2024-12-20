@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from "react";
 import { giftCardApi } from "@/core/gift-cards/services/GiftCardApi";
 import { Button } from "@/components/ui/button";
