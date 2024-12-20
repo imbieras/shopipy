@@ -75,6 +75,19 @@ namespace Shopipy.GiftcardManagement.Services
             return await giftCardRepository.UpdateAsync(giftCard);
         }
 
+
+        public async Task<GiftCard?> GetGiftCardByHashAsync(int businessId, string hash)
+        {
+            if (string.IsNullOrWhiteSpace(hash))
+            {
+                throw new ArgumentException("Hash is required", nameof(hash));
+            }
+
+            var giftCard = await giftCardRepository.GetByConditionAsync(g => g.GiftCardCode == hash && g.BusinessId == businessId);
+
+            return giftCard;
+        }
+
         public async Task<bool> DeleteGiftCardAsync(int giftCardId, int businessId)
         {
             var giftCard = await giftCardRepository.GetByConditionAsync(g => g.GiftCardId == giftCardId && g.BusinessId == businessId);

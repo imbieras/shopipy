@@ -1,15 +1,17 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared.Services;
 using Stripe;
+using Stripe.Climate;
 using PaymentMethod = Shopipy.Persistence.Models.PaymentMethod;
 
 namespace Shopipy.OrderManagement.Services;
 
-public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, OrderService orderService)
+public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, OrderService orderService, IGiftCardService giftCardService)
 {
     public async Task<OrderPayment> CreatePaymentAsync(OrderPayment orderPayment)
     {
-        if (orderPayment is { PaymentMethod: PaymentMethod.GiftCard, GiftCardId: null })
+        if (orderPayment is { PaymentMethod: PaymentMethod.GiftCard, GiftCardHash: null })
         {
             throw new ArgumentException("Gift card id not provided");
         }
@@ -24,6 +26,17 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
 
             orderPayment.StripePaymentId = clientSecret;       
             orderPayment.StripePaymentIntentId = paymentIntentId;
+        }
+        if (orderPayment.PaymentMethod == PaymentMethod.GiftCard)
+        {
+            var giftCard = await giftCardService.GetGiftCardByHashAsync(orderPayment.BusinessId, orderPayment.GiftCardHash);
+
+            if (giftCard.AmountLeft < orderPayment.AmountPaid)
+            {
+                throw new ArgumentException($"You do not have enough money in the gift card!!");
+            }
+            var giftCardUp  = giftCardService.UpdateGiftCardLeftAmountAsync(orderPayment.BusinessId, giftCard.GiftCardId, orderPayment.AmountPaid);
+            orderPayment.Status = OrderPaymentStatus.Succeeded;
         }
 
         var createdPayment = await paymentRepository.AddAsync(orderPayment);

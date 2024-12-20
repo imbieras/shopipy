@@ -16,7 +16,7 @@ public class OrderPayment
     public OrderPaymentStatus Status { get; set; }
     public string? StripePaymentId { get; set; }
     public string? StripePaymentIntentId { get; set; }
-    public int? GiftCardId { get; set; }
+    public string? GiftCardHash { get; set; }
     
     /* Navigational properties */
     public Business? Business { get; set; }
