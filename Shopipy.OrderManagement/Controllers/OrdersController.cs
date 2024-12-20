@@ -146,4 +146,52 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
         await orderService.DeleteDiscount(businessId, orderId, discountId);
         return NoContent();
     }
+
+    [HttpGet("{orderId:int}/receipt")]
+    [ProducesResponseType(typeof(ReceiptDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> GetReceipt(int businessId, int orderId)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId);
+        if (order is null)
+        {
+            return NotFound($"Order with ID {orderId} not found.");
+        }
+
+        if (order.OrderStatus != OrderStatus.Closed)
+        {
+            return Conflict("Receipt can only be retrieved for closed orders.");
+        }
+
+        var receipt = new ReceiptDto
+        {
+            //PaymentId = 12345, // Placeholder for payment integration
+            OrderId = order.OrderId,
+            //PaymentMethod = "Card", // Placeholder for payment integration
+            TipAmount = order.TotalTip,
+            //TotalDiscount = order.OrderDiscounts?.Sum(d => d.DiscountValue) ?? 0,
+            TaxAmount = order.OrderItems?.Sum(i => i.TaxRateId.HasValue ? i.UnitPrice * 0.1m : 0) ?? 0, // Placeholder tax logic
+            //ServiceCharge = 5.00m, // Placeholder service charge
+            TotalAmount = await orderService.GetTotalPriceAsync(businessId, orderId),
+            CreatedAt = order.CreatedAt,
+            ClosedAt = order.ClosedAt,
+            Items = order.OrderItems?.Select(item => new OrderItemReceiptDto
+            {
+                ItemId = item.OrderItemId,
+                ItemType = item is ProductOrderItem ? "Product" : "Service",
+                //Name = item is ProductOrderItem product ? product.ProductName : "Service Name", // Replace with actual property
+                Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1,
+                UnitPrice = item.UnitPrice,
+                //DiscountAmount = item.Discounts?.Sum(d => d.DiscountValue) ?? 0,
+                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, // Placeholder tax logic
+                TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) // Adjust for discounts, etc.
+            }) ?? Enumerable.Empty<OrderItemReceiptDto>()
+        };
+
+        return Ok(receipt);
+    }
+
+
 }
