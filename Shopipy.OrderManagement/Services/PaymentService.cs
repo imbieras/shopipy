@@ -30,6 +30,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         return createdPayment;
     }
 
+    // TODO: update payment status
     public async Task<IEnumerable<OrderPayment>> GetPaymentsByOrderIdAsync(int businessId, int orderId)
     {
         return await paymentRepository.GetAllByConditionAsync(p => p.BusinessId == businessId && p.OrderId == orderId);

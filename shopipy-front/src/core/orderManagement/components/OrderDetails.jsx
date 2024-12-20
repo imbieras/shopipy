@@ -29,6 +29,7 @@ import { CategoryFilter } from "@/core/categoryManagement/components/CategoryFil
 import { Package, Wrench, Plus } from "lucide-react";
 import ProductOrderItem from "./ProductOrderItem";
 import ServiceOrderItem from "./ServiceOrderItem";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const useOrder = () => {
   const { orderId } = useParams();
@@ -40,17 +41,92 @@ const useOrder = () => {
   return { order, orderLoading };
 };
 
+const StripeDialog = ({ paymentId, onPaymentSuccess }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleCardPayment = async () => {
+    if (!stripe || !elements || !paymentId) return;
+    setProcessing(true);
+    setErrorMessage("");
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setProcessing(false);
+      return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(
+      paymentId,
+      {
+        payment_method: {
+          card: cardElement,
+        },
+      }
+    );
+
+    setProcessing(false);
+
+    if (error) {
+      console.error("Payment error:", error);
+      setErrorMessage(error.message || "An unknown error occurred.");
+    } else if (paymentIntent && paymentIntent.status === "succeeded") {
+      console.log("Payment successful:", paymentIntent);
+      if (onPaymentSuccess) {
+        onPaymentSuccess(paymentIntent);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <label>Card Details</label>
+        <CardElement />
+      </div>
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      <Button
+        onClick={handleCardPayment}
+        disabled={processing || !stripe || !elements}
+        className="w-full bg-blue-600"
+      >
+        {processing ? "Processing..." : "Confirm Payment"}
+      </Button>
+    </div>
+  );
+};
+
 const PaymentDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { order, orderLoading } = useOrder();
+  const { order } = useOrder();
   const [paymentType, setPaymentType] = useState("Cash");
   const [paymentAmount, setPaymentAmount] = useState("");
+  const { businessId } = useBusiness();
+  const elements = useElements();
+  const stripe = useStripe();
+  const [paymentId, setPaymentId] = useState(undefined);
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     // Add payment handling logic here
     console.log("Payment Type:", paymentType);
     console.log("Payment Amount:", paymentAmount);
+    var response = await ordersApi.createPayment(businessId, order.orderId, {
+      amountPaid: paymentAmount,
+      paymentMethod: paymentType,
+    });
+    if (response.stripePaymentId) {
+      setPaymentId(response.stripePaymentId);
+    }
+  };
+
+  const handleStripeSuccess = (paymentIntent) => {
+    // Handle successful Stripe payment here
+    console.log("Stripe payment succeeded:", paymentIntent);
+    // You might want to close the dialog, or refresh the order
+    setIsOpen(false);
   };
 
   if (!order) return null;
@@ -69,44 +145,51 @@ const PaymentDialog = () => {
         <DialogHeader>
           <DialogTitle>Payment</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handlePayment} className="space-y-4">
-          <div className="space-y-2">
-            <label>Payment Type</label>
-            <Select
-              value={paymentType}
-              onValueChange={(value) => {
-                setPaymentType(value);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Cash">Cash</SelectItem>
-                <SelectItem value="Card">Card</SelectItem>
-                <SelectItem value="GiftCard">GiftCard</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {paymentId ? (
+          <StripeDialog
+            paymentId={paymentId}
+            onPaymentSuccess={handleStripeSuccess}
+          />
+        ) : (
+          <form onSubmit={handlePayment} className="space-y-4">
+            <div className="space-y-2">
+              <label>Payment Type</label>
+              <Select
+                value={paymentType}
+                onValueChange={(value) => {
+                  setPaymentType(value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="Card">Card</SelectItem>
+                  <SelectItem value="GiftCard">GiftCard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="paymentAmount">Payment Amount</label>
-            <Input
-              id="paymentAmount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              required
-              placeholder="Enter payment amount"
-            />
-          </div>
+            <div className="space-y-2">
+              <label htmlFor="paymentAmount">Payment Amount</label>
+              <Input
+                id="paymentAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                required
+                placeholder="Enter payment amount"
+              />
+            </div>
 
-          <Button type="submit" className="w-full" disabled={!paymentAmount}>
-            Pay
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" disabled={!paymentAmount}>
+              Pay
+            </Button>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
