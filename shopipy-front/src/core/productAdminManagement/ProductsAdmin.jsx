@@ -1,5 +1,3 @@
-'use client';
-
 import {useState, useEffect} from 'react';
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -8,11 +6,11 @@ import {Textarea} from "@/components/ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {productsApi} from './services/ProductsAdminApi.jsx';
-import {useUser} from '@/hooks/useUser';
+import {useBusiness} from '@/hooks/useUser';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 
 const ProductsPage = () => {
-  const {businessId} = useUser();
+  const {businessId} = useBusiness();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);

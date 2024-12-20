@@ -22,6 +22,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import GiftCardsPage from "./core/gift-cards/Page";
 import ProductsAdmin from "./core/productAdminManagement/ProductsAdmin";
 import Taxes from "./core/taxManagement/Taxes";
+import Businesses from "./core/businessManagement/Businesses.jsx";
 
 const stripePromise = loadStripe(
   "pk_test_51QUqe5GEPoWoNv6luqQPizUcSpEaV81UpMbjIQ5MWtgFy3smQ9c3DxmpfuZgu59D19Ceko7i9pvCMHCM2ZXdje3p00uUD0U8Zb"
@@ -209,6 +210,17 @@ function App() {
               isAuthenticated &&
               (role === "BusinessOwner" || role === "SuperAdmin") ? (
                 <Taxes />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/businesses"
+            element={
+              isAuthenticated &&
+              (role === "SuperAdmin") ? (
+                <Businesses />
               ) : (
                 <Navigate to="/" />
               )
