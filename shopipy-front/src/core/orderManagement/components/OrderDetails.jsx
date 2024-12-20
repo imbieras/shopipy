@@ -29,6 +29,171 @@ import { CategoryFilter } from "@/core/categoryManagement/components/CategoryFil
 import { Package, Wrench, Plus } from "lucide-react";
 import ProductOrderItem from "./ProductOrderItem";
 import ServiceOrderItem from "./ServiceOrderItem";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+const useOrder = () => {
+  const { orderId } = useParams();
+  const { businessId } = useBusiness();
+  const { data: order, isLoading: orderLoading } = useQuery({
+    queryKey: ["order", businessId, orderId],
+    queryFn: () => ordersApi.getOrderById(businessId, orderId, true),
+  });
+  return { order, orderLoading };
+};
+
+const StripeDialog = ({ paymentId, onPaymentSuccess }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleCardPayment = async () => {
+    if (!stripe || !elements || !paymentId) return;
+    setProcessing(true);
+    setErrorMessage("");
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setProcessing(false);
+      return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(
+      paymentId,
+      {
+        payment_method: {
+          card: cardElement,
+        },
+      }
+    );
+
+    setProcessing(false);
+
+    if (error) {
+      console.error("Payment error:", error);
+      setErrorMessage(error.message || "An unknown error occurred.");
+    } else if (paymentIntent && paymentIntent.status === "succeeded") {
+      console.log("Payment successful:", paymentIntent);
+      if (onPaymentSuccess) {
+        onPaymentSuccess(paymentIntent);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <label>Card Details</label>
+        <CardElement />
+      </div>
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      <Button
+        onClick={handleCardPayment}
+        disabled={processing || !stripe || !elements}
+        className="w-full bg-blue-600"
+      >
+        {processing ? "Processing..." : "Confirm Payment"}
+      </Button>
+    </div>
+  );
+};
+
+const PaymentDialog = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { order } = useOrder();
+  const [paymentType, setPaymentType] = useState("Cash");
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const { businessId } = useBusiness();
+  const elements = useElements();
+  const stripe = useStripe();
+  const [paymentId, setPaymentId] = useState(undefined);
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    // Add payment handling logic here
+    console.log("Payment Type:", paymentType);
+    console.log("Payment Amount:", paymentAmount);
+    var response = await ordersApi.createPayment(businessId, order.orderId, {
+      amountPaid: paymentAmount,
+      paymentMethod: paymentType,
+    });
+    if (response.stripePaymentId) {
+      setPaymentId(response.stripePaymentId);
+    }
+  };
+
+  const handleStripeSuccess = (paymentIntent) => {
+    // Handle successful Stripe payment here
+    console.log("Stripe payment succeeded:", paymentIntent);
+    // You might want to close the dialog, or refresh the order
+    setIsOpen(false);
+  };
+
+  if (!order) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="flex items-center gap-2 bg-blue-600"
+          disabled={order.orderStatus !== "Open"}
+        >
+          Pay
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Payment</DialogTitle>
+        </DialogHeader>
+        {paymentId ? (
+          <StripeDialog
+            paymentId={paymentId}
+            onPaymentSuccess={handleStripeSuccess}
+          />
+        ) : (
+          <form onSubmit={handlePayment} className="space-y-4">
+            <div className="space-y-2">
+              <label>Payment Type</label>
+              <Select
+                value={paymentType}
+                onValueChange={(value) => {
+                  setPaymentType(value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="Card">Card</SelectItem>
+                  <SelectItem value="GiftCard">GiftCard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="paymentAmount">Payment Amount</label>
+              <Input
+                id="paymentAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                required
+                placeholder="Enter payment amount"
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={!paymentAmount}>
+              Pay
+            </Button>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function OrderDetails() {
   const { orderId } = useParams();
@@ -43,10 +208,7 @@ export default function OrderDetails() {
   const [newQuantity, setNewQuantity] = useState("1");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const { data: order, isLoading: orderLoading } = useQuery({
-    queryKey: ["order", businessId, orderId],
-    queryFn: () => ordersApi.getOrderById(businessId, orderId, true),
-  });
+  const { order, orderLoading } = useOrder();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", businessId],
@@ -225,6 +387,7 @@ export default function OrderDetails() {
           <CardTitle>Order #{orderId}</CardTitle>
           <p className="text-lg font-medium">Total: {calculateTotalPrice()}</p>
           <div className="flex gap-2 items-center">
+            <PaymentDialog />
             <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
               <DialogTrigger asChild>
                 <Button

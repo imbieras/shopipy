@@ -4,15 +4,19 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { ordersApi } from "./services/ordersApi";
 import { useBusiness } from "@/hooks/useUser";
 import { OrderListItem } from "./components/OrderListItem";
+import { useUser } from "@/hooks/useUser";
 
 export default function Orders() {
   const { businessId } = useBusiness();
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const user = useUser()
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders", businessId],
@@ -71,37 +75,61 @@ export default function Orders() {
         />
       </div>
       <ScrollArea className="h-[calc(100vh-200px)]">
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold">Active Orders</h2>
-          {activeOrders.map((order) => (
-            <OrderListItem
-              key={order.orderId}
-              order={order}
-              isExpanded={selectedOrder === order.orderId}
-              onToggle={() => handleOrderClick(order.orderId)}
-              onCancel={handleCancelOrder}
-            />
-          ))}
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <h2 className="text-lg font-semibold">Active Orders</h2>
+      <Button
+  onClick={async () => {
+    try {
 
-          {cancelledOrders.length > 0 && (
-            <>
-              <Separator className="my-6" />
-              <h2 className="text-lg font-semibold text-gray-600">
-                Cancelled Orders
-              </h2>
-              {cancelledOrders.map((order) => (
-                <OrderListItem
-                  key={order.orderId}
-                  order={order}
-                  isExpanded={selectedOrder === order.orderId}
-                  onToggle={() => handleOrderClick(order.orderId)}
-                  onCancel={handleCancelOrder}
-                />
-              ))}
-            </>
-          )}
-        </div>
-      </ScrollArea>
+      const orderData = {
+        orderItems: [], // Empty array as required
+        userId: user.id, // Ensure this is a valid string
+      };
+
+      console.log("Payload to backend:", orderData);
+
+      const newOrder = await ordersApi.createOrder(businessId, orderData);
+      console.log("Order created successfully:", newOrder);
+    } catch (error) {
+      console.error("Error creating order:", error);
+    }
+  }}
+  className="flex items-center gap-2"
+>
+  <Plus className="h-4 w-4" />
+  Create Order
+</Button>
+    </div>
+    {activeOrders.map((order) => (
+      <OrderListItem
+        key={order.orderId}
+        order={order}
+        isExpanded={selectedOrder === order.orderId}
+        onToggle={() => handleOrderClick(order.orderId)}
+        onCancel={handleCancelOrder}
+      />
+    ))}
+
+    {cancelledOrders.length > 0 && (
+      <>
+        <Separator className="my-6" />
+        <h2 className="text-lg font-semibold text-gray-600">
+          Cancelled Orders
+        </h2>
+        {cancelledOrders.map((order) => (
+          <OrderListItem
+            key={order.orderId}
+            order={order}
+            isExpanded={selectedOrder === order.orderId}
+            onToggle={() => handleOrderClick(order.orderId)}
+            onCancel={handleCancelOrder}
+          />
+        ))}
+      </>
+    )}
+  </div>
+</ScrollArea>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Stripe;
+using PaymentMethod = Shopipy.Persistence.Models.PaymentMethod;
 
 namespace Shopipy.OrderManagement.Services;
 
@@ -11,18 +13,24 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         {
             throw new ArgumentException("Gift card id not provided");
         }
+
         await orderService.ValidateOrderAsync(orderPayment.BusinessId, orderPayment.OrderId);
-        
+
         orderPayment.Status = OrderPaymentStatus.Pending;
         if (orderPayment.PaymentMethod == PaymentMethod.Cash) orderPayment.Status = OrderPaymentStatus.Succeeded;
-        
-        var createdPayment =  await paymentRepository.AddAsync(orderPayment);
-        
+        if (orderPayment.PaymentMethod == PaymentMethod.Card)
+        {
+            orderPayment.StripePaymentId = await ProcessStripePaymentAsync(orderPayment);
+        }
+
+        var createdPayment = await paymentRepository.AddAsync(orderPayment);
+
         // TODO: close order after enough payments
-        
+
         return createdPayment;
     }
-    
+
+    // TODO: update payment status
     public async Task<IEnumerable<OrderPayment>> GetPaymentsByOrderIdAsync(int businessId, int orderId)
     {
         return await paymentRepository.GetAllByConditionAsync(p => p.BusinessId == businessId && p.OrderId == orderId);
@@ -30,7 +38,69 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
 
     public async Task<OrderPayment?> GetPaymentById(int businessId, int orderId, int paymentId)
     {
-        return await paymentRepository.GetByConditionAsync(p => p.BusinessId == businessId && p.OrderId == orderId && p.PaymentId == paymentId);
+        return await paymentRepository.GetByConditionAsync(p =>
+            p.BusinessId == businessId && p.OrderId == orderId && p.PaymentId == paymentId);
     }
 
+    private async Task<string> ProcessStripePaymentAsync(OrderPayment orderPayment)
+    {
+        var options = new PaymentIntentCreateOptions
+        {
+            Amount = (long)(orderPayment.AmountPaid * 100), // Convert to cents
+            Currency = "usd",
+            PaymentMethodTypes = ["card"],
+        };
+
+        var service = new PaymentIntentService();
+        
+        var paymentIntent = await service.CreateAsync(options);
+
+        return paymentIntent.ClientSecret;
+    }
+
+    public async Task<string> RefundStripePaymentAsync(OrderPayment orderPayment, string reason)
+    {
+        var options = new RefundCreateOptions
+        {
+            Amount = (long)(orderPayment.AmountPaid * 100),
+            Reason = reason,
+            PaymentIntent = orderPayment.StripePaymentId,
+        };
+
+        var service = new RefundService();
+
+        var refund = await service.CreateAsync(options);
+
+        if (refund.Status == "succeeded")
+        {
+            return "completed";
+        }
+        return "failed";
+    }
+
+    public async Task<OrderPayment> RefundPaymentAsync(OrderPayment payment, string reason)
+    {
+        var order = await orderService.GetOrderByIdAsync(payment.BusinessId, payment.OrderId);
+
+        if (order.OrderStatus != OrderStatus.Open)
+        {
+            throw new ArgumentException($"Order with id {order.OrderId} is not open");
+        }
+        
+
+        if (payment.PaymentMethod == PaymentMethod.Card)
+        {
+            await RefundStripePaymentAsync(payment, reason);
+        }
+        else if (payment.PaymentMethod == PaymentMethod.GiftCard)
+        {
+            //sorry no refund
+        }
+
+        order.OrderStatus = OrderStatus.Refunded;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        //await orderService.UpdateOrderItemAsync(order);
+        return payment;
+    }
 }

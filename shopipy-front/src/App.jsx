@@ -1,30 +1,35 @@
-import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
-import {useEffect, useState} from 'react';
-import {AuthLayout} from './core/layouts/AuthLayout';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { AuthLayout } from "./core/layouts/AuthLayout";
 import LoginPage from "./core/auth/LoginPage";
-import {authService} from './core/auth/services/AuthService';
-import {useUser} from './hooks/useUser';
-import {jwtDecode} from 'jwt-decode';
-import Navbar from './core/ui/Navbar';
-import Services from './core/serviceManagement/page';
-import Appointments from './core/appointmentManagement/Appointments';
-import {useQueryClient} from '@tanstack/react-query';
-import {useQuery} from '@tanstack/react-query';
-import Categories from './core/categoryManagement/Categories';
-import Orders from './core/orderManagement/Orders';
-import Products from './core/productManagement/Products';
-import OrderDetails from './core/orderManagement/components/OrderDetails';
-import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
-import Users from './core/userManagement/Users';
-import GiftCardsPage from './core/gift-cards/Page';
-import Discounts from './core/discountsManagement/Discounts';
-import ProductsAdmin from './core/productAdminManagement/ProductsAdmin';
-import Taxes from './core/taxManagement/Taxes';
+import { authService } from "./core/auth/services/AuthService";
+import { useUser } from "./hooks/useUser";
+import { jwtDecode } from "jwt-decode";
+import Navbar from "./core/ui/Navbar";
+import Services from "./core/serviceManagement/page";
+import Appointments from "./core/appointmentManagement/Appointments";
+import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import Categories from "./core/categoryManagement/Categories";
+import Orders from "./core/orderManagement/Orders";
+import Products from "./core/productManagement/Products";
+import OrderDetails from "./core/orderManagement/components/OrderDetails";
+import BusinessSwitcher from "./core/superAdminManagement/BusinessSwitcher";
+import Users from "./core/userManagement/Users";
+import Discounts from "./core/discountsManagement/Discounts";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import GiftCardsPage from "./core/gift-cards/Page";
+import ProductsAdmin from "./core/productAdminManagement/ProductsAdmin";
+import Taxes from "./core/taxManagement/Taxes";
 
+const stripePromise = loadStripe(
+  "pk_test_51QUqe5GEPoWoNv6luqQPizUcSpEaV81UpMbjIQ5MWtgFy3smQ9c3DxmpfuZgu59D19Ceko7i9pvCMHCM2ZXdje3p00uUD0U8Zb"
+);
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const {fetchUser, clearUser, role} = useUser();
+  const { fetchUser, clearUser, role } = useUser();
   const queryClient = useQueryClient();
 
   const checkAuthentication = async () => {
@@ -55,7 +60,7 @@ function App() {
   }, []);
 
   useQuery({
-    queryKey: ['auth'],
+    queryKey: ["auth"],
     queryFn: async () => {
       const token = authService.getToken();
       if (!token) return null;
@@ -95,103 +100,81 @@ function App() {
     authService.logout();
     setIsAuthenticated(false);
     clearUser();
-    queryClient.invalidateQueries(['auth']);
+    queryClient.invalidateQueries(["auth"]);
     queryClient.clear();
   };
 
   return (
+  <Elements stripe={stripePromise}>
     <BrowserRouter>
       <div className="App">
-        {isAuthenticated && <Navbar onLogout={handleLogout}/>}
+        {isAuthenticated && <Navbar onLogout={handleLogout} />}
         <Routes>
           <Route
             path="/"
             element={
               !isAuthenticated ? (
                 <AuthLayout>
-                  <LoginPage onLogin={handleLogin}/>
+                  <LoginPage onLogin={handleLogin} />
                 </AuthLayout>
               ) : (
-                <Navigate to="/services"/>
+                <Navigate to="/services" />
               )
             }
           />
           <Route
             path="/services"
-            element={
-              isAuthenticated ? <Services/> : <Navigate to="/"/>
-            }
+            element={isAuthenticated ? <Services /> : <Navigate to="/" />}
           />
           <Route
             path="/orders"
-            element={
-              isAuthenticated ? <Orders/> : <Navigate to="/"/>
-            }
+            element={isAuthenticated ? <Orders /> : <Navigate to="/" />}
           />
           <Route
             path="/orders/:orderId"
-            element={
-              isAuthenticated ? <OrderDetails/> : <Navigate to="/"/>
-            }
+            element={isAuthenticated ? <OrderDetails /> : <Navigate to="/" />}
           />
           <Route
             path="/products"
-            element={
-              isAuthenticated ? <Products/> : <Navigate to="/"/>
-            }
+            element={isAuthenticated ? <Products /> : <Navigate to="/" />}
           />
           <Route
             path="/appointments"
-            element={
-              isAuthenticated ? <Appointments/> : <Navigate to="/"/>
-            }
+            element={isAuthenticated ? <Appointments /> : <Navigate to="/" />}
           />
           <Route
             path="/categories"
             element={
-              isAuthenticated && role === 'BusinessOwner' ? (
-                <Categories/>
-              ) : (
-                <Navigate to="/"/>
-              )
-            }
-          />
-          <Route
-          path="/categories"
-          element={
-            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-              <Categories/>
-            ) : (
-              <Navigate to="/"/>
-            )
-          }
-          />
-          <Route
-
-            path="/switch-business"
-            element={
-              isAuthenticated ? (
-                <BusinessSwitcher />
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
+                <Categories />
               ) : (
                 <Navigate to="/" />
               )
             }
           />
           <Route
-          path="/users"
-          element={
-            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-              <Users />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-
-        />
-        <Route
+            path="/switch-business"
+            element={
+              isAuthenticated ? <BusinessSwitcher /> : <Navigate to="/" />
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
+                <Users />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
             path="/gift-cards"
             element={
-              isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
                 <GiftCardsPage />
               ) : (
                 <Navigate to="/" />
@@ -199,39 +182,44 @@ function App() {
             }
           />
           <Route
-          path="/discounts"
-          element={
-            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-              <Discounts />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+            path="/discounts"
+            element={
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
+                <Discounts />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
           <Route
-          path="/productsAdmin"
-          element={
-            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-              <ProductsAdmin />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+            path="/productsAdmin"
+            element={
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
+                <ProductsAdmin />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
           <Route
-          path="/taxes"
-          element={
-            isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
-              <Taxes />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+            path="/taxes"
+            element={
+              isAuthenticated &&
+              (role === "BusinessOwner" || role === "SuperAdmin") ? (
+                <Taxes />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
         </Routes>
       </div>
     </BrowserRouter>
-  );
+  </Elements>
+);
+
 }
 
 export default App;

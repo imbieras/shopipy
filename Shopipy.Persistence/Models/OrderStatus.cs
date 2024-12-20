@@ -4,5 +4,6 @@ public enum OrderStatus
 {
     Open,
     Closed,
-    Cancelled
+    Cancelled,
+    Refunded
 }

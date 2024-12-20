@@ -39,6 +39,7 @@ using Shopipy.UserManagement;
 
 
 var builder = WebApplication.CreateBuilder(args);
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();

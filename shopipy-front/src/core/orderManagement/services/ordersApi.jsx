@@ -2,24 +2,41 @@ import axiosInstance from "@/services/axios";
 
 export const ordersApi = {
   getOrderById: async (businessId, orderId, withItems = true) => {
-    const response = await axiosInstance.get(`/businesses/${businessId}/orders/${orderId}`, {
-      params: { withItems },
-    });
+    const response = await axiosInstance.get(
+      `/businesses/${businessId}/orders/${orderId}`,
+      {
+        params: { withItems },
+      }
+    );
     return response.data;
   },
 
   getOrders: async (businessId) => {
-    const response = await axiosInstance.get(`/businesses/${businessId}/orders`);
+    const response = await axiosInstance.get(
+      `/businesses/${businessId}/orders`
+    );
+    return response.data;
+  },
+
+  createOrder: async (businessId, orderData) => {
+    const response = await axiosInstance.post(
+      `/businesses/${businessId}/orders`,
+      orderData
+    );
     return response.data;
   },
 
   getProductItems: async (businessId, orderId) => {
-    const response = await axiosInstance.get(`/businesses/${businessId}/orders/${orderId}/product-items`);
+    const response = await axiosInstance.get(
+      `/businesses/${businessId}/orders/${orderId}/product-items`
+    );
     return response.data;
   },
 
   getServiceItems: async (businessId, orderId) => {
-    const response = await axiosInstance.get(`/businesses/${businessId}/orders/${orderId}/service-items`);
+    const response = await axiosInstance.get(
+      `/businesses/${businessId}/orders/${orderId}/service-items`
+    );
     return response.data;
   },
 
@@ -49,6 +66,14 @@ export const ordersApi = {
   deleteOrderItem: async (businessId, orderId, orderItemId) => {
     const response = await axiosInstance.delete(
       `/businesses/${businessId}/orders/${orderId}/items/${orderItemId}`
+    );
+    return response.data;
+  },
+
+  createPayment: async (businessId, orderId, payment) => {
+    const response = await axiosInstance.post(
+      `/businesses/${businessId}/orders/${orderId}/payments`,
+      payment
     );
     return response.data;
   },
