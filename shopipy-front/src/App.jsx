@@ -16,9 +16,11 @@ import Products from './core/productManagement/Products';
 import OrderDetails from './core/orderManagement/components/OrderDetails';
 import BusinessSwitcher from './core/superAdminManagement/BusinessSwitcher';
 import Users from './core/userManagement/Users';
+import GiftCardsPage from './core/gift-cards/Page';
 import Discounts from './core/discountsManagement/Discounts';
 import ProductsAdmin from './core/productAdminManagement/ProductsAdmin';
 import Taxes from './core/taxManagement/Taxes';
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -165,14 +167,15 @@ function App() {
           }
           />
           <Route
-          path="/switch-business"
-          element={
-            isAuthenticated ? (
-              <BusinessSwitcher />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+
+            path="/switch-business"
+            element={
+              isAuthenticated ? (
+                <BusinessSwitcher />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
           <Route
           path="/users"
@@ -183,6 +186,17 @@ function App() {
               <Navigate to="/" />
             )
           }
+
+        />
+        <Route
+            path="/gift-cards"
+            element={
+              isAuthenticated && (role === 'BusinessOwner' || role === 'SuperAdmin') ? (
+                <GiftCardsPage />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
           <Route
           path="/discounts"
