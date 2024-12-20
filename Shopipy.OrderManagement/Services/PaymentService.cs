@@ -57,4 +57,50 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
 
         return paymentIntent.ClientSecret;
     }
+
+    public async Task<string> RefundStripePaymentAsync(OrderPayment orderPayment, string reason)
+    {
+        var options = new RefundCreateOptions
+        {
+            Amount = (long)(orderPayment.AmountPaid * 100),
+            Reason = reason,
+            PaymentIntent = orderPayment.StripePaymentId,
+        };
+
+        var service = new RefundService();
+
+        var refund = await service.CreateAsync(options);
+
+        if (refund.Status == "succeeded")
+        {
+            return "completed";
+        }
+        return "failed";
+    }
+
+    public async Task<OrderPayment> RefundPaymentAsync(OrderPayment payment, string reason)
+    {
+        var order = await orderService.GetOrderByIdAsync(payment.BusinessId, payment.OrderId);
+
+        if (order.OrderStatus != OrderStatus.Open)
+        {
+            throw new ArgumentException($"Order with id {order.OrderId} is not open");
+        }
+        
+
+        if (payment.PaymentMethod == PaymentMethod.Card)
+        {
+            await RefundStripePaymentAsync(payment, reason);
+        }
+        else if (payment.PaymentMethod == PaymentMethod.GiftCard)
+        {
+            //sorry no refund
+        }
+
+        order.OrderStatus = OrderStatus.Refunded;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        //await orderService.UpdateOrderItemAsync(order);
+        return payment;
+    }
 }

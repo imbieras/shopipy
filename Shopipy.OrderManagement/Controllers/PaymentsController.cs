@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Shopipy.OrderManagement.DTOs;
 using Shopipy.OrderManagement.DTOs.Payments;
 using Shopipy.OrderManagement.Services;
 using Shopipy.Persistence.Models;
@@ -9,7 +8,7 @@ namespace Shopipy.OrderManagement.Controllers;
 
 [ApiController]
 [Route("businesses/{businessId:int}/orders/{orderId:int}/payments")]
-public class PaymentsController(IMapper mapper, PaymentService paymentService) : ControllerBase {
+public class PaymentsController(IMapper mapper, PaymentService paymentService, ILogger<PaymentsController> logger) : ControllerBase {
 
     [HttpPost]
     public async Task<ActionResult<PaymentDto>> CreatePayment(int businessId, int orderId, [FromBody] CreatePaymentRequestDto request)
@@ -31,5 +30,19 @@ public class PaymentsController(IMapper mapper, PaymentService paymentService) :
     public async Task<ActionResult<PaymentDto>> GetPayment(int businessId, int orderId, int paymentId)
     {
         return Ok(mapper.Map<PaymentDto>(await paymentService.GetPaymentById(businessId, orderId, paymentId)));
+    }
+
+    [HttpPost("{paymentId:int}/refund")]
+    public async Task<IActionResult> RefundPayment(int businessId, int orderId, int paymentId, RefundDto refund)
+    {
+        var payment = await paymentService.GetPaymentById(businessId, orderId, paymentId);
+        if (payment == null)
+        {
+            logger.LogWarning("Attempted to refund non-existent payment {PaymentId} for business {BusinessId}.", paymentId, businessId);
+            return NotFound();
+        }
+
+        await paymentService.RefundPaymentAsync(payment, refund.RefundReason);
+        return Ok();
     }
 }
