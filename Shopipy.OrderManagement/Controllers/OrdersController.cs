@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shopipy.OrderManagement.DTOs;
 using Shopipy.OrderManagement.DTOs.Discounts;
 using Shopipy.OrderManagement.Services;
+using Shopipy.Persistence.Data.Migrations;
 using Shopipy.Persistence.Models;
 using Shopipy.Shared;
 
@@ -12,7 +13,7 @@ namespace Shopipy.OrderManagement.Controllers;
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.RequireBusinessAccess)]
 [Route("businesses/{businessId:int}/orders")]
-public class OrdersController(OrderService orderService, IMapper mapper, ILogger<OrdersController> logger) : ControllerBase
+public class OrdersController(OrderService orderService, IMapper mapper, ILogger<OrdersController> logger, PaymentService paymentService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(int businessId)
@@ -50,7 +51,31 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
         if (!serviceItems.Any()) return NotFound();
         return Ok(mapper.Map<IEnumerable<ServiceOrderItemDto>>(serviceItems));
     }
-    
+
+    [HttpGet("{orderId:int}/leftAmount")]
+    public async Task<ActionResult<decimal>> GetLeftToPayForOrder(int businessId, int orderId)
+    {
+        var order = await orderService.GetOrderByIdAsync(businessId, orderId, withItems: false);
+        if (order == null)
+        {
+            logger.LogWarning("Attempted to get non-existent order {OrderId} for business {BusinessId}.", orderId, businessId);
+            return NotFound();
+        }
+
+        var totalAmount = await orderService.GetTotalPriceAsync(businessId, orderId);
+
+        var payments = await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId);
+
+        decimal leftTopay = totalAmount;
+
+        foreach (var payment in payments)
+        {
+            leftTopay = leftTopay - payment.AmountPaid;
+        }
+        Console.WriteLine("test");
+        return Ok(leftTopay);
+    }
+
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder(int businessId, [FromBody] CreateOrderRequestDto request)
     {
@@ -148,10 +173,6 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
     }
 
     [HttpGet("{orderId:int}/receipt")]
-    [ProducesResponseType(typeof(ReceiptDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GetReceipt(int businessId, int orderId)
     {
         var order = await orderService.GetOrderByIdAsync(businessId, orderId);
@@ -165,29 +186,28 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
             return Conflict("Receipt can only be retrieved for closed orders.");
         }
 
+        var payments = await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId);
+
+        // Prepare the receipt DTO
         var receipt = new ReceiptDto
         {
-            //PaymentId = 12345, // Placeholder for payment integration
+            PaymentIds = payments.Select(payment => payment.PaymentId).ToList(),
+            PaymentMethods = payments.Select(payment => payment.PaymentMethod.ToString()).ToList(),
             OrderId = order.OrderId,
-            //PaymentMethod = "Card", // Placeholder for payment integration
-            TipAmount = order.TotalTip,
-            //TotalDiscount = order.OrderDiscounts?.Sum(d => d.DiscountValue) ?? 0,
-            TaxAmount = order.OrderItems?.Sum(i => i.TaxRateId.HasValue ? i.UnitPrice * 0.1m : 0) ?? 0, // Placeholder tax logic
-            //ServiceCharge = 5.00m, // Placeholder service charge
+            TipAmount = order.TotalTip, //do we have that
+            TaxAmount = order.OrderItems?.Sum(i => i.TaxRateId.HasValue ? i.UnitPrice * 0.1m : 0) ?? 0, //not sure
             TotalAmount = await orderService.GetTotalPriceAsync(businessId, orderId),
             CreatedAt = order.CreatedAt,
             ClosedAt = order.ClosedAt,
             Items = order.OrderItems?.Select(item => new OrderItemReceiptDto
             {
                 ItemId = item.OrderItemId,
-                ItemType = item is ProductOrderItem ? "Product" : "Service",
-                //Name = item is ProductOrderItem product ? product.ProductName : "Service Name", // Replace with actual property
-                Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1,
+                ItemType = item is ProductOrderItem ? "Product" : "Service", 
+                Quantity = item is ProductOrderItem prodItem ? prodItem.ProductQuantity : 1, 
                 UnitPrice = item.UnitPrice,
-                //DiscountAmount = item.Discounts?.Sum(d => d.DiscountValue) ?? 0,
-                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, // Placeholder tax logic
-                TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) // Adjust for discounts, etc.
-            }) ?? Enumerable.Empty<OrderItemReceiptDto>()
+                TaxAmount = item.TaxRateId.HasValue ? item.UnitPrice * 0.1m : 0, // 
+                TotalPrice = item.UnitPrice * (item is ProductOrderItem p ? p.ProductQuantity : 1) 
+            })?.ToList() ?? new List<OrderItemReceiptDto>()
         };
 
         return Ok(receipt);

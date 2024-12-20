@@ -2,9 +2,9 @@
 
 public class ReceiptDto
 {
-    public int PaymentId { get; init; }
+    public required List<int> PaymentIds { get; init; }
     public int OrderId { get; init; }
-    public string PaymentMethod { get; init; } = default!;
+    public List<string> PaymentMethods { get; init; } = new List<string>();
     public decimal TipAmount { get; init; }
     public decimal TotalDiscount { get; init; }
     public decimal TaxAmount { get; init; }
