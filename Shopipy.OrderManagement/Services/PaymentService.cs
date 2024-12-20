@@ -1,19 +1,19 @@
 using Shopipy.OrderManagement.Repositories;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
+using Shopipy.Shared.Services;
 using Stripe;
+using Stripe.Climate;
 using PaymentMethod = Shopipy.Persistence.Models.PaymentMethod;
 
 namespace Shopipy.OrderManagement.Services;
 
-public class PaymentService(
-    IGenericRepository<OrderPayment> paymentRepository,
-    OrderService orderService,
-    OrderRepository orderRepository)
+
+public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, OrderService orderService,  OrderRepository orderRepository, IGiftCardService giftCardService)
 {
     public async Task<OrderPayment> CreatePaymentAsync(OrderPayment orderPayment)
     {
-        if (orderPayment is { PaymentMethod: PaymentMethod.GiftCard, GiftCardId: null })
+        if (orderPayment is { PaymentMethod: PaymentMethod.GiftCard, GiftCardHash: null })
         {
             throw new ArgumentException("Gift card id not provided");
         }
@@ -24,7 +24,21 @@ public class PaymentService(
         if (orderPayment.PaymentMethod == PaymentMethod.Cash) orderPayment.Status = OrderPaymentStatus.Succeeded;
         if (orderPayment.PaymentMethod == PaymentMethod.Card)
         {
-            orderPayment.StripePaymentId = await ProcessStripePaymentAsync(orderPayment);
+            var (clientSecret, paymentIntentId) = await ProcessStripePaymentAsync(orderPayment);
+
+            orderPayment.StripePaymentId = clientSecret;       
+            orderPayment.StripePaymentIntentId = paymentIntentId;
+        }
+        if (orderPayment.PaymentMethod == PaymentMethod.GiftCard)
+        {
+            var giftCard = await giftCardService.GetGiftCardByHashAsync(orderPayment.BusinessId, orderPayment.GiftCardHash);
+
+            if (giftCard.AmountLeft < orderPayment.AmountPaid)
+            {
+                throw new ArgumentException($"You do not have enough money in the gift card!!");
+            }
+            var giftCardUp  = giftCardService.UpdateGiftCardLeftAmountAsync(orderPayment.BusinessId, giftCard.GiftCardId, orderPayment.AmountPaid);
+            orderPayment.Status = OrderPaymentStatus.Succeeded;
         }
 
         var createdPayment = await paymentRepository.AddAsync(orderPayment);
@@ -54,7 +68,7 @@ public class PaymentService(
             p.BusinessId == businessId && p.OrderId == orderId && p.PaymentId == paymentId);
     }
 
-    private async Task<string> ProcessStripePaymentAsync(OrderPayment orderPayment)
+    private async Task<(string ClientSecret, string PaymentIntentId)> ProcessStripePaymentAsync(OrderPayment orderPayment)
     {
         var options = new PaymentIntentCreateOptions
         {
@@ -67,16 +81,15 @@ public class PaymentService(
 
         var paymentIntent = await service.CreateAsync(options);
 
-        return paymentIntent.ClientSecret;
+        return (paymentIntent.ClientSecret, paymentIntent.Id); 
     }
 
     public async Task<string> RefundStripePaymentAsync(OrderPayment orderPayment, string reason)
     {
         var options = new RefundCreateOptions
         {
-            Amount = (long)(orderPayment.AmountPaid * 100),
+            PaymentIntent = orderPayment.StripePaymentIntentId,
             Reason = reason,
-            PaymentIntent = orderPayment.StripePaymentId,
         };
 
         var service = new RefundService();
@@ -95,11 +108,10 @@ public class PaymentService(
     {
         var order = await orderService.GetOrderByIdAsync(payment.BusinessId, payment.OrderId);
 
-        if (order.OrderStatus != OrderStatus.Open)
+        if (order.OrderStatus != OrderStatus.Closed)
         {
-            throw new ArgumentException($"Order with id {order.OrderId} is not open");
+            throw new ArgumentException($"Order with id {order.OrderId} is not closed");
         }
-
 
         if (payment.PaymentMethod == PaymentMethod.Card)
         {
@@ -107,7 +119,7 @@ public class PaymentService(
         }
         else if (payment.PaymentMethod == PaymentMethod.GiftCard)
         {
-            //sorry no refund
+            throw new ArgumentException($"Order with id {order.OrderId} is not closed");
         }
 
         order.OrderStatus = OrderStatus.Refunded;
