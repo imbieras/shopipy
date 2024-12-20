@@ -1,3 +1,4 @@
+using Shopipy.OrderManagement.Repositories;
 using Shopipy.Persistence.Models;
 using Shopipy.Persistence.Repositories;
 using Stripe;
@@ -5,7 +6,10 @@ using PaymentMethod = Shopipy.Persistence.Models.PaymentMethod;
 
 namespace Shopipy.OrderManagement.Services;
 
-public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, OrderService orderService)
+public class PaymentService(
+    IGenericRepository<OrderPayment> paymentRepository,
+    OrderService orderService,
+    OrderRepository orderRepository)
 {
     public async Task<OrderPayment> CreatePaymentAsync(OrderPayment orderPayment)
     {
@@ -25,7 +29,15 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
 
         var createdPayment = await paymentRepository.AddAsync(orderPayment);
 
-        // TODO: close order after enough payments
+        if (await AmountLeft(orderPayment.BusinessId, orderPayment.OrderId) <= 0)
+        {
+            var order = await orderRepository.GetByIdAsync(orderPayment.OrderId);
+            if (order != null)
+            {
+                order.OrderStatus = OrderStatus.Closed;
+                await orderRepository.UpdateAsync(order);
+            }
+        }
 
         return createdPayment;
     }
@@ -52,7 +64,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         };
 
         var service = new PaymentIntentService();
-        
+
         var paymentIntent = await service.CreateAsync(options);
 
         return paymentIntent.ClientSecret;
@@ -75,6 +87,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         {
             return "completed";
         }
+
         return "failed";
     }
 
@@ -86,7 +99,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         {
             throw new ArgumentException($"Order with id {order.OrderId} is not open");
         }
-        
+
 
         if (payment.PaymentMethod == PaymentMethod.Card)
         {
@@ -102,5 +115,33 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
 
         //await orderService.UpdateOrderItemAsync(order);
         return payment;
+    }
+
+    public async Task<decimal> AmountLeft(int businessId, int orderId)
+    {
+        var totalAmount = await orderService.GetTotalPriceAsync(businessId, orderId);
+
+        var payments = await GetPaymentsByOrderIdAsync(businessId, orderId);
+
+        decimal leftTopay = totalAmount;
+
+        foreach (var payment in payments)
+        {
+            leftTopay = leftTopay - payment.AmountPaid;
+        }
+
+        return leftTopay;
+    }
+
+    public async Task CompleteStripePaymentAsync(string paymentId)
+    {
+        var payment = await paymentRepository.GetByConditionAsync(p => p.StripePaymentId == paymentId);
+        if (payment == null)
+        {
+            throw new InvalidOperationException($"Payment with id {paymentId} is not found");
+        }
+
+        payment.Status = OrderPaymentStatus.Succeeded;
+        await paymentRepository.UpdateAsync(payment);
     }
 }

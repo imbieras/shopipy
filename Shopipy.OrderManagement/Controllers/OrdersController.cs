@@ -61,19 +61,7 @@ public class OrdersController(OrderService orderService, IMapper mapper, ILogger
             logger.LogWarning("Attempted to get non-existent order {OrderId} for business {BusinessId}.", orderId, businessId);
             return NotFound();
         }
-
-        var totalAmount = await orderService.GetTotalPriceAsync(businessId, orderId);
-
-        var payments = await paymentService.GetPaymentsByOrderIdAsync(businessId, orderId);
-
-        decimal leftTopay = totalAmount;
-
-        foreach (var payment in payments)
-        {
-            leftTopay = leftTopay - payment.AmountPaid;
-        }
-        Console.WriteLine("test");
-        return Ok(leftTopay);
+        return Ok(await paymentService.AmountLeft(businessId, orderId));
     }
 
     [HttpPost]
