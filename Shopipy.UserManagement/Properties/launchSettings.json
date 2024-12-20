@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Shopipy.UserManagement": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:64275;http://localhost:64276"
+    }
+  }
+}

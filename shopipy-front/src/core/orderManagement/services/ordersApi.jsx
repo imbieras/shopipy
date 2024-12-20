@@ -18,6 +18,14 @@ export const ordersApi = {
     return response.data;
   },
 
+  createOrder: async (businessId, orderData) => {
+    const response = await axiosInstance.post(
+      `/businesses/${businessId}/orders`,
+      orderData
+    );
+    return response.data;
+  },
+
   getProductItems: async (businessId, orderId) => {
     const response = await axiosInstance.get(
       `/businesses/${businessId}/orders/${orderId}/product-items`
