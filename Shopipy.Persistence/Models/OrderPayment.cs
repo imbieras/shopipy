@@ -15,6 +15,7 @@ public class OrderPayment
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public OrderPaymentStatus Status { get; set; }
     public string? StripePaymentId { get; set; }
+    public string? StripePaymentIntentId { get; set; }
     public int? GiftCardId { get; set; }
     
     /* Navigational properties */

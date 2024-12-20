@@ -20,7 +20,10 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         if (orderPayment.PaymentMethod == PaymentMethod.Cash) orderPayment.Status = OrderPaymentStatus.Succeeded;
         if (orderPayment.PaymentMethod == PaymentMethod.Card)
         {
-            orderPayment.StripePaymentId = await ProcessStripePaymentAsync(orderPayment);
+            var (clientSecret, paymentIntentId) = await ProcessStripePaymentAsync(orderPayment);
+
+            orderPayment.StripePaymentId = clientSecret;       
+            orderPayment.StripePaymentIntentId = paymentIntentId;
         }
 
         var createdPayment = await paymentRepository.AddAsync(orderPayment);
@@ -42,7 +45,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
             p.BusinessId == businessId && p.OrderId == orderId && p.PaymentId == paymentId);
     }
 
-    private async Task<string> ProcessStripePaymentAsync(OrderPayment orderPayment)
+    private async Task<(string ClientSecret, string PaymentIntentId)> ProcessStripePaymentAsync(OrderPayment orderPayment)
     {
         var options = new PaymentIntentCreateOptions
         {
@@ -52,10 +55,10 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         };
 
         var service = new PaymentIntentService();
-        
+
         var paymentIntent = await service.CreateAsync(options);
 
-        return paymentIntent.ClientSecret;
+        return (paymentIntent.ClientSecret, paymentIntent.Id); 
     }
 
     public async Task<string> RefundStripePaymentAsync(OrderPayment orderPayment, string reason)
@@ -64,7 +67,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         {
             Amount = (long)(orderPayment.AmountPaid * 100),
             Reason = reason,
-            PaymentIntent = orderPayment.StripePaymentId,
+            PaymentIntent = orderPayment.StripePaymentIntentId,
         };
 
         var service = new RefundService();
@@ -82,9 +85,9 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
     {
         var order = await orderService.GetOrderByIdAsync(payment.BusinessId, payment.OrderId);
 
-        if (order.OrderStatus != OrderStatus.Open)
+        if (order.OrderStatus != OrderStatus.Closed)
         {
-            throw new ArgumentException($"Order with id {order.OrderId} is not open");
+            throw new ArgumentException($"Order with id {order.OrderId} is not closed");
         }
         
 
@@ -94,7 +97,7 @@ public class PaymentService(IGenericRepository<OrderPayment> paymentRepository, 
         }
         else if (payment.PaymentMethod == PaymentMethod.GiftCard)
         {
-            //sorry no refund
+            throw new ArgumentException($"Order with id {order.OrderId} is not closed");
         }
 
         order.OrderStatus = OrderStatus.Refunded;
