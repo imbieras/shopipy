@@ -48,7 +48,8 @@ public class OrderMappingProfile : Profile
             .ForMember(d => d.Status, opt => opt.Ignore())
             .ForMember(d => d.StripePaymentId, opt => opt.Ignore())
             .ForMember(d => d.Business, opt => opt.Ignore())
-            .ForMember(d => d.Order, opt => opt.Ignore());
+            .ForMember(d => d.Order, opt => opt.Ignore())
+            .ForMember(d => d.StripePaymentIntentId, opt => opt.Ignore());
 
         CreateMap<OrderPayment, PaymentDto>();
     }

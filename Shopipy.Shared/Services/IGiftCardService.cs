@@ -11,5 +11,6 @@ public interface IGiftCardService
     Task<GiftCard?> GetGiftCardByIdInBusinessAsync(int giftCardId, int businessId);
     Task<GiftCard> UpdateGiftCardAsync(GiftCard giftCard);
     Task<bool> DeleteGiftCardAsync(int giftCardId, int businessId);
-
+    Task<GiftCard> GetGiftCardByHashAsync(int businessId, string? giftCardHash);
+    Task<GiftCard> UpdateGiftCardLeftAmountAsync(int businessId, int giftCardId, decimal amountPaid);
 }
